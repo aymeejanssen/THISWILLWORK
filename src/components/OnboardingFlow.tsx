@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,16 +88,10 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       content: (
         <div className="space-y-6 text-center">
           <p className="text-lg text-gray-700 leading-relaxed">
-            To provide you with personalized support tailored to your unique experiences and background, 
-            we need to understand more about your life, challenges, and cultural context.
-          </p>
-          <p className="text-base text-gray-600 leading-relaxed">
-            This assessment helps us offer culturally sensitive guidance that respects your values 
-            and addresses your specific mental wellness needs.
+            To provide personalized support, we need to understand your background, challenges, and cultural context.
           </p>
           <p className="text-sm text-gray-500">
-            All information is completely confidential and encrypted. You may skip any question 
-            that feels uncomfortable to answer.
+            All information is confidential and encrypted. You may skip any uncomfortable questions.
           </p>
         </div>
       )
