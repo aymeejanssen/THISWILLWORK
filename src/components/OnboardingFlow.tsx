@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Users, UserCircle, Briefcase, Compass, Brain, ArrowRight, Check, Shield } from 'lucide-react';
+import { Heart, Users, UserCircle, Briefcase, Compass, Brain, ArrowRight, Check, Shield, UserPlus } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 
 interface OnboardingFlowProps {
@@ -26,9 +26,16 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       color: 'from-pink-500 to-rose-500'
     },
     {
-      id: 'relationships',
-      title: 'Relationships',
-      description: 'Romantic relationships, friendships, social connections',
+      id: 'romantic-relationships',
+      title: 'Romantic Relationships',
+      description: 'Dating, partnerships, romantic connections, intimacy',
+      icon: <Heart className="h-6 w-6" />,
+      color: 'from-red-500 to-pink-500'
+    },
+    {
+      id: 'friendships',
+      title: 'Friendships',
+      description: 'Friendships, social connections, building relationships',
       icon: <Users className="h-6 w-6" />,
       color: 'from-blue-500 to-cyan-500'
     },
@@ -92,10 +99,15 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Did you have to take on adult responsibilities as a child?",
         "Do you still carry unresolved pain from your family dynamics?"
       ],
-      relationships: [
-        "What challenges do you face most often in your relationships?",
-        "How do you handle conflict or disagreement with people you care about?",
-        "What would your ideal relationship dynamic look like?"
+      'romantic-relationships': [
+        "What patterns do you notice in your romantic relationships?",
+        "How do you handle conflict with romantic partners?",
+        "What makes you feel most secure in a romantic relationship?"
+      ],
+      friendships: [
+        "What challenges do you face most often in your friendships?",
+        "How do you handle disagreements with friends?",
+        "What kind of friendships do you find most fulfilling?"
       ],
       'self-worth': [
         "What thoughts go through your mind when you look at yourself?",
