@@ -8,8 +8,6 @@ interface AssessmentContextType {
   completeAssessment: () => void;
   resetAssessment: () => void;
   currentQuestionIndex: number;
-  isModalOpen: boolean;
-  setModalOpen: (open: boolean) => void;
 }
 
 const AssessmentContext = createContext<AssessmentContextType | undefined>(undefined);
@@ -25,7 +23,6 @@ export const useAssessment = () => {
 export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const updateResponses = (key: string, value: any) => {
@@ -38,8 +35,7 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
       
-      // Close modal and navigate to answer summary page
-      setIsModalOpen(false);
+      // Navigate to answer summary page
       setTimeout(() => {
         navigate(`/answer-summary/${newIndex}`);
       }, 100);
@@ -50,8 +46,6 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
 
   const completeAssessment = () => {
     console.log('AssessmentContext: Assessment completed with responses:', responses);
-    setIsModalOpen(false);
-    navigate('/assessment-summary');
   };
 
   const resetAssessment = () => {
@@ -60,19 +54,13 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
     setCurrentQuestionIndex(0);
   };
 
-  const setModalOpen = (open: boolean) => {
-    setIsModalOpen(open);
-  };
-
   return (
     <AssessmentContext.Provider value={{
       responses,
       updateResponses,
       completeAssessment,
       resetAssessment,
-      currentQuestionIndex,
-      isModalOpen,
-      setModalOpen
+      currentQuestionIndex
     }}>
       {children}
     </AssessmentContext.Provider>
