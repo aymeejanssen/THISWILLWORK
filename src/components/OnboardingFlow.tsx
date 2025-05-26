@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Users, UserCircle, Briefcase, Compass, Brain, ArrowRight, Check } from 'lucide-react';
+import { Heart, Users, UserCircle, Briefcase, Compass, Brain, ArrowRight, Check, Shield } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 
 interface OnboardingFlowProps {
@@ -65,6 +65,13 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       description: 'Processing loss, bereavement, major life changes',
       icon: <Heart className="h-6 w-6" />,
       color: 'from-slate-500 to-gray-500'
+    },
+    {
+      id: 'trauma',
+      title: 'Trauma/Difficult Experiences',
+      description: 'Past traumatic events, difficult experiences, recovery',
+      icon: <Shield className="h-6 w-6" />,
+      color: 'from-red-500 to-pink-500'
     }
   ];
 
@@ -104,6 +111,11 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "What loss or change has been most difficult for you to process?",
         "How has this loss affected your daily life and relationships?",
         "What would healing or acceptance look like for you?"
+      ],
+      trauma: [
+        "How do past difficult experiences affect your daily life now?",
+        "What helps you feel safe and grounded when you're struggling?",
+        "What would feeling healed or at peace look like for you?"
       ]
     };
 
