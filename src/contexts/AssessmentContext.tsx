@@ -8,6 +8,8 @@ interface AssessmentContextType {
   completeAssessment: () => void;
   resetAssessment: () => void;
   currentQuestionIndex: number;
+  isModalOpen: boolean;
+  setModalOpen: (open: boolean) => void;
 }
 
 const AssessmentContext = createContext<AssessmentContextType | undefined>(undefined);
@@ -23,6 +25,7 @@ export const useAssessment = () => {
 export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const updateResponses = (key: string, value: any) => {
@@ -31,11 +34,12 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
       const updated = { ...prev, [key]: value };
       console.log('AssessmentContext: Updated responses:', updated);
       
-      // Increment question index and navigate to answer summary
+      // Increment question index
       const newIndex = currentQuestionIndex + 1;
       setCurrentQuestionIndex(newIndex);
       
-      // Navigate to answer summary page
+      // Close modal and navigate to answer summary page
+      setIsModalOpen(false);
       setTimeout(() => {
         navigate(`/answer-summary/${newIndex}`);
       }, 100);
@@ -46,7 +50,8 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
 
   const completeAssessment = () => {
     console.log('AssessmentContext: Assessment completed with responses:', responses);
-    // This will be called when the user finishes all questions
+    setIsModalOpen(false);
+    navigate('/assessment-summary');
   };
 
   const resetAssessment = () => {
@@ -55,13 +60,19 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
     setCurrentQuestionIndex(0);
   };
 
+  const setModalOpen = (open: boolean) => {
+    setIsModalOpen(open);
+  };
+
   return (
     <AssessmentContext.Provider value={{
       responses,
       updateResponses,
       completeAssessment,
       resetAssessment,
-      currentQuestionIndex
+      currentQuestionIndex,
+      isModalOpen,
+      setModalOpen
     }}>
       {children}
     </AssessmentContext.Provider>

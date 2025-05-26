@@ -17,22 +17,10 @@ const OnboardingWrapper = ({ onClose }: OnboardingWrapperProps) => {
     onClose();
   };
 
-  const handleAssessmentComplete = () => {
-    console.log('OnboardingWrapper: Assessment completion started');
-    completeAssessment();
-    console.log('OnboardingWrapper: completeAssessment called');
-    onClose(); // Close the modal
-    console.log('OnboardingWrapper: modal closed');
-    navigate('/assessment-summary'); // Navigate to final summary page
-    console.log('OnboardingWrapper: navigating to /assessment-summary');
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-        <OnboardingFlow 
-          onAssessmentComplete={handleAssessmentComplete} 
-        />
+        <OnboardingFlow />
       </div>
     </div>
   );
