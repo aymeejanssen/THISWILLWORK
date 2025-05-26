@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       id: 'family',
       title: 'Family & Childhood',
       description: 'Family dynamics, childhood experiences, parental relationships',
-      icon: <Heart className="h-6 w-6" />,
+      icon: <Users className="h-6 w-6" />,
       color: 'from-pink-500 to-rose-500'
     },
     {
