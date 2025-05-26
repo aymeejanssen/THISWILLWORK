@@ -1,11 +1,13 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface AssessmentContextType {
   responses: Record<string, any>;
   updateResponses: (key: string, value: any) => void;
   completeAssessment: () => void;
   resetAssessment: () => void;
+  currentQuestionIndex: number;
 }
 
 const AssessmentContext = createContext<AssessmentContextType | undefined>(undefined);
@@ -20,12 +22,24 @@ export const useAssessment = () => {
 
 export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
   const [responses, setResponses] = useState<Record<string, any>>({});
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const navigate = useNavigate();
 
   const updateResponses = (key: string, value: any) => {
     console.log('AssessmentContext: Updating responses', { key, value });
     setResponses(prev => {
       const updated = { ...prev, [key]: value };
       console.log('AssessmentContext: Updated responses:', updated);
+      
+      // Increment question index and navigate to answer summary
+      const newIndex = currentQuestionIndex + 1;
+      setCurrentQuestionIndex(newIndex);
+      
+      // Navigate to answer summary page
+      setTimeout(() => {
+        navigate(`/answer-summary/${newIndex}`);
+      }, 100);
+      
       return updated;
     });
   };
@@ -38,6 +52,7 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
   const resetAssessment = () => {
     console.log('AssessmentContext: Resetting assessment');
     setResponses({});
+    setCurrentQuestionIndex(0);
   };
 
   return (
@@ -45,7 +60,8 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
       responses,
       updateResponses,
       completeAssessment,
-      resetAssessment
+      resetAssessment,
+      currentQuestionIndex
     }}>
       {children}
     </AssessmentContext.Provider>

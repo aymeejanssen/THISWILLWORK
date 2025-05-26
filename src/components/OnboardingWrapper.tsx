@@ -17,12 +17,6 @@ const OnboardingWrapper = ({ onClose }: OnboardingWrapperProps) => {
     onClose();
   };
 
-  const handleAnswerComplete = (questionIndex: number, totalQuestions: number) => {
-    console.log('OnboardingWrapper: Answer completed', { questionIndex, totalQuestions });
-    onClose(); // Close the modal
-    navigate(`/answer-summary/${questionIndex + 1}`); // Navigate to summary for this answer
-  };
-
   const handleAssessmentComplete = () => {
     console.log('OnboardingWrapper: Assessment completion started');
     completeAssessment();
@@ -37,7 +31,6 @@ const OnboardingWrapper = ({ onClose }: OnboardingWrapperProps) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
         <OnboardingFlow 
-          onAnswerComplete={handleAnswerComplete}
           onAssessmentComplete={handleAssessmentComplete} 
         />
       </div>
