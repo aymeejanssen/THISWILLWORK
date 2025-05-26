@@ -13,26 +13,19 @@ const OnboardingWrapper = ({ onClose }: OnboardingWrapperProps) => {
   const { completeAssessment } = useAssessment();
 
   const handleClose = () => {
+    console.log('OnboardingWrapper: handleClose called');
     onClose();
-    console.log('Onboarding closed');
   };
 
   const handleAssessmentComplete = () => {
+    console.log('OnboardingWrapper: Assessment completion started');
     completeAssessment();
+    console.log('OnboardingWrapper: completeAssessment called');
     onClose(); // Close the modal
+    console.log('OnboardingWrapper: modal closed');
     navigate('/assessment-summary'); // Navigate to summary page
+    console.log('OnboardingWrapper: navigating to /assessment-summary');
   };
-
-  // Listen for when the onboarding flow is completed
-  React.useEffect(() => {
-    const handleOnboardingComplete = () => {
-      handleAssessmentComplete();
-    };
-
-    // We'll trigger completion when the user finishes the flow
-    // For now, we'll use a simple approach where OnboardingFlow calls onClose when done
-    return () => {};
-  }, []);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

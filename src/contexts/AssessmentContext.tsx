@@ -22,15 +22,21 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
   const [responses, setResponses] = useState<Record<string, any>>({});
 
   const updateResponses = (key: string, value: any) => {
-    setResponses(prev => ({ ...prev, [key]: value }));
+    console.log('AssessmentContext: Updating responses', { key, value });
+    setResponses(prev => {
+      const updated = { ...prev, [key]: value };
+      console.log('AssessmentContext: Updated responses:', updated);
+      return updated;
+    });
   };
 
   const completeAssessment = () => {
-    console.log('Assessment completed with responses:', responses);
+    console.log('AssessmentContext: Assessment completed with responses:', responses);
     // This will be called when the user finishes all questions
   };
 
   const resetAssessment = () => {
+    console.log('AssessmentContext: Resetting assessment');
     setResponses({});
   };
 
