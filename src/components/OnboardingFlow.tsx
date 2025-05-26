@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -142,9 +143,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you often feel like you're a burden to others?"
       ],
       work: [
-        "What aspects of your work life cause you the most stress?",
-        "How do you handle pressure or criticism at work?",
-        "What would make you feel more fulfilled professionally?"
+        "Do you feel constantly overwhelmed or burned out by your job or responsibilities?",
+        "Do you often feel like you're falling behind, no matter how much you do?",
+        "Do you feel pressure to always be perfect or high-performing at work?",
+        "Do you feel anxious or uneasy around your boss or authority figures?",
+        "Have you ever stayed in a job that drained you emotionally or mentally?",
+        "Do you struggle to switch off or relax outside of work hours?",
+        "Do you tie your self-worth to how productive or successful you are?",
+        "Have you experienced toxic leadership, micromanagement, or workplace bullying?",
+        "Do you fear speaking up at work, even when something feels wrong?",
+        "Are you working in a job that doesn't align with who you are or want to be?",
+        "Do you ever feel invisible, underappreciated, or replaceable at work?",
+        "Do you feel stuck in your career path and unsure how to change it?"
       ],
       identity: [
         "How would you describe who you are at your core?",
