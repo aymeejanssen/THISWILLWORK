@@ -50,6 +50,16 @@ interface UserProfile {
   // Relationship subcategories
   relationshipIssueType?: string;
   relationshipSpecificProblem?: string;
+  relationshipQuestion1?: string;
+  relationshipQuestion2?: string;
+  relationshipQuestion3?: string;
+  relationshipQuestion4?: string;
+  relationshipQuestion5?: string;
+  relationshipQuestion6?: string;
+  relationshipQuestion7?: string;
+  relationshipQuestion8?: string;
+  relationshipQuestion9?: string;
+  relationshipQuestion10?: string;
   
   // Additional responses
   [key: string]: string | undefined;
@@ -195,6 +205,123 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
     ];
 
     return familyQuestions.filter(q => !profile[q.key as keyof UserProfile]);
+  };
+
+  const getRelationshipQuestions = () => {
+    const relationshipQuestions = [
+      {
+        key: 'relationshipQuestion1',
+        question: 'Do you feel safe, respected, and understood in your current or past relationships?',
+        options: [
+          { value: 'always', label: 'Always feel safe and respected' },
+          { value: 'mostly', label: 'Mostly, with some exceptions' },
+          { value: 'sometimes', label: 'Sometimes, but inconsistently' },
+          { value: 'rarely', label: 'Rarely feel this way' },
+          { value: 'never', label: 'Never feel safe or respected' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion2',
+        question: 'Do you fear abandonment or rejection in relationships?',
+        options: [
+          { value: 'never', label: 'Never worry about this' },
+          { value: 'occasionally', label: 'Occasionally concerned' },
+          { value: 'often', label: 'Often anxious about it' },
+          { value: 'constantly', label: 'Constantly fearful' },
+          { value: 'paralyzing', label: 'It\'s paralyzing and overwhelming' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion3',
+        question: 'Do you often lose yourself in relationships or over-give?',
+        options: [
+          { value: 'never', label: 'I maintain my identity well' },
+          { value: 'sometimes', label: 'Sometimes I give too much' },
+          { value: 'often', label: 'Often lose myself' },
+          { value: 'always', label: 'Always sacrifice myself' },
+          { value: 'completely', label: 'I completely disappear in relationships' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion4',
+        question: 'Have you experienced emotional or physical abuse from a partner?',
+        options: [
+          { value: 'never', label: 'Never experienced abuse' },
+          { value: 'emotional-mild', label: 'Mild emotional mistreatment' },
+          { value: 'emotional-severe', label: 'Severe emotional abuse' },
+          { value: 'physical', label: 'Physical abuse' },
+          { value: 'both', label: 'Both emotional and physical abuse' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion5',
+        question: 'Do you struggle to trust others or open up emotionally?',
+        options: [
+          { value: 'easy', label: 'I trust and open up easily' },
+          { value: 'somewhat-difficult', label: 'Somewhat difficult' },
+          { value: 'very-difficult', label: 'Very difficult to trust' },
+          { value: 'nearly-impossible', label: 'Nearly impossible' },
+          { value: 'walls-up', label: 'I keep walls up always' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion6',
+        question: 'Do your relationships tend to follow the same painful patterns?',
+        options: [
+          { value: 'no-patterns', label: 'No, each relationship is different' },
+          { value: 'some-patterns', label: 'Some similar patterns' },
+          { value: 'clear-patterns', label: 'Clear repeating patterns' },
+          { value: 'same-cycle', label: 'Always the same painful cycle' },
+          { value: 'trapped', label: 'I feel trapped in these patterns' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion7',
+        question: 'Do you find yourself choosing partners who don\'t treat you well?',
+        options: [
+          { value: 'never', label: 'I choose healthy partners' },
+          { value: 'sometimes', label: 'Sometimes make poor choices' },
+          { value: 'often', label: 'Often attracted to wrong people' },
+          { value: 'always', label: 'Always end up with bad partners' },
+          { value: 'cant-help', label: 'I can\'t help being drawn to toxic people' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion8',
+        question: 'Are you afraid of being alone, even in unhappy relationships?',
+        options: [
+          { value: 'comfortable-alone', label: 'I\'m comfortable being alone' },
+          { value: 'prefer-company', label: 'Prefer company but okay alone' },
+          { value: 'dislike-alone', label: 'Dislike being alone' },
+          { value: 'afraid-alone', label: 'Afraid of being alone' },
+          { value: 'terrified', label: 'Terrified of being alone' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion9',
+        question: 'Do you feel you have to earn love or prove your worth?',
+        options: [
+          { value: 'unconditional', label: 'I feel worthy of unconditional love' },
+          { value: 'sometimes-prove', label: 'Sometimes feel I need to prove myself' },
+          { value: 'often-earn', label: 'Often feel I must earn love' },
+          { value: 'always-prove', label: 'Always trying to prove my worth' },
+          { value: 'exhausting', label: 'It\'s exhausting trying to be worthy' }
+        ]
+      },
+      {
+        key: 'relationshipQuestion10',
+        question: 'What part of love or connection feels most difficult for you?',
+        options: [
+          { value: 'none', label: 'Love and connection feel natural' },
+          { value: 'vulnerability', label: 'Being vulnerable and open' },
+          { value: 'trust', label: 'Trusting others completely' },
+          { value: 'communication', label: 'Communicating needs and feelings' },
+          { value: 'all', label: 'All aspects of love feel overwhelming' }
+        ]
+      }
+    ];
+
+    return relationshipQuestions.filter(q => !profile[q.key as keyof UserProfile]);
   };
 
   const getSubQuestions = () => {
@@ -348,6 +475,30 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
             { value: 'moving-on', label: 'Difficulty moving on' },
             { value: 'self-blame', label: 'Blaming myself' },
             { value: 'co-parenting', label: 'Co-parenting challenges' }
+          ];
+        } else if (profile.relationshipIssueType === 'dating') {
+          specificOptions = [
+            { value: 'finding-someone', label: 'Difficulty finding the right person' },
+            { value: 'dating-anxiety', label: 'Anxiety about dating' },
+            { value: 'past-baggage', label: 'Past relationship baggage' },
+            { value: 'attachment', label: 'Attachment and intimacy issues' },
+            { value: 'self-worth', label: 'Low self-worth in dating' }
+          ];
+        } else if (profile.relationshipIssueType === 'friendship') {
+          specificOptions = [
+            { value: 'making-friends', label: 'Difficulty making new friends' },
+            { value: 'friendship-conflict', label: 'Conflict with existing friends' },
+            { value: 'boundary-issues', label: 'Boundary issues with friends' },
+            { value: 'feeling-used', label: 'Feeling used or taken advantage of' },
+            { value: 'loneliness', label: 'Loneliness despite having friends' }
+          ];
+        } else if (profile.relationshipIssueType === 'trust') {
+          specificOptions = [
+            { value: 'trust-betrayal', label: 'Past betrayal affecting trust' },
+            { value: 'emotional-walls', label: 'Emotional walls and barriers' },
+            { value: 'intimacy-fear', label: 'Fear of emotional intimacy' },
+            { value: 'vulnerability', label: 'Difficulty being vulnerable' },
+            { value: 'abandonment', label: 'Fear of abandonment' }
           ];
         }
         
