@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,7 +53,7 @@ const Index = () => {
   const supportTopics = [
     "Self-love & confidence",
     "Relationship challenges", 
-    "LGBTQ+ identity support",
+    "Sexual orientation & identity",
     "Work burnout & stress",
     "Anxiety & overthinking",
     "Loneliness & motivation",

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ const TherapistSection = () => {
   const therapists = [
     {
       name: "Dr. Sarah Ahmed",
-      specialties: ["Cultural Identity", "Anxiety", "LGBTQ+ Support"],
+      specialties: ["Cultural Identity", "Anxiety", "Identity Support"],
       languages: ["English", "Arabic"],
       location: "Online",
       rating: 4.9,
