@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
     {
       id: 'romantic-relationships',
       title: 'Romantic Relationships',
-      description: 'Dating, partnerships, romantic connections, intimacy',
+      description: 'Dating, marriage problems, partnerships, romantic connections, intimacy',
       icon: <Heart className="h-6 w-6" />,
       color: 'from-red-500 to-pink-500'
     },
