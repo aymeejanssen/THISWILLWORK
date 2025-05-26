@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -127,9 +128,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you struggle to believe people genuinely like or care about you?"
       ],
       'self-worth': [
-        "What thoughts go through your mind when you look at yourself?",
-        "How do you respond to mistakes or setbacks?",
-        "What would change in your life if you truly believed you were enough?"
+        "Do you often feel like you're not good enough no matter what you do?",
+        "Do you struggle to accept compliments or praise?",
+        "Do you compare yourself to others and feel like you fall short?",
+        "Do you feel like your value depends on your achievements or appearance?",
+        "Do you criticize yourself harshly when you make mistakes?",
+        "Do you feel guilty when you take time for yourself or say no to others?",
+        "Do you worry that people will leave you if they see the \"real\" you?",
+        "Have you ever felt like you had to earn love or acceptance?",
+        "Do you downplay your accomplishments or avoid attention?",
+        "Do you believe you're hard to love or understand?",
+        "Do you avoid trying new things because you're afraid to fail?",
+        "Do you often feel like you're a burden to others?"
       ],
       work: [
         "What aspects of your work life cause you the most stress?",
