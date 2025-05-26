@@ -1,27 +1,19 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAssessment } from '../contexts/AssessmentContext';
 import OnboardingFlow from './OnboardingFlow';
 
 const OnboardingWrapper = () => {
   const navigate = useNavigate();
-  const { updateResponses } = useAssessment();
+  const { responses } = useAssessment();
 
-  // This component wraps the OnboardingFlow and handles completion
-  const handleComplete = (allResponses: Record<string, any>) => {
-    console.log('Onboarding completed with responses:', allResponses);
-    
-    // Update the assessment context with all responses
-    Object.keys(allResponses).forEach(key => {
-      updateResponses(key, allResponses[key]);
-    });
+  // Check if assessment is complete and navigate to summary
+  React.useEffect(() => {
+    // You can add logic here to check if the assessment is complete
+    // and navigate to summary when needed
+  }, [responses, navigate]);
 
-    // Navigate to summary page
-    navigate('/summary');
-  };
-
-  return <OnboardingFlow onComplete={handleComplete} />;
+  return <OnboardingFlow />;
 };
 
 export default OnboardingWrapper;
