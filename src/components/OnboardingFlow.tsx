@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Users, UserCircle, Briefcase, Compass, Brain, ArrowRight, Check, Shield, UserPlus } from 'lucide-react';
+import { Heart, Users, User, Briefcase, Compass, Brain, ArrowRight, Check, Shield, UserPlus } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 
 interface OnboardingFlowProps {
@@ -21,7 +21,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       id: 'family',
       title: 'Family & Childhood',
       description: 'Family dynamics, childhood experiences, parental relationships',
-      icon: <Users className="h-6 w-6" />,
+      icon: <User className="h-6 w-6" />,
       color: 'from-pink-500 to-rose-500'
     },
     {
@@ -113,9 +113,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you feel worthy of love and affection in your relationships?"
       ],
       friendships: [
-        "What challenges do you face most often in your friendships?",
-        "How do you handle disagreements with friends?",
-        "What kind of friendships do you find most fulfilling?"
+        "Did you struggle to make or keep friends growing up?",
+        "Have you ever been excluded or left out by people you cared about?",
+        "Were you ever bullied by someone you considered a friend?",
+        "Do you often feel like the one who gives more in friendships?",
+        "Have your close friends ever turned on you or betrayed your trust?",
+        "Do you have trouble trusting new people or opening up emotionally?",
+        "Have you lost friends because you stood up for yourself or set boundaries?",
+        "Do you fear being too much or too needy in friendships?",
+        "Have you ever felt like a backup option or second choice to your friends?",
+        "Do you often feel lonely even when you're socially connected?",
+        "Have you experienced long periods without close or supportive friendships?",
+        "Do you struggle to believe people genuinely like or care about you?"
       ],
       'self-worth': [
         "What thoughts go through your mind when you look at yourself?",
