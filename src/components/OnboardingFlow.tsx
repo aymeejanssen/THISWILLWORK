@@ -42,7 +42,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       id: 'self-worth',
       title: 'Self-Worth & Confidence',
       description: 'Self-esteem, confidence, self-image, perfectionism',
-      icon: <UserCircle className="h-6 w-6" />,
+      icon: <User className="h-6 w-6" />,
       color: 'from-purple-500 to-indigo-500'
     },
     {
