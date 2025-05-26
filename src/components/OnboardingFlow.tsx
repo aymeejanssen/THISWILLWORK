@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +24,16 @@ interface UserProfile {
   // Family subcategories
   familyIssueType?: string;
   familySpecificProblem?: string;
+  familyQuestion1?: string;
+  familyQuestion2?: string;
+  familyQuestion3?: string;
+  familyQuestion4?: string;
+  familyQuestion5?: string;
+  familyQuestion6?: string;
+  familyQuestion7?: string;
+  familyQuestion8?: string;
+  familyQuestion9?: string;
+  familyQuestion10?: string;
   
   // Identity subcategories  
   identityIssueType?: string;
@@ -69,6 +78,123 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       setShowWarning(false);
       setCanProceed(true);
     }
+  };
+
+  const getFamilyQuestions = () => {
+    const familyQuestions = [
+      {
+        key: 'familyQuestion1',
+        question: 'How would you describe your relationship with your parents growing up?',
+        options: [
+          { value: 'very-close', label: 'Very close and supportive' },
+          { value: 'somewhat-close', label: 'Somewhat close but complicated' },
+          { value: 'distant', label: 'Distant or disconnected' },
+          { value: 'conflicted', label: 'Conflicted or stressful' },
+          { value: 'abusive', label: 'Abusive or harmful' }
+        ]
+      },
+      {
+        key: 'familyQuestion2',
+        question: 'Do you feel emotionally supported by your family today?',
+        options: [
+          { value: 'yes-very', label: 'Yes, very supported' },
+          { value: 'sometimes', label: 'Sometimes, but inconsistently' },
+          { value: 'rarely', label: 'Rarely feel supported' },
+          { value: 'no-never', label: 'No, never feel supported' },
+          { value: 'no-contact', label: 'We have no contact' }
+        ]
+      },
+      {
+        key: 'familyQuestion3',
+        question: 'Were emotions openly discussed in your household?',
+        options: [
+          { value: 'yes-healthy', label: 'Yes, in healthy ways' },
+          { value: 'sometimes', label: 'Sometimes, but awkwardly' },
+          { value: 'rarely', label: 'Rarely discussed' },
+          { value: 'never', label: 'Never discussed' },
+          { value: 'negatively', label: 'Only negative emotions were expressed' }
+        ]
+      },
+      {
+        key: 'familyQuestion4',
+        question: 'Did you ever feel responsible for keeping peace in the family?',
+        options: [
+          { value: 'never', label: 'Never' },
+          { value: 'sometimes', label: 'Sometimes' },
+          { value: 'often', label: 'Often' },
+          { value: 'always', label: 'Always felt responsible' },
+          { value: 'parentified', label: 'I was the family peacekeeper/parent' }
+        ]
+      },
+      {
+        key: 'familyQuestion5',
+        question: 'Was there a lot of conflict, criticism, or tension at home?',
+        options: [
+          { value: 'none', label: 'Very little conflict' },
+          { value: 'occasional', label: 'Occasional disagreements' },
+          { value: 'frequent', label: 'Frequent arguments' },
+          { value: 'constant', label: 'Constant tension' },
+          { value: 'toxic', label: 'Toxic and hostile environment' }
+        ]
+      },
+      {
+        key: 'familyQuestion6',
+        question: 'Have you ever felt like the "black sheep" in your family?',
+        options: [
+          { value: 'never', label: 'Never' },
+          { value: 'sometimes', label: 'Sometimes' },
+          { value: 'often', label: 'Often' },
+          { value: 'always', label: 'Always felt different' },
+          { value: 'rejected', label: 'Actively rejected or excluded' }
+        ]
+      },
+      {
+        key: 'familyQuestion7',
+        question: 'Did you experience favoritism or emotional neglect?',
+        options: [
+          { value: 'none', label: 'No, treated fairly' },
+          { value: 'mild-favoritism', label: 'Mild favoritism toward siblings' },
+          { value: 'clear-favoritism', label: 'Clear favoritism, I was less favored' },
+          { value: 'emotional-neglect', label: 'Emotional neglect or indifference' },
+          { value: 'severe-neglect', label: 'Severe emotional abandonment' }
+        ]
+      },
+      {
+        key: 'familyQuestion8',
+        question: 'Have you ever been physically or emotionally harmed by a family member?',
+        options: [
+          { value: 'never', label: 'Never' },
+          { value: 'mild-emotional', label: 'Mild emotional harm (criticism, yelling)' },
+          { value: 'severe-emotional', label: 'Severe emotional abuse' },
+          { value: 'physical', label: 'Physical harm' },
+          { value: 'both', label: 'Both physical and emotional abuse' }
+        ]
+      },
+      {
+        key: 'familyQuestion9',
+        question: 'Do you find it hard to set boundaries with family members?',
+        options: [
+          { value: 'easy', label: 'Easy to set boundaries' },
+          { value: 'somewhat-hard', label: 'Somewhat difficult' },
+          { value: 'very-hard', label: 'Very difficult' },
+          { value: 'impossible', label: 'Nearly impossible' },
+          { value: 'no-boundaries', label: 'I have no boundaries with them' }
+        ]
+      },
+      {
+        key: 'familyQuestion10',
+        question: 'Do family expectations ever make you feel trapped, judged, or unseen?',
+        options: [
+          { value: 'never', label: 'Never' },
+          { value: 'sometimes', label: 'Sometimes' },
+          { value: 'often', label: 'Often' },
+          { value: 'always', label: 'Always feel this way' },
+          { value: 'suffocating', label: 'It feels suffocating' }
+        ]
+      }
+    ];
+
+    return familyQuestions.filter(q => !profile[q.key as keyof UserProfile]);
   };
 
   const getSubQuestions = () => {
@@ -144,6 +270,31 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
             </div>
           )
         });
+      } else if (profile.familyIssueType && profile.familySpecificProblem) {
+        // Add the 10 family questions one by one
+        const familyQuestions = getFamilyQuestions();
+        if (familyQuestions.length > 0) {
+          const currentQuestion = familyQuestions[0];
+          subQuestions.push({
+            title: `Family Question ${11 - familyQuestions.length}`,
+            content: (
+              <div className="space-y-4">
+                <Label>{currentQuestion.question}</Label>
+                <RadioGroup 
+                  value={profile[currentQuestion.key as keyof UserProfile] || ''} 
+                  onValueChange={(value) => updateProfile(currentQuestion.key as keyof UserProfile, value)}
+                >
+                  {currentQuestion.options.map((option) => (
+                    <div key={option.value} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.value} id={`${currentQuestion.key}-${option.value}`} />
+                      <Label htmlFor={`${currentQuestion.key}-${option.value}`}>{option.label}</Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            )
+          });
+        }
       }
     }
 
