@@ -8,6 +8,7 @@ import { AssessmentProvider } from "./contexts/AssessmentContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AssessmentSummary from "./pages/AssessmentSummary";
+import AnswerSummary from "./pages/AnswerSummary";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/answer-summary/:questionNumber" element={<AnswerSummary />} />
             <Route path="/assessment-summary" element={<AssessmentSummary />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
