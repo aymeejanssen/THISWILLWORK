@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -134,7 +133,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
             </RadioGroup>
           </div>
           <div>
-            <Label htmlFor="gender">How do you identify?</Label>
+            <Label htmlFor="gender">Sex</Label>
             <RadioGroup value={profile.gender} onValueChange={(value) => updateProfile('gender', value)}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="female" id="female" />
@@ -143,14 +142,6 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="male" id="male" />
                 <Label htmlFor="male">Male</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="non-binary" id="non-binary" />
-                <Label htmlFor="non-binary">Non-binary</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="prefer-not-to-say" id="prefer-not" />
-                <Label htmlFor="prefer-not">Prefer not to say</Label>
               </div>
             </RadioGroup>
           </div>
