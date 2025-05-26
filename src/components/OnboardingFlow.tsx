@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -99,9 +100,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you still carry unresolved pain from your family dynamics?"
       ],
       'romantic-relationships': [
-        "What patterns do you notice in your romantic relationships?",
-        "How do you handle conflict with romantic partners?",
-        "What makes you feel most secure in a romantic relationship?"
+        "Are you currently in a relationship, married, or single?",
+        "Are you going through a breakup, divorce, or separation right now?",
+        "Have you recently experienced heartbreak or rejection?",
+        "Was your last or current relationship emotionally fulfilling?",
+        "Have you ever experienced emotional or physical abuse in a relationship?",
+        "Do you feel safe expressing your needs in romantic relationships?",
+        "Do you often fear being abandoned or left?",
+        "Do you tend to lose yourself or over-give in relationships?",
+        "Do you find yourself repeating the same unhealthy relationship patterns?",
+        "Do you struggle to trust your partner or partners in general?",
+        "Has infidelity or betrayal played a role in your current or past relationship?",
+        "Do you feel worthy of love and affection in your relationships?"
       ],
       friendships: [
         "What challenges do you face most often in your friendships?",
