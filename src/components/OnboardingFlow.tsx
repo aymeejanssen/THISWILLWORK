@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Heart, X, ArrowRight, ArrowLeft, AlertTriangle } from "lucide-react";
 import ChatInterface from "@/components/ChatInterface";
@@ -152,39 +153,87 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         <div className="space-y-4">
           <div>
             <Label htmlFor="culture">What's your cultural or ethnic background?</Label>
-            <Input
-              id="culture"
-              placeholder="e.g., Arab, South Asian, Latino, etc."
-              value={profile.culture}
-              onChange={(e) => updateProfile('culture', e.target.value)}
-            />
+            <Select value={profile.culture} onValueChange={(value) => updateProfile('culture', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your cultural background" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="arab">Arab</SelectItem>
+                <SelectItem value="south-asian">South Asian</SelectItem>
+                <SelectItem value="latino">Latino/Hispanic</SelectItem>
+                <SelectItem value="african">African</SelectItem>
+                <SelectItem value="east-asian">East Asian</SelectItem>
+                <SelectItem value="european">European</SelectItem>
+                <SelectItem value="middle-eastern">Middle Eastern</SelectItem>
+                <SelectItem value="native-american">Native American</SelectItem>
+                <SelectItem value="pacific-islander">Pacific Islander</SelectItem>
+                <SelectItem value="mixed">Mixed/Multiracial</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="language">What language do you feel most comfortable expressing emotions in?</Label>
-            <Input
-              id="language"
-              placeholder="e.g., English, Arabic, Spanish, Hindi, etc."
-              value={profile.preferredLanguage}
-              onChange={(e) => updateProfile('preferredLanguage', e.target.value)}
-            />
+            <Select value={profile.preferredLanguage} onValueChange={(value) => updateProfile('preferredLanguage', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your preferred language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="english">English</SelectItem>
+                <SelectItem value="spanish">Spanish</SelectItem>
+                <SelectItem value="arabic">Arabic</SelectItem>
+                <SelectItem value="hindi">Hindi</SelectItem>
+                <SelectItem value="urdu">Urdu</SelectItem>
+                <SelectItem value="french">French</SelectItem>
+                <SelectItem value="german">German</SelectItem>
+                <SelectItem value="chinese">Chinese</SelectItem>
+                <SelectItem value="japanese">Japanese</SelectItem>
+                <SelectItem value="korean">Korean</SelectItem>
+                <SelectItem value="portuguese">Portuguese</SelectItem>
+                <SelectItem value="russian">Russian</SelectItem>
+                <SelectItem value="italian">Italian</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="location">Where are you currently located?</Label>
-            <Input
-              id="location"
-              placeholder="Country or region"
-              value={profile.location}
-              onChange={(e) => updateProfile('location', e.target.value)}
-            />
+            <Select value={profile.location} onValueChange={(value) => updateProfile('location', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="north-america">North America</SelectItem>
+                <SelectItem value="europe">Europe</SelectItem>
+                <SelectItem value="middle-east">Middle East</SelectItem>
+                <SelectItem value="south-asia">South Asia</SelectItem>
+                <SelectItem value="east-asia">East Asia</SelectItem>
+                <SelectItem value="africa">Africa</SelectItem>
+                <SelectItem value="south-america">South America</SelectItem>
+                <SelectItem value="australia-oceania">Australia/Oceania</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="spiritual">Do you have any spiritual or religious beliefs that are important to you?</Label>
-            <Textarea
-              id="spiritual"
-              placeholder="Optional - this helps us respect your values"
-              value={profile.spiritualBeliefs}
-              onChange={(e) => updateProfile('spiritualBeliefs', e.target.value)}
-            />
+            <Select value={profile.spiritualBeliefs} onValueChange={(value) => updateProfile('spiritualBeliefs', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your spiritual/religious beliefs" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="islam">Islam</SelectItem>
+                <SelectItem value="christianity">Christianity</SelectItem>
+                <SelectItem value="judaism">Judaism</SelectItem>
+                <SelectItem value="hinduism">Hinduism</SelectItem>
+                <SelectItem value="buddhism">Buddhism</SelectItem>
+                <SelectItem value="sikhism">Sikhism</SelectItem>
+                <SelectItem value="spiritual-not-religious">Spiritual but not religious</SelectItem>
+                <SelectItem value="atheist">Atheist</SelectItem>
+                <SelectItem value="agnostic">Agnostic</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )
@@ -225,12 +274,23 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
           {profile.hasDiagnosedCondition === 'yes' && (
             <div>
               <Label htmlFor="conditions">Please specify your diagnosed condition(s):</Label>
-              <Textarea
-                id="conditions"
-                placeholder="List your diagnosed conditions"
-                value={profile.diagnosedConditions}
-                onChange={(e) => updateProfile('diagnosedConditions', e.target.value)}
-              />
+              <Select value={profile.diagnosedConditions} onValueChange={(value) => updateProfile('diagnosedConditions', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your diagnosed condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="depression">Depression</SelectItem>
+                  <SelectItem value="anxiety">Anxiety Disorders</SelectItem>
+                  <SelectItem value="ptsd">PTSD</SelectItem>
+                  <SelectItem value="bipolar">Bipolar Disorder</SelectItem>
+                  <SelectItem value="eating-disorder">Eating Disorder</SelectItem>
+                  <SelectItem value="ocd">OCD</SelectItem>
+                  <SelectItem value="adhd">ADHD</SelectItem>
+                  <SelectItem value="personality-disorder">Personality Disorder</SelectItem>
+                  <SelectItem value="multiple">Multiple conditions</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
 
@@ -289,21 +349,40 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
           </div>
           <div>
             <Label htmlFor="work">Current work/study situation</Label>
-            <Input
-              id="work"
-              placeholder="e.g., Student, Working full-time, Unemployed, etc."
-              value={profile.workSituation}
-              onChange={(e) => updateProfile('workSituation', e.target.value)}
-            />
+            <Select value={profile.workSituation} onValueChange={(value) => updateProfile('workSituation', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your work situation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="student">Student</SelectItem>
+                <SelectItem value="working-full-time">Working full-time</SelectItem>
+                <SelectItem value="working-part-time">Working part-time</SelectItem>
+                <SelectItem value="unemployed">Unemployed</SelectItem>
+                <SelectItem value="self-employed">Self-employed</SelectItem>
+                <SelectItem value="retired">Retired</SelectItem>
+                <SelectItem value="homemaker">Homemaker</SelectItem>
+                <SelectItem value="between-jobs">Between jobs</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="family">How would you describe your family dynamics?</Label>
-            <Textarea
-              id="family"
-              placeholder="Optional - e.g., supportive, complicated, distant, traditional, etc."
-              value={profile.familyDynamics}
-              onChange={(e) => updateProfile('familyDynamics', e.target.value)}
-            />
+            <Select value={profile.familyDynamics} onValueChange={(value) => updateProfile('familyDynamics', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select family dynamics" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="supportive">Supportive</SelectItem>
+                <SelectItem value="complicated">Complicated</SelectItem>
+                <SelectItem value="distant">Distant</SelectItem>
+                <SelectItem value="traditional">Traditional</SelectItem>
+                <SelectItem value="conflicted">Conflicted</SelectItem>
+                <SelectItem value="close">Close</SelectItem>
+                <SelectItem value="toxic">Toxic</SelectItem>
+                <SelectItem value="no-contact">No contact</SelectItem>
+                <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )
@@ -357,12 +436,21 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         <div className="space-y-4">
           <div>
             <Label htmlFor="goals">What are you hoping to get from talking with our AI companion?</Label>
-            <Textarea
-              id="goals"
-              placeholder="e.g., Someone to listen, help processing emotions, daily motivation, etc."
-              value={profile.supportGoals}
-              onChange={(e) => updateProfile('supportGoals', e.target.value)}
-            />
+            <Select value={profile.supportGoals} onValueChange={(value) => updateProfile('supportGoals', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select your main goal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="someone-to-listen">Someone to listen</SelectItem>
+                <SelectItem value="process-emotions">Help processing emotions</SelectItem>
+                <SelectItem value="daily-motivation">Daily motivation</SelectItem>
+                <SelectItem value="stress-management">Stress management</SelectItem>
+                <SelectItem value="relationship-advice">Relationship advice</SelectItem>
+                <SelectItem value="confidence-building">Confidence building</SelectItem>
+                <SelectItem value="life-guidance">Life guidance</SelectItem>
+                <SelectItem value="cultural-understanding">Cultural understanding</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="therapy">Have you tried therapy or counseling before?</Label>
@@ -386,13 +474,24 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
             </RadioGroup>
           </div>
           <div>
-            <Label htmlFor="coping">What helps you feel better when you're stressed? (Optional)</Label>
-            <Textarea
-              id="coping"
-              placeholder="e.g., music, exercise, talking to friends, prayer, etc."
-              value={profile.copingMechanisms}
-              onChange={(e) => updateProfile('copingMechanisms', e.target.value)}
-            />
+            <Label htmlFor="coping">What helps you feel better when you're stressed?</Label>
+            <Select value={profile.copingMechanisms} onValueChange={(value) => updateProfile('copingMechanisms', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select what helps you cope" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="music">Music</SelectItem>
+                <SelectItem value="exercise">Exercise</SelectItem>
+                <SelectItem value="talking-to-friends">Talking to friends</SelectItem>
+                <SelectItem value="prayer-meditation">Prayer/Meditation</SelectItem>
+                <SelectItem value="reading">Reading</SelectItem>
+                <SelectItem value="creative-activities">Creative activities</SelectItem>
+                <SelectItem value="nature">Spending time in nature</SelectItem>
+                <SelectItem value="alone-time">Alone time</SelectItem>
+                <SelectItem value="sleeping">Sleeping</SelectItem>
+                <SelectItem value="nothing-works">Nothing seems to work</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )
@@ -403,7 +502,6 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Onboarding complete
       setShowChat(true);
     }
   };
