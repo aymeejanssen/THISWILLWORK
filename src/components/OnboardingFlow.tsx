@@ -79,9 +79,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
   const getQuestions = (concern: string) => {
     const questionSets = {
       family: [
-        "How would you describe your family environment growing up?",
-        "What patterns from your childhood do you notice showing up in your adult life?",
-        "How do you feel your family relationships affect your current well-being?"
+        "Who were you closer to growing up?",
+        "Did you lose a parent or caregiver during childhood?",
+        "Were you raised mostly by one parent or guardian?",
+        "Was there emotional or verbal abuse in your household?",
+        "Did anyone in your home struggle with addiction or mental illness?",
+        "Did you feel safe at home growing up?",
+        "Were you often punished physically at home?",
+        "Were you expected to be perfect or always perform well?",
+        "Did you feel loved unconditionally by your caregivers?",
+        "Were your parents emotionally available when you needed them?",
+        "Did you have to take on adult responsibilities as a child?",
+        "Do you still carry unresolved pain from your family dynamics?"
       ],
       relationships: [
         "What challenges do you face most often in your relationships?",
