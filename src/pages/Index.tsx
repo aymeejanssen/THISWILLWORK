@@ -16,7 +16,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-wellness-pink to-wellness-yellow">
+    <div className="min-h-screen bg-gradient-to-br from-wellness-purple via-wellness-pink to-wellness-yellow">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="text-center max-w-4xl mx-auto">
@@ -76,7 +76,7 @@ const Index = () => {
         {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <div className="group bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-wellness-pink rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-gradient-to-br from-wellness-purple to-wellness-pink rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <Heart className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">AI Emotional Support</h3>
@@ -98,7 +98,7 @@ const Index = () => {
           </div>
 
           <div className="group bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-wellness-teal rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-gradient-to-br from-wellness-purple to-wellness-teal rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <Globe className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Global & Cultural</h3>
