@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Heart, Globe, Shield, Calendar, Users } from "lucide-react";
-import ChatInterface from "@/components/ChatInterface";
+import OnboardingFlow from "@/components/OnboardingFlow";
 import FeatureCard from "@/components/FeatureCard";
 import Disclaimer from "@/components/Disclaimer";
 import TherapistSection from "@/components/TherapistSection";
 
 const Index = () => {
-  const [showChat, setShowChat] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const features = [
     {
@@ -85,10 +85,10 @@ const Index = () => {
               <Button 
                 size="lg" 
                 className="bg-wellness-purple hover:bg-wellness-purple/90 text-white px-8 py-6 text-lg"
-                onClick={() => setShowChat(true)}
+                onClick={() => setShowOnboarding(true)}
               >
-                <MessageCircle className="mr-2 h-5 w-5" />
-                Start Chatting Now
+                <Heart className="mr-2 h-5 w-5" />
+                Begin Your Journey
               </Button>
               <Button 
                 size="lg" 
@@ -171,9 +171,9 @@ const Index = () => {
       {/* Disclaimer Section */}
       <Disclaimer />
 
-      {/* Chat Interface Modal */}
-      {showChat && (
-        <ChatInterface onClose={() => setShowChat(false)} />
+      {/* Onboarding Flow Modal */}
+      {showOnboarding && (
+        <OnboardingFlow onClose={() => setShowOnboarding(false)} />
       )}
     </div>
   );

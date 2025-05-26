@@ -8,13 +8,30 @@ import { MessageCircle, User, X, Heart } from "lucide-react";
 
 interface ChatInterfaceProps {
   onClose: () => void;
+  userProfile?: any;
 }
 
-const ChatInterface = ({ onClose }: ChatInterfaceProps) => {
+const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
+  const getPersonalizedGreeting = () => {
+    if (!userProfile) {
+      return "Hello! I'm here to listen and support you. Feel free to share what's on your mind today. Remember, this is a safe, judgment-free space. 💜";
+    }
+
+    const name = userProfile.name || 'friend';
+    const struggles = userProfile.currentStruggles?.join(', ') || 'life challenges';
+    const language = userProfile.preferredLanguage || 'English';
+    
+    return `Hello ${name}! 🌸 I'm so glad you're here and ready to begin this journey with me. I understand you're working through ${struggles}, and I want you to know that your feelings are completely valid. 
+
+I'll be communicating with you in ${language} and I'm here to listen with cultural sensitivity and understanding. This is your safe space - feel free to share whatever is on your heart today. 💜
+
+What would you like to talk about first?`;
+  };
+
   const [messages, setMessages] = useState([
     {
       type: 'ai',
-      content: "Hello! I'm here to listen and support you. Feel free to share what's on your mind today. Remember, this is a safe, judgment-free space. 💜",
+      content: getPersonalizedGreeting(),
       timestamp: new Date()
     }
   ]);
@@ -58,14 +75,14 @@ const ChatInterface = ({ onClose }: ChatInterfaceProps) => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-6 w-6" />
-              MindEase AI Companion
+              {userProfile?.name ? `MindEase & ${userProfile.name}` : 'MindEase AI Companion'}
             </CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
               <X className="h-5 w-5" />
             </Button>
           </div>
           <Badge className="bg-white/20 text-white border-white/30 w-fit">
-            Demo Mode - Experience the conversation
+            {userProfile ? 'Personalized Support Session' : 'Demo Mode - Experience the conversation'}
           </Badge>
         </CardHeader>
 
@@ -85,7 +102,7 @@ const ChatInterface = ({ onClose }: ChatInterfaceProps) => {
                     ) : (
                       <User className="h-4 w-4 text-white mt-0.5 flex-shrink-0" />
                     )}
-                    <div className="text-sm">{message.content}</div>
+                    <div className="text-sm whitespace-pre-line">{message.content}</div>
                   </div>
                 </div>
               </div>
@@ -96,7 +113,7 @@ const ChatInterface = ({ onClose }: ChatInterfaceProps) => {
           <div className="p-6 border-t bg-white">
             <div className="flex gap-2">
               <Input
-                placeholder="Type your message... (This is a demo)"
+                placeholder={userProfile ? "Share what's on your heart..." : "Type your message... (This is a demo)"}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -110,7 +127,7 @@ const ChatInterface = ({ onClose }: ChatInterfaceProps) => {
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              This is a demo. In the real app, conversations are private and secure.
+              {userProfile ? 'Your conversations are private and secure.' : 'This is a demo. In the real app, conversations are private and secure.'}
             </p>
           </div>
         </CardContent>
