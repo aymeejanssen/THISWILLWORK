@@ -30,16 +30,6 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
     setResponses(prev => {
       const updated = { ...prev, [key]: value };
       console.log('AssessmentContext: Updated responses:', updated);
-      
-      // Increment question index
-      const newIndex = currentQuestionIndex + 1;
-      setCurrentQuestionIndex(newIndex);
-      
-      // Navigate to answer summary page
-      setTimeout(() => {
-        navigate(`/answer-summary/${newIndex}`);
-      }, 100);
-      
       return updated;
     });
   };
