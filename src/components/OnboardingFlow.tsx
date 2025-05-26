@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
     {
       id: 'identity',
       title: 'Identity & Purpose',
-      description: 'Life direction, values, personal identity, meaning',
+      description: 'Life direction, sexual orientation, personal identity, values',
       icon: <Compass className="h-6 w-6" />,
       color: 'from-orange-500 to-amber-500'
     },
