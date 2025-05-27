@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -169,9 +170,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you feel ashamed or uncertain about expressing your true self?"
       ],
       loneliness: [
-        "When do you feel most alone, even when others are around?",
-        "What makes it difficult to connect with others?",
-        "What kind of connection are you most longing for?"
+        "Do you often feel emotionally alone, even when you're around other people?",
+        "Do you currently have someone you can talk to about how you really feel?",
+        "Do you struggle to form close or meaningful connections?",
+        "Do you often feel misunderstood or unseen by those around you?",
+        "Do you avoid reaching out because you worry you'll be a burden?",
+        "Have you gone through long periods without close friendships or connection?",
+        "Do you fear being vulnerable or truly known by others?",
+        "Do you find it easier to isolate yourself than to explain your feelings?",
+        "Do you feel like people only value you when you're useful or entertaining?",
+        "Do you feel disconnected from the world or like you don't quite belong anywhere?",
+        "Do you avoid social situations due to anxiety, discomfort, or fear of rejection?",
+        "Do you crave deeper connection but feel unsure how to create it?"
       ],
       grief: [
         "What loss or change has been most difficult for you to process?",
