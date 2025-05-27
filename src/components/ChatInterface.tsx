@@ -19,7 +19,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
   const getPersonalizedGreeting = () => {
     if (!userProfile) {
-      return "Hello there! I'm here to listen and support you. Feel free to share what's on your mind today. Remember, this is a safe, judgment-free space.";
+      return ""; // No greeting for trial users
     }
 
     const name = userProfile.name || 'friend';
@@ -29,13 +29,17 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     return `Hello ${name}! I'm so glad you're here and ready to begin this journey with me. I understand you're working through ${struggles}, and I want you to know that your feelings are completely valid. I'll be communicating with you in ${language} and I'm here to listen with cultural sensitivity and understanding. This is your safe space - feel free to share whatever is on your heart today. What would you like to talk about first?`;
   };
 
-  const [messages, setMessages] = useState([
-    {
-      type: 'ai',
-      content: getPersonalizedGreeting(),
-      timestamp: new Date()
+  const initialGreeting = getPersonalizedGreeting();
+  const [messages, setMessages] = useState(() => {
+    if (initialGreeting) {
+      return [{
+        type: 'ai',
+        content: initialGreeting,
+        timestamp: new Date()
+      }];
     }
-  ]);
+    return [];
+  });
   const [inputMessage, setInputMessage] = useState('');
 
   const sampleResponses = [
@@ -77,11 +81,11 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
     speechSynthesisRef.current = window.speechSynthesis;
 
-    // Speak the initial greeting if voice is enabled
-    if (useVoice && speechSynthesisRef.current) {
+    // Speak the initial greeting if voice is enabled and there's a greeting
+    if (useVoice && speechSynthesisRef.current && initialGreeting) {
       // Small delay to ensure the interface is ready
       setTimeout(() => {
-        speakText(getPersonalizedGreeting());
+        speakText(initialGreeting);
       }, 500);
     }
 
@@ -118,8 +122,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
           voice.name.includes('Premium') ||
           voice.name.includes('Enhanced') ||
           voice.name.includes('Natural') ||
-          voice.name.includes('Neural') ||
-          voice.quality === 'high'
+          voice.name.includes('Neural')
         )
       );
       
