@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +80,7 @@ const AssessmentSummary = () => {
             <CardContent>
               <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-purple-600" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing Your Responses</h2>
-              <p className="text-gray-600">Our AI is generating personalized insights just for you...</p>
+              <p className="text-gray-600">Please wait while we process your assessment...</p>
             </CardContent>
           </Card>
         </div>
