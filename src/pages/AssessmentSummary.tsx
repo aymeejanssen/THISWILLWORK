@@ -322,26 +322,49 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Enhanced AI Therapy Trial Button */}
-        <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100">
-          <CardContent className="pt-8 pb-8 text-center space-y-6">
+        {/* Enhanced AI Therapy Trial Button with glowing orb design */}
+        <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 via-pink-200/30 to-yellow-200/30 blur-xl"></div>
+          <CardContent className="pt-8 pb-8 text-center space-y-6 relative z-10">
             <div className="flex justify-center">
               <div className="relative">
+                {/* Outer glow ring */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400 via-pink-400 to-yellow-400 opacity-20 blur-2xl scale-150 animate-pulse"></div>
+                
+                {/* Middle glow ring */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-300 via-pink-300 to-yellow-300 opacity-30 blur-xl scale-125 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                
+                {/* Inner glow */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-200 via-pink-200 to-yellow-200 opacity-40 blur-lg scale-110 animate-pulse" style={{animationDelay: '1s'}}></div>
+                
+                {/* Main button */}
                 <Button 
                   onClick={handleStartFreeTrial}
-                  className="bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400 hover:from-purple-700 hover:via-pink-600 hover:to-yellow-500 text-white rounded-full w-24 h-24 flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all duration-500 border-4 border-white hover:scale-105 transform"
+                  className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white rounded-full w-32 h-32 flex items-center justify-center shadow-2xl border-4 border-white/20 backdrop-blur-sm hover:scale-105 transform transition-all duration-500 group"
                   size="lg"
                 >
-                  <Brain className="h-12 w-12 animate-pulse" />
+                  {/* Inner gradient overlay */}
+                  <div className="absolute inset-1 rounded-full bg-gradient-to-br from-white/10 to-transparent"></div>
+                  
+                  {/* Brain icon with glow */}
+                  <div className="relative">
+                    <div className="absolute inset-0 text-white/50 blur-sm">
+                      <Brain className="h-16 w-16" />
+                    </div>
+                    <Brain className="h-16 w-16 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
                 </Button>
-                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                  <Badge className="bg-green-100 text-green-800 text-sm px-4 py-2 shadow-lg">
+                
+                {/* Badge */}
+                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                  <Badge className="bg-white/90 backdrop-blur-sm text-purple-800 text-sm px-4 py-2 shadow-lg border border-purple-200/50">
                     <Clock className="h-3 w-3 mr-1" />
                     Try AI Therapy Free - 5 min
                   </Badge>
                 </div>
               </div>
             </div>
+            
             <div>
               <h3 className="text-3xl font-bold text-gray-900 mb-3">Experience AI Therapy</h3>
               <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto text-lg">
@@ -381,7 +404,7 @@ const AssessmentSummary = () => {
           </CardContent>
         </Card>
 
-        {/* Enhanced Pricing Plans */}
+        {/* Enhanced Pricing Plans - showing all features */}
         <Card className="shadow-lg border-purple-200">
           <CardHeader>
             <CardTitle className="text-2xl text-gray-900 text-center">Choose Your Plan</CardTitle>
@@ -418,6 +441,14 @@ const AssessmentSummary = () => {
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <span>Basic emotional support</span>
                   </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Stress management techniques</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Goal setting guidance</span>
+                  </div>
                 </div>
                 
                 <Button variant="outline" className="w-full" onClick={handleStartSession}>
@@ -440,6 +471,10 @@ const AssessmentSummary = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>30-minute sessions</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                     <span>Any time, any day</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
@@ -456,7 +491,15 @@ const AssessmentSummary = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Relationship guidance</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                     <span>Trauma-informed approach</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Mood pattern analysis</span>
                   </div>
                 </div>
                 
@@ -490,7 +533,19 @@ const AssessmentSummary = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Always there when you need support</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                     <span>Immediate anxiety relief</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Companion during lonely moments</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Timeless sessions</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-600" />
@@ -502,7 +557,15 @@ const AssessmentSummary = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Progress insights & reports</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                     <span>Advanced emotional coaching</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Sleep & wellness guidance</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-600" />
