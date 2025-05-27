@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -322,30 +321,31 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Try AI Therapy Button */}
+        {/* Chat with Online Coach Button */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden">
           <CardContent className="pt-8 pb-8 text-center space-y-6">
             <div className="flex justify-center">
               <Button 
                 onClick={handleStartFreeTrial}
-                className="bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300"
+                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group"
                 size="lg"
               >
-                <Brain className="h-12 w-12" />
+                <MessageCircle className="h-12 w-12 group-hover:animate-pulse" />
+                <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
               </Button>
             </div>
             
             <div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-3">Experience AI Therapy</h3>
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your Online Coach</h3>
               <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto text-lg">
-                Try our AI therapy companion for free! Have a real conversation about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
-                No commitment needed - just click and start talking.
+                Start a real conversation with your personal wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
+                Click the button above to begin - no commitment needed!
               </p>
             </div>
             
             <Badge className="bg-white text-purple-800 text-sm px-4 py-2">
               <Clock className="h-3 w-3 mr-2" />
-              Try AI Therapy Free - 5 min
+              Try Free Chat - 5 min
             </Badge>
             
             <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
