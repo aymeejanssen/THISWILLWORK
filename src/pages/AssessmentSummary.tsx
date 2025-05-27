@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 
@@ -31,6 +32,10 @@ const AssessmentSummary = () => {
   const [aiInsights, setAiInsights] = useState<AIResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPricing, setShowPricing] = useState(false);
+
+  // Get the primary concern from responses
+  const primaryConcern = responses.primaryConcern || 'general wellness';
 
   useEffect(() => {
     const generateInsights = async () => {
@@ -38,7 +43,7 @@ const AssessmentSummary = () => {
         console.log('Calling AI function with responses:', responses);
         
         const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-          body: { responses }
+          body: { responses, primaryConcern }
         });
 
         if (error) {
@@ -56,21 +61,48 @@ const AssessmentSummary = () => {
       }
     };
 
-    // Only generate insights if we have responses
     if (Object.keys(responses).length > 0) {
       generateInsights();
     } else {
       setIsLoading(false);
     }
-  }, [responses]);
+  }, [responses, primaryConcern]);
 
-  const personalizedMessage = () => {
-    if (aiInsights) {
-      return aiInsights.supportiveMessage;
-    }
-    
-    return "Thank you for sharing with us. Every journey to better mental health starts with a single step, and you've already taken that step by being here.";
+  const handleStartSession = () => {
+    setShowPricing(true);
   };
+
+  const PricingCard = ({ title, price, sessions, features, isPopular = false }: {
+    title: string;
+    price: string;
+    sessions: string;
+    features: string[];
+    isPopular?: boolean;
+  }) => (
+    <Card className={`relative ${isPopular ? 'border-purple-500 border-2' : ''}`}>
+      {isPopular && (
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <Badge className="bg-purple-600 text-white px-4 py-1">Most Popular</Badge>
+        </div>
+      )}
+      <CardHeader className="text-center">
+        <CardTitle className="text-xl">{title}</CardTitle>
+        <div className="text-3xl font-bold text-purple-600">{price}</div>
+        <p className="text-gray-600">{sessions}</p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {features.map((feature, index) => (
+          <div key={index} className="flex items-start gap-2">
+            <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
+            <span className="text-sm text-gray-700">{feature}</span>
+          </div>
+        ))}
+        <Button className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
+          Choose Plan
+        </Button>
+      </CardContent>
+    </Card>
+  );
 
   if (isLoading) {
     return (
@@ -106,6 +138,110 @@ const AssessmentSummary = () => {
     );
   }
 
+  if (showPricing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="text-center space-y-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowPricing(false)}
+              className="mb-4"
+            >
+              ← Back to Summary
+            </Button>
+            <h1 className="text-4xl font-bold text-gray-900">Choose Your Healing Journey</h1>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Start your personalized {primaryConcern} sessions and get the support you deserve
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <PricingCard
+              title="Weekly Support"
+              price="29.99 AED"
+              sessions="4 sessions per month"
+              features={[
+                "Once a week sessions",
+                "30-minute conversations",
+                "Flexible scheduling",
+                "Personal growth tracking"
+              ]}
+            />
+            
+            <PricingCard
+              title="Regular Care"
+              price="49.99 AED"
+              sessions="3 times per week"
+              features={[
+                "12 sessions per month",
+                "30-minute sessions",
+                "Any time, any day",
+                "Faster progress tracking",
+                "Priority support"
+              ]}
+              isPopular={true}
+            />
+            
+            <PricingCard
+              title="Unlimited Support"
+              price="99.99 AED"
+              sessions="Unlimited access"
+              features={[
+                "24/7 availability",
+                "Unlimited conversations",
+                "Panic attack support at 2am",
+                "Anxiety relief anytime",
+                "Loneliness companion",
+                "Timeless sessions"
+              ]}
+            />
+          </div>
+
+          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <CardContent className="pt-6 text-center">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What You'll Experience</h3>
+              <div className="grid md:grid-cols-2 gap-6 text-left">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Brain className="h-5 w-5 text-purple-600 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">Deep Conversations</h4>
+                      <p className="text-sm text-gray-600">Get to the root of your challenges through meaningful dialogue</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-purple-600 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">At Your Own Pace</h4>
+                      <p className="text-sm text-gray-600">No pressure - progress at a speed that feels right for you</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Heart className="h-5 w-5 text-purple-600 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">Practical Exercises</h4>
+                      <p className="text-sm text-gray-600">Guided activities to help you process and heal</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <UserCircle className="h-5 w-5 text-purple-600 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">Clear Explanations</h4>
+                      <p className="text-sm text-gray-600">Understand why you feel certain ways and how past experiences shape your responses</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -114,100 +250,100 @@ const AssessmentSummary = () => {
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm font-medium">Assessment Complete</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">You Are Seen and Understood</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            {personalizedMessage()}
+            You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
           </p>
         </div>
 
-        {aiInsights && aiInsights.insights.length > 0 ? (
-          <>
-            <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-              <CardContent className="pt-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">What Your Responses Tell Us About You</h2>
-                <p className="text-gray-700 text-center leading-relaxed">
-                  Your answers reveal someone with deep emotional intelligence, strong values, and a genuine desire for growth. 
-                  Here's what we see in you:
-                </p>
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-6">
-              {aiInsights.insights.map((insight, index) => (
-                <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow">
-                  <CardHeader className="flex flex-row items-center space-y-0 space-x-4">
+        {aiInsights && aiInsights.insights.length > 0 && (
+          <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-900 text-center">What We See In You</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {aiInsights.insights.slice(0, 2).map((insight, index) => (
+                  <div key={index} className="flex items-start gap-3 p-4 bg-white rounded-lg">
                     <div className="p-2 bg-purple-100 rounded-lg">
-                      <Heart className="h-5 w-5" />
+                      <Heart className="h-4 w-4 text-purple-600" />
                     </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-xl text-gray-900">{insight.title}</CardTitle>
-                      <Badge className="mt-2 bg-purple-100 text-purple-800 border-purple-200">
-                        Core Strength
-                      </Badge>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">• {insight.title}</h4>
+                      <p className="text-gray-700 text-sm">{insight.description}</p>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-gray-700 leading-relaxed">{insight.description}</p>
-                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                      <p className="text-blue-800 italic font-medium">💙 {insight.reframe}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {aiInsights.actionSteps.length > 0 && (
-              <Card className="shadow-lg bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-green-800 flex items-center gap-2">
-                    <ArrowRight className="h-6 w-6" />
-                    Your Personalized Next Steps
-                  </CardTitle>
-                  <p className="text-green-700">Small, gentle steps that honor where you are right now</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    {aiInsights.actionSteps.map((step, index) => (
-                      <div key={index} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-400">
-                        <h4 className="font-semibold text-gray-900 mb-2">{step.title}</h4>
-                        <p className="text-gray-600 mb-2">{step.description}</p>
-                        <div className="bg-green-50 p-3 rounded border">
-                          <p className="text-green-800 text-sm font-medium">✨ {step.action}</p>
-                        </div>
-                      </div>
-                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-              <CardContent className="pt-6 text-center">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Remember This</h3>
-                <p className="text-gray-700 italic text-lg leading-relaxed max-w-2xl mx-auto">
-                  "You are not broken and you don't need fixing. You are a human being with a beautiful, complex inner world who deserves love, understanding, and gentle growth. Every step you take toward healing is an act of courage."
-                </p>
-              </CardContent>
-            </Card>
-          </>
-        ) : (
-          <Card className="shadow-lg">
-            <CardContent className="pt-6 text-center">
-              <p className="text-gray-600">
-                Thank you for beginning this journey with us. Every path to wellness starts with a single step, 
-                and you've already taken that step by being here.
-              </p>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}
 
+        {aiInsights && aiInsights.actionSteps.length > 0 && (
+          <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="text-xl text-blue-800">Your First Steps</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {aiInsights.actionSteps.slice(0, 2).map((step, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="p-1 bg-blue-100 rounded-full">
+                      <ArrowRight className="h-3 w-3 text-blue-600" />
+                    </div>
+                    <p className="text-gray-700 text-sm">• {step.action}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="shadow-lg border-purple-300 bg-gradient-to-r from-purple-100 to-pink-100">
+          <CardContent className="pt-6 text-center space-y-6">
+            <h3 className="text-2xl font-bold text-gray-900">Ready to Go Deeper?</h3>
+            <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto">
+              Start your first <span className="font-semibold text-purple-700">{primaryConcern}</span> session and begin meaningful conversations that get to the root of your challenges. 
+              We'll work at your pace, include practical exercises, and provide clear explanations to help you understand 
+              why you feel certain ways and how past experiences shape your adult responses.
+            </p>
+            
+            <div className="bg-white p-6 rounded-lg border border-purple-200">
+              <h4 className="font-semibold text-gray-900 mb-3">What makes our approach different:</h4>
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Available 24/7 for panic attacks or anxiety</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Companion when you're feeling lonely</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Emotional education and awareness building</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Understanding trauma responses in adulthood</span>
+                </div>
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleStartSession}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg"
+              size="lg"
+            >
+              Start Your First {primaryConcern.charAt(0).toUpperCase() + primaryConcern.slice(1)} Session
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </CardContent>
+        </Card>
+
         <div className="flex justify-center gap-4">
           <Button onClick={() => navigate('/')} variant="outline" size="lg">
             Take Assessment Again
-          </Button>
-          <Button onClick={() => navigate('/chat')} className="bg-purple-600 hover:bg-purple-700" size="lg">
-            Start Your Healing Journey
-            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
