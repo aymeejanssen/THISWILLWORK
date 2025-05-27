@@ -19,6 +19,12 @@ serve(async (req) => {
     const { responses, primaryConcern } = await req.json();
 
     console.log('Generating insights for:', { primaryConcern, responseCount: Object.keys(responses).length });
+    
+    // Check if API key is available
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not found in environment variables');
+      throw new Error('OpenAI API key not configured');
+    }
 
     const prompt = `You are a compassionate mental health assistant. A user has completed an assessment about their mental health concerns. Please analyze their responses and provide:
 
@@ -26,7 +32,7 @@ serve(async (req) => {
 2. 3-4 specific, actionable next steps they can take
 3. A supportive closing message
 
-Primary concern: ${primaryConcern}
+Primary concern: ${primaryConcern || 'Not specified'}
 User responses: ${JSON.stringify(responses, null, 2)}
 
 Please respond in JSON format:
@@ -50,6 +56,8 @@ Please respond in JSON format:
 
 Be warm, understanding, and focus on their strengths. Avoid clinical language.`;
 
+    console.log('Making OpenAI API call...');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -68,10 +76,14 @@ Be warm, understanding, and focus on their strengths. Avoid clinical language.`;
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`OpenAI API error: ${response.status} ${response.statusText}`, errorText);
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('OpenAI API response received successfully');
+    
     const aiResponse = data.choices[0].message.content;
 
     console.log('AI Response:', aiResponse);
@@ -82,6 +94,7 @@ Be warm, understanding, and focus on their strengths. Avoid clinical language.`;
       parsedResponse = JSON.parse(aiResponse);
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
+      console.error('Raw AI response:', aiResponse);
       // Fallback response if parsing fails
       parsedResponse = {
         insights: [{
