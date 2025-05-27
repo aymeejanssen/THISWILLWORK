@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, User, X, Heart } from "lucide-react";
+import { MessageCircle, User, X, Heart, Mic, MicOff, Type } from "lucide-react";
 
 interface ChatInterfaceProps {
   onClose: () => void;
@@ -12,6 +12,11 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
+  const [isListening, setIsListening] = useState(false);
+  const [useVoice, setUseVoice] = useState(true);
+  const recognitionRef = useRef<any>(null);
+  const speechSynthesisRef = useRef<SpeechSynthesis | null>(null);
+
   const getPersonalizedGreeting = () => {
     if (!userProfile) {
       return "Hello! I'm here to listen and support you. Feel free to share what's on your mind today. Remember, this is a safe, judgment-free space. 💜";
@@ -44,12 +49,84 @@ What would you like to talk about first?`;
     "Self-doubt is something many people struggle with. You're not alone in feeling this way..."
   ];
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
+  // Initialize speech recognition and synthesis
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result: any) => result.transcript)
+          .join('');
+
+        if (event.results[event.results.length - 1].isFinal) {
+          handleSendMessage(transcript);
+        }
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+    }
+
+    speechSynthesisRef.current = window.speechSynthesis;
+
+    // Speak the initial greeting if voice is enabled
+    if (useVoice && speechSynthesisRef.current) {
+      speakText(getPersonalizedGreeting());
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      if (speechSynthesisRef.current) {
+        speechSynthesisRef.current.cancel();
+      }
+    };
+  }, []);
+
+  const speakText = (text: string) => {
+    if (speechSynthesisRef.current && useVoice) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 0.8;
+      speechSynthesisRef.current.speak(utterance);
+    }
+  };
+
+  const startListening = () => {
+    if (recognitionRef.current && !isListening) {
+      setIsListening(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  const handleSendMessage = (messageText?: string) => {
+    const textToSend = messageText || inputMessage;
+    if (!textToSend.trim()) return;
 
     const newUserMessage = {
       type: 'user' as const,
-      content: inputMessage,
+      content: textToSend,
       timestamp: new Date()
     };
 
@@ -65,7 +142,22 @@ What would you like to talk about first?`;
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiResponse]);
+      
+      // Speak the AI response if voice is enabled
+      if (useVoice) {
+        speakText(randomResponse);
+      }
     }, 1000);
+  };
+
+  const toggleInputMode = () => {
+    setUseVoice(!useVoice);
+    if (isListening) {
+      stopListening();
+    }
+    if (speechSynthesisRef.current) {
+      speechSynthesisRef.current.cancel();
+    }
   };
 
   return (
@@ -81,9 +173,14 @@ What would you like to talk about first?`;
               <X className="h-5 w-5" />
             </Button>
           </div>
-          <Badge className="bg-white/20 text-white border-white/30 w-fit">
-            {userProfile ? 'Personalized Support Session' : 'Demo Mode - Experience the conversation'}
-          </Badge>
+          <div className="flex items-center justify-between">
+            <Badge className="bg-white/20 text-white border-white/30 w-fit">
+              {userProfile ? 'Personalized Support Session' : 'Demo Mode - Experience the conversation'}
+            </Badge>
+            <Badge className={`${useVoice ? 'bg-green-500/80' : 'bg-blue-500/80'} text-white border-white/30`}>
+              {useVoice ? '🎤 Voice Mode' : '⌨️ Text Mode'}
+            </Badge>
+          </div>
         </CardHeader>
 
         <CardContent className="flex-1 flex flex-col p-0">
@@ -111,21 +208,64 @@ What would you like to talk about first?`;
 
           {/* Input Area */}
           <div className="p-6 border-t bg-white">
-            <div className="flex gap-2">
-              <Input
-                placeholder={userProfile ? "Share what's on your heart..." : "Type your message... (This is a demo)"}
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="flex-1"
-              />
-              <Button 
-                onClick={handleSendMessage}
-                className="bg-wellness-purple hover:bg-wellness-purple/90"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </Button>
-            </div>
+            {useVoice ? (
+              // Voice Mode
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex gap-2 items-center">
+                  <Button
+                    onClick={isListening ? stopListening : startListening}
+                    className={`rounded-full w-16 h-16 ${
+                      isListening 
+                        ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                        : 'bg-wellness-purple hover:bg-wellness-purple/90'
+                    }`}
+                  >
+                    {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-600 text-center">
+                  {isListening ? 'Listening... Tap to stop' : 'Tap to speak your thoughts'}
+                </p>
+                <Button 
+                  onClick={toggleInputMode}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Type className="h-4 w-4" />
+                  I prefer to type right now
+                </Button>
+              </div>
+            ) : (
+              // Text Mode
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={userProfile ? "Share what's on your heart..." : "Type your message... (This is a demo)"}
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={() => handleSendMessage()}
+                    className="bg-wellness-purple hover:bg-wellness-purple/90"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button 
+                  onClick={toggleInputMode}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 mx-auto"
+                >
+                  <Mic className="h-4 w-4" />
+                  Switch to voice mode
+                </Button>
+              </div>
+            )}
+            
             <p className="text-xs text-gray-500 mt-2 text-center">
               {userProfile ? 'Your conversations are private and secure.' : 'This is a demo. In the real app, conversations are private and secure.'}
             </p>
