@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
@@ -217,7 +218,10 @@ const AssessmentSummary = () => {
                 "Once a week sessions",
                 "30-minute conversations",
                 "Flexible scheduling",
-                "Personal growth tracking"
+                "Personal growth tracking",
+                "Basic emotional support",
+                "Stress management techniques",
+                "Goal setting guidance"
               ]}
             />
             
@@ -230,7 +234,11 @@ const AssessmentSummary = () => {
                 "30-minute sessions",
                 "Any time, any day",
                 "Faster progress tracking",
-                "Priority support"
+                "Priority support",
+                "Advanced coping strategies",
+                "Relationship guidance",
+                "Trauma-informed approach",
+                "Mood pattern analysis"
               ]}
             />
             
@@ -244,7 +252,13 @@ const AssessmentSummary = () => {
                 "Always there when you need support",
                 "Immediate anxiety relief",
                 "Companion during lonely moments",
-                "Timeless sessions"
+                "Timeless sessions",
+                "Crisis intervention support",
+                "Personalized therapy plans",
+                "Progress insights & reports",
+                "Advanced emotional coaching",
+                "Sleep & wellness guidance",
+                "Family relationship support"
               ]}
               isPopular={true}
             />
@@ -308,47 +322,58 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* AI Therapy Trial Button */}
-        <Card className="shadow-lg border-purple-300 bg-gradient-to-r from-purple-100 to-pink-100">
-          <CardContent className="pt-6 text-center space-y-6">
+        {/* Enhanced AI Therapy Trial Button */}
+        <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100">
+          <CardContent className="pt-8 pb-8 text-center space-y-6">
             <div className="flex justify-center">
               <div className="relative">
                 <Button 
                   onClick={handleStartFreeTrial}
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 border-4 border-white"
+                  className="bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-400 hover:from-purple-700 hover:via-pink-600 hover:to-yellow-500 text-white rounded-full w-24 h-24 flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all duration-500 border-4 border-white hover:scale-105 transform"
                   size="lg"
                 >
-                  <Brain className="h-10 w-10" />
+                  <Brain className="h-12 w-12 animate-pulse" />
                 </Button>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                  <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1">Try AI Therapy Free - 5 min</Badge>
+                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                  <Badge className="bg-green-100 text-green-800 text-sm px-4 py-2 shadow-lg">
+                    <Clock className="h-3 w-3 mr-1" />
+                    Try AI Therapy Free - 5 min
+                  </Badge>
                 </div>
               </div>
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Experience AI Therapy</h3>
-              <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto">
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">Experience AI Therapy</h3>
+              <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto text-lg">
                 Try our AI therapy companion for free! Have a real conversation about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
                 No commitment needed - just click and start talking.
               </p>
             </div>
             
-            <div className="bg-white p-4 rounded-lg border border-purple-200">
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
               <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-100 p-1 rounded-full">
+                    <Shield className="h-4 w-4 text-green-600" />
+                  </div>
                   <span>Available 24/7 for panic attacks or anxiety</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-100 p-1 rounded-full">
+                    <Heart className="h-4 w-4 text-blue-600" />
+                  </div>
                   <span>Companion when you're feeling lonely</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="flex items-center gap-3">
+                  <div className="bg-purple-100 p-1 rounded-full">
+                    <Brain className="h-4 w-4 text-purple-600" />
+                  </div>
                   <span>Emotional education and awareness building</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="flex items-center gap-3">
+                  <div className="bg-pink-100 p-1 rounded-full">
+                    <Headphones className="h-4 w-4 text-pink-600" />
+                  </div>
                   <span>Understanding trauma responses in adulthood</span>
                 </div>
               </div>
@@ -356,47 +381,143 @@ const AssessmentSummary = () => {
           </CardContent>
         </Card>
 
-        {/* Pricing Plans */}
+        {/* Enhanced Pricing Plans */}
         <Card className="shadow-lg border-purple-200">
           <CardHeader>
             <CardTitle className="text-2xl text-gray-900 text-center">Choose Your Plan</CardTitle>
             <p className="text-center text-gray-600">Start your personalized {primaryConcern} sessions</p>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="text-center p-4 border rounded-lg hover:border-purple-300 transition-colors">
-                <h4 className="font-bold text-lg">Weekly Support</h4>
-                <div className="text-2xl font-bold text-purple-600 my-2">29.99 AED</div>
-                <p className="text-sm text-gray-600 mb-3">4 sessions per month</p>
-                <Button variant="outline" className="w-full" onClick={handleStartSession}>
-                  Choose Plan
-                </Button>
-              </div>
-              
-              <div className="text-center p-4 border rounded-lg hover:border-purple-300 transition-colors">
-                <h4 className="font-bold text-lg">Regular Care</h4>
-                <div className="text-2xl font-bold text-purple-600 my-2">49.99 AED</div>
-                <p className="text-sm text-gray-600 mb-3">12 sessions per month</p>
-                <Button variant="outline" className="w-full" onClick={handleStartSession}>
-                  Choose Plan
-                </Button>
-              </div>
-              
-              <div className="text-center p-4 border-2 border-purple-500 rounded-lg bg-purple-50 relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-purple-600 text-white px-3 py-1">Most Popular</Badge>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-6 border rounded-xl hover:border-purple-300 transition-colors hover:shadow-lg">
+                <div className="bg-purple-100 p-3 rounded-full w-fit mx-auto mb-4">
+                  <Calendar className="h-6 w-6 text-purple-600" />
                 </div>
-                <h4 className="font-bold text-lg">Unlimited Support</h4>
-                <div className="text-2xl font-bold text-purple-600 my-2">99.99 AED</div>
-                <p className="text-sm text-gray-600 mb-3">Unlimited access</p>
+                <h4 className="font-bold text-xl mb-2">Weekly Support</h4>
+                <div className="text-3xl font-bold text-purple-600 my-3">29.99 AED</div>
+                <p className="text-sm text-gray-600 mb-4">4 sessions per month</p>
+                
+                <div className="space-y-2 mb-6 text-left">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Once a week sessions</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>30-minute conversations</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Flexible scheduling</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Personal growth tracking</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Basic emotional support</span>
+                  </div>
+                </div>
+                
+                <Button variant="outline" className="w-full" onClick={handleStartSession}>
+                  Choose Plan
+                </Button>
+              </div>
+              
+              <div className="text-center p-6 border rounded-xl hover:border-purple-300 transition-colors hover:shadow-lg">
+                <div className="bg-blue-100 p-3 rounded-full w-fit mx-auto mb-4">
+                  <Zap className="h-6 w-6 text-blue-600" />
+                </div>
+                <h4 className="font-bold text-xl mb-2">Regular Care</h4>
+                <div className="text-3xl font-bold text-purple-600 my-3">49.99 AED</div>
+                <p className="text-sm text-gray-600 mb-4">12 sessions per month</p>
+                
+                <div className="space-y-2 mb-6 text-left">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>3 times per week sessions</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Any time, any day</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Faster progress tracking</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Priority support</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Advanced coping strategies</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Trauma-informed approach</span>
+                  </div>
+                </div>
+                
+                <Button variant="outline" className="w-full" onClick={handleStartSession}>
+                  Choose Plan
+                </Button>
+              </div>
+              
+              <div className="text-center p-6 border-2 border-purple-500 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 relative hover:shadow-xl transition-shadow">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-purple-600 text-white px-4 py-2 shadow-lg">
+                    <Star className="h-3 w-3 mr-1" />
+                    Most Popular
+                  </Badge>
+                </div>
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-3 rounded-full w-fit mx-auto mb-4">
+                  <Brain className="h-6 w-6 text-purple-600" />
+                </div>
+                <h4 className="font-bold text-xl mb-2">Unlimited Support</h4>
+                <div className="text-3xl font-bold text-purple-600 my-3">99.99 AED</div>
+                <p className="text-sm text-gray-600 mb-4">Unlimited access</p>
+                
+                <div className="space-y-2 mb-6 text-left">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>24/7 availability</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Unlimited conversations</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Immediate anxiety relief</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Crisis intervention support</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Personalized therapy plans</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Advanced emotional coaching</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Family relationship support</span>
+                  </div>
+                </div>
+                
                 <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={handleStartSession}>
                   Choose Plan
                 </Button>
               </div>
             </div>
             
-            <div className="text-center mt-6">
-              <Button variant="link" onClick={handleStartSession} className="text-purple-600">
+            <div className="text-center mt-8">
+              <Button variant="link" onClick={handleStartSession} className="text-purple-600 hover:text-purple-700">
                 View detailed plan comparison →
               </Button>
             </div>
