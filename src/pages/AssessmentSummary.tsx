@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -190,9 +189,9 @@ const AssessmentSummary = () => {
               features={[
                 "24/7 availability",
                 "Unlimited conversations",
-                "Panic attack support at 2am",
-                "Anxiety relief anytime",
-                "Loneliness companion",
+                "Always there when you need support",
+                "Immediate anxiety relief",
+                "Companion during lonely moments",
                 "Timeless sessions"
               ]}
             />
