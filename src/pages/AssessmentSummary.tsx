@@ -322,43 +322,61 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Enhanced AI Therapy Trial Button with glowing orb design */}
+        {/* Enhanced AI Therapy Trial Button with foggy, cloudy, organic design */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 via-pink-200/30 to-yellow-200/30 blur-xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-200/20 via-pink-200/20 to-yellow-200/20 blur-3xl"></div>
           <CardContent className="pt-8 pb-8 text-center space-y-6 relative z-10">
             <div className="flex justify-center">
               <div className="relative">
-                {/* Outer glow ring */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400 via-pink-400 to-yellow-400 opacity-20 blur-2xl scale-150 animate-pulse"></div>
+                {/* Outermost foggy cloud layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/15 via-pink-300/15 to-yellow-300/15 blur-3xl scale-[2.5] animate-pulse opacity-40 rounded-[60% 40% 70% 30% / 60% 30% 70% 40%]" style={{animationDelay: '0s', animationDuration: '4s'}}></div>
                 
-                {/* Middle glow ring */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-300 via-pink-300 to-yellow-300 opacity-30 blur-xl scale-125 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                {/* Second cloud layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 via-pink-400/20 to-yellow-400/20 blur-2xl scale-[2] animate-pulse opacity-50 rounded-[40% 60% 30% 70% / 70% 40% 60% 30%]" style={{animationDelay: '1s', animationDuration: '3s'}}></div>
                 
-                {/* Inner glow */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-200 via-pink-200 to-yellow-200 opacity-40 blur-lg scale-110 animate-pulse" style={{animationDelay: '1s'}}></div>
+                {/* Third cloud layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/25 via-pink-500/25 to-yellow-500/25 blur-xl scale-[1.6] animate-pulse opacity-60 rounded-[70% 30% 60% 40% / 40% 70% 30% 60%]" style={{animationDelay: '2s', animationDuration: '3.5s'}}></div>
                 
-                {/* Main button */}
+                {/* Inner glow layers */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/30 via-pink-400/30 to-yellow-400/30 blur-lg scale-[1.3] animate-pulse opacity-70 rounded-[50% 50% 60% 40% / 60% 40% 50% 50%]" style={{animationDelay: '0.5s', animationDuration: '2.8s'}}></div>
+                
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/35 via-pink-300/35 to-yellow-300/35 blur-md scale-[1.15] animate-pulse opacity-80 rounded-[45% 55% 35% 65% / 55% 35% 65% 45%]" style={{animationDelay: '1.5s', animationDuration: '2.5s'}}></div>
+                
+                {/* Main organic button */}
                 <Button 
                   onClick={handleStartFreeTrial}
-                  className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white rounded-full w-32 h-32 flex items-center justify-center shadow-2xl border-4 border-white/20 backdrop-blur-sm hover:scale-105 transform transition-all duration-500 group"
+                  className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-36 h-36 flex items-center justify-center shadow-2xl border-4 border-white/30 backdrop-blur-sm hover:scale-105 transform transition-all duration-700 group overflow-hidden"
+                  style={{
+                    borderRadius: '45% 55% 60% 40% / 55% 45% 40% 60%',
+                    animation: 'float 6s ease-in-out infinite'
+                  }}
                   size="lg"
                 >
-                  {/* Inner gradient overlay */}
-                  <div className="absolute inset-1 rounded-full bg-gradient-to-br from-white/10 to-transparent"></div>
+                  {/* Inner organic gradient overlays */}
+                  <div className="absolute inset-1 bg-gradient-to-br from-white/15 to-transparent rounded-[40% 60% 55% 45% / 50% 40% 60% 50%]"></div>
+                  <div className="absolute inset-2 bg-gradient-to-br from-transparent to-white/10 rounded-[35% 65% 45% 55% / 45% 55% 35% 65%]"></div>
                   
-                  {/* Brain icon with glow */}
-                  <div className="relative">
-                    <div className="absolute inset-0 text-white/50 blur-sm">
+                  {/* Floating internal clouds */}
+                  <div className="absolute top-4 left-6 w-4 h-4 bg-white/20 rounded-full blur-sm animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                  <div className="absolute bottom-6 right-4 w-3 h-3 bg-white/15 rounded-full blur-sm animate-pulse" style={{animationDelay: '1.2s'}}></div>
+                  <div className="absolute top-8 right-8 w-2 h-2 bg-white/25 rounded-full blur-sm animate-pulse" style={{animationDelay: '2s'}}></div>
+                  
+                  {/* Brain icon with soft glow */}
+                  <div className="relative z-10">
+                    <div className="absolute inset-0 text-white/40 blur-md">
                       <Brain className="h-16 w-16" />
                     </div>
-                    <Brain className="h-16 w-16 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="absolute inset-0 text-white/60 blur-sm">
+                      <Brain className="h-16 w-16" />
+                    </div>
+                    <Brain className="h-16 w-16 relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg" />
                   </div>
                 </Button>
                 
-                {/* Badge */}
-                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                  <Badge className="bg-white/90 backdrop-blur-sm text-purple-800 text-sm px-4 py-2 shadow-lg border border-purple-200/50">
-                    <Clock className="h-3 w-3 mr-1" />
+                {/* Floating badge with organic shape */}
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                  <Badge className="bg-white/95 backdrop-blur-md text-purple-800 text-sm px-6 py-3 shadow-xl border border-purple-200/30 rounded-[30% 70% 60% 40% / 40% 60% 70% 30%]">
+                    <Clock className="h-3 w-3 mr-2" />
                     Try AI Therapy Free - 5 min
                   </Badge>
                 </div>
