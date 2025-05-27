@@ -345,11 +345,6 @@ const AssessmentSummary = () => {
               </p>
             </div>
             
-            <Badge className="bg-white text-purple-800 text-sm px-4 py-2">
-              <Clock className="h-3 w-3 mr-2" />
-              Try Free Chat - 5 min
-            </Badge>
-            
             <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
               <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
                 <div className="flex items-center gap-3">
@@ -381,7 +376,6 @@ const AssessmentSummary = () => {
           </CardContent>
         </Card>
 
-        {/* AI Insights */}
         {aiInsights && aiInsights.insights.length > 0 && (
           <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
             <CardHeader>
