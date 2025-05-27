@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -375,6 +376,70 @@ const AssessmentSummary = () => {
           </CardContent>
         </Card>
 
+        {/* Pricing Cards Section */}
+        <div className="space-y-8">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold text-gray-900">Choose Your Healing Journey</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Start your personalized {primaryConcern} sessions and get the support you deserve
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <PricingCard
+              title="Weekly Support"
+              price="29.99 AED"
+              sessions="4 sessions per month"
+              features={[
+                "Once a week sessions",
+                "30-minute conversations",
+                "Flexible scheduling",
+                "Personal growth tracking",
+                "Basic emotional support",
+                "Stress management techniques",
+                "Goal setting guidance"
+              ]}
+            />
+            
+            <PricingCard
+              title="Regular Care"
+              price="49.99 AED"
+              sessions="3 times per week"
+              features={[
+                "12 sessions per month",
+                "30-minute sessions",
+                "Any time, any day",
+                "Faster progress tracking",
+                "Priority support",
+                "Advanced coping strategies",
+                "Relationship guidance",
+                "Trauma-informed approach",
+                "Mood pattern analysis"
+              ]}
+            />
+            
+            <PricingCard
+              title="Unlimited Support"
+              price="99.99 AED"
+              sessions="Unlimited access"
+              features={[
+                "24/7 availability",
+                "Unlimited conversations",
+                "Always there when you need support",
+                "Immediate anxiety relief",
+                "Companion during lonely moments",
+                "Timeless sessions",
+                "Crisis intervention support",
+                "Personalized therapy plans",
+                "Progress insights & reports",
+                "Advanced emotional coaching",
+                "Family relationship support"
+              ]}
+              isPopular={true}
+            />
+          </div>
+        </div>
+
         {aiInsights && aiInsights.insights.length > 0 && (
           <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
             <CardHeader>
@@ -421,6 +486,9 @@ const AssessmentSummary = () => {
         <div className="flex justify-center gap-4">
           <Button onClick={() => navigate('/')} variant="outline" size="lg">
             Take Assessment Again
+          </Button>
+          <Button onClick={handleStartSession} size="lg" className="bg-purple-600 hover:bg-purple-700">
+            View All Plans
           </Button>
         </div>
       </div>
