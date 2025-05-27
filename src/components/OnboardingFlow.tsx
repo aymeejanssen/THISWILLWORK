@@ -197,9 +197,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you sometimes feel guilt, anger, or confusion related to your loss?"
       ],
       trauma: [
-        "How do past difficult experiences affect your daily life now?",
-        "What helps you feel safe and grounded when you're struggling?",
-        "What would feeling healed or at peace look like for you?"
+        "Have you experienced a situation where you felt completely unsafe or powerless?",
+        "Were you ever hurt emotionally by someone you trusted deeply?",
+        "Have you experienced physical harm, violence, or aggression from someone close to you?",
+        "Did you grow up in a household with constant fear, conflict, or unpredictability?",
+        "Have you ever experienced unwanted touching or sexual boundaries being crossed?",
+        "Were you exposed to emotional neglect or made to feel invisible for long periods of time?",
+        "Have you ever been in a situation where your life or safety felt at risk (accident, assault, disaster)?",
+        "Have you witnessed serious harm, violence, or trauma happening to someone else?",
+        "Did you have to take on adult responsibilities too early because of a difficult home life?",
+        "Have you experienced a controlling or manipulative relationship that left lasting effects?",
+        "Do certain places, sounds, or situations trigger fear or panic without a clear reason?",
+        "Do you often feel disconnected from your body, emotions, or like you're just \"getting through the day\"?"
       ]
     };
 
