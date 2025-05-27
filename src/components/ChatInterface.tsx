@@ -19,18 +19,14 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
   const getPersonalizedGreeting = () => {
     if (!userProfile) {
-      return "Hello! I'm here to listen and support you. Feel free to share what's on your mind today. Remember, this is a safe, judgment-free space. 💜";
+      return "Hello there! I'm here to listen and support you. Feel free to share what's on your mind today. Remember, this is a safe, judgment-free space.";
     }
 
     const name = userProfile.name || 'friend';
     const struggles = userProfile.currentStruggles?.join(', ') || 'life challenges';
     const language = userProfile.preferredLanguage || 'English';
     
-    return `Hello ${name}! 🌸 I'm so glad you're here and ready to begin this journey with me. I understand you're working through ${struggles}, and I want you to know that your feelings are completely valid. 
-
-I'll be communicating with you in ${language} and I'm here to listen with cultural sensitivity and understanding. This is your safe space - feel free to share whatever is on your heart today. 💜
-
-What would you like to talk about first?`;
+    return `Hello ${name}! I'm so glad you're here and ready to begin this journey with me. I understand you're working through ${struggles}, and I want you to know that your feelings are completely valid. I'll be communicating with you in ${language} and I'm here to listen with cultural sensitivity and understanding. This is your safe space - feel free to share whatever is on your heart today. What would you like to talk about first?`;
   };
 
   const [messages, setMessages] = useState([
@@ -43,10 +39,10 @@ What would you like to talk about first?`;
   const [inputMessage, setInputMessage] = useState('');
 
   const sampleResponses = [
-    "I understand that work burnout can feel overwhelming. Let's explore what's making you feel this way...",
-    "It sounds like you're going through a difficult time with relationships. Your feelings are completely valid...",
-    "Cultural identity questions can be complex. Tell me more about what you're experiencing...",
-    "Self-doubt is something many people struggle with. You're not alone in feeling this way..."
+    "I hear you, and I understand that work burnout can feel really overwhelming. It's like carrying a heavy weight that just keeps getting heavier, isn't it? Let's explore what's making you feel this way...",
+    "It sounds like you're going through a difficult time with relationships, and that can be so hard. Your feelings are completely valid, and you're not alone in this. Can you tell me more about what you're experiencing?",
+    "Questions about cultural identity can feel really complex and sometimes isolating. I appreciate you sharing this with me. Tell me more about what you're experiencing...",
+    "Self-doubt is something so many people struggle with, even though it might feel like you're the only one. You're definitely not alone in feeling this way. What thoughts have been coming up for you lately?"
   ];
 
   // Initialize speech recognition and synthesis
@@ -83,7 +79,10 @@ What would you like to talk about first?`;
 
     // Speak the initial greeting if voice is enabled
     if (useVoice && speechSynthesisRef.current) {
-      speakText(getPersonalizedGreeting());
+      // Small delay to ensure the interface is ready
+      setTimeout(() => {
+        speakText(getPersonalizedGreeting());
+      }, 500);
     }
 
     return () => {
@@ -98,10 +97,50 @@ What would you like to talk about first?`;
 
   const speakText = (text: string) => {
     if (speechSynthesisRef.current && useVoice) {
+      // Cancel any ongoing speech
+      speechSynthesisRef.current.cancel();
+      
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
+      
+      // Make voice more natural and human-like
+      utterance.rate = 0.85; // Slightly slower for more natural conversation
+      utterance.pitch = 0.95; // Slightly lower pitch for warmth
+      utterance.volume = 0.9;
+      
+      // Try to use a more natural voice if available
+      const voices = speechSynthesisRef.current.getVoices();
+      
+      // Look for high-quality voices (often contain "premium", "enhanced", or specific names)
+      const preferredVoices = voices.filter(voice => 
+        voice.lang.startsWith('en') && (
+          voice.name.includes('Samantha') || 
+          voice.name.includes('Alex') ||
+          voice.name.includes('Premium') ||
+          voice.name.includes('Enhanced') ||
+          voice.name.includes('Natural') ||
+          voice.name.includes('Neural') ||
+          voice.quality === 'high'
+        )
+      );
+      
+      // Fallback to any English voice that sounds natural
+      const englishVoices = voices.filter(voice => 
+        voice.lang.startsWith('en') && voice.name.includes('Female')
+      );
+      
+      // Set the best available voice
+      if (preferredVoices.length > 0) {
+        utterance.voice = preferredVoices[0];
+      } else if (englishVoices.length > 0) {
+        utterance.voice = englishVoices[0];
+      } else if (voices.length > 0) {
+        // Fallback to first English voice
+        const fallbackVoice = voices.find(voice => voice.lang.startsWith('en'));
+        if (fallbackVoice) utterance.voice = fallbackVoice;
+      }
+      
+      console.log('Using voice:', utterance.voice?.name || 'default');
+      
       speechSynthesisRef.current.speak(utterance);
     }
   };
@@ -133,7 +172,7 @@ What would you like to talk about first?`;
     setMessages(prev => [...prev, newUserMessage]);
     setInputMessage('');
 
-    // Simulate AI response
+    // Simulate AI response with more natural conversation flow
     setTimeout(() => {
       const randomResponse = sampleResponses[Math.floor(Math.random() * sampleResponses.length)];
       const aiResponse = {
@@ -145,9 +184,12 @@ What would you like to talk about first?`;
       
       // Speak the AI response if voice is enabled
       if (useVoice) {
-        speakText(randomResponse);
+        // Small delay to make conversation feel more natural
+        setTimeout(() => {
+          speakText(randomResponse);
+        }, 300);
       }
-    }, 1000);
+    }, 1200); // Slightly longer delay for more natural conversation rhythm
   };
 
   const toggleInputMode = () => {
