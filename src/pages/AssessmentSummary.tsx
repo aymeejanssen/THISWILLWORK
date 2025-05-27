@@ -1,229 +1,111 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
+import { supabase } from '../integrations/supabase/client';
+
+interface AIInsight {
+  title: string;
+  description: string;
+  reframe: string;
+}
+
+interface AIActionStep {
+  title: string;
+  description: string;
+  action: string;
+}
+
+interface AIResponse {
+  insights: AIInsight[];
+  actionSteps: AIActionStep[];
+  supportiveMessage: string;
+}
 
 const AssessmentSummary = () => {
   const navigate = useNavigate();
   const { responses } = useAssessment();
+  const [aiInsights, setAiInsights] = useState<AIResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Helper function to analyze patterns based on responses
-  const analyzePatterns = () => {
-    const patterns = [];
-    
-    // Family patterns analysis
-    if (responses.primaryConcern === 'family') {
-      if (responses.familyResponses?.some((r: any) => r.includes('conflict') || r.includes('criticism'))) {
-        patterns.push({
-          title: "Hypervigilance & People-Pleasing",
-          description: "Growing up in a critical or conflict-heavy environment often creates a hypervigilant nervous system. You may find yourself constantly scanning for signs of disapproval, leading to perfectionism and difficulty setting boundaries.",
-          insight: "Your sensitivity to others' emotions is actually a superpower - you just need to learn when to turn it on and off.",
-          icon: <Users className="h-5 w-5" />,
-          severity: "high"
+  useEffect(() => {
+    const generateInsights = async () => {
+      try {
+        console.log('Calling AI function with responses:', responses);
+        
+        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
+          body: { responses }
         });
-      }
-      
-      if (responses.familyResponses?.some((r: any) => r.includes('responsible') || r.includes('peace'))) {
-        patterns.push({
-          title: "Parentification & Over-Responsibility",
-          description: "Being responsible for family peace as a child creates adults who feel responsible for everyone's emotions. This shows your incredible capacity for care and empathy.",
-          insight: "You learned to be strong for others - now it's time to be gentle with yourself.",
-          icon: <Heart className="h-5 w-5" />,
-          severity: "medium"
-        });
-      }
-    }
 
-    // Relationship patterns analysis
-    if (responses.primaryConcern === 'relationships') {
-      if (responses.relationshipResponses?.some((r: any) => r.includes('abandonment') || r.includes('rejection'))) {
-        patterns.push({
-          title: "Deep Capacity for Love",
-          description: "Your fear of abandonment stems from how deeply you love and connect. This isn't a weakness - it's evidence of your profound emotional depth.",
-          insight: "Your heart's capacity to love is extraordinary. Learning to love yourself with that same intensity will transform everything.",
-          icon: <Heart className="h-5 w-5" />,
-          severity: "high"
-        });
-      }
-      
-      if (responses.relationshipResponses?.some((r: any) => r.includes('lose yourself') || r.includes('over-give'))) {
-        patterns.push({
-          title: "Beautiful Generosity",
-          description: "Your tendency to over-give shows a heart that naturally wants to nurture and care. This is a gift that just needs some boundaries around it.",
-          insight: "Your generosity is beautiful - now let's help you be equally generous with yourself.",
-          icon: <Users className="h-5 w-5" />,
-          severity: "medium"
-        });
-      }
-    }
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw error;
+        }
 
-    // Self-worth patterns analysis
-    if (responses.primaryConcern === 'self-worth') {
-      if (responses.selfWorthResponses?.some((r: any) => r.includes('not good enough') || r.includes('perfect'))) {
-        patterns.push({
-          title: "High Standards & Deep Care",
-          description: "Your perfectionism comes from a place of caring deeply about quality and excellence. This drive has likely helped you achieve amazing things.",
-          insight: "Your high standards show how much you care. Now let's apply that same excellence to self-compassion.",
-          icon: <UserCircle className="h-5 w-5" />,
-          severity: "high"
-        });
+        console.log('AI insights generated:', data);
+        setAiInsights(data);
+      } catch (err) {
+        console.error('Error generating AI insights:', err);
+        setError('Failed to generate personalized insights. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
-      
-      if (responses.selfWorthResponses?.some((r: any) => r.includes('failure') || r.includes('success'))) {
-        patterns.push({
-          title: "Thoughtful & Reflective Nature",
-          description: "Your awareness of both success and failure shows deep self-reflection and emotional intelligence. This insight is actually quite rare and valuable.",
-          insight: "Your ability to see nuance in yourself shows remarkable emotional maturity.",
-          icon: <Brain className="h-5 w-5" />,
-          severity: "medium"
-        });
-      }
-    }
+    };
 
-    // Work patterns analysis
-    if (responses.primaryConcern === 'work') {
-      if (responses.workResponses?.some((r: any) => r.includes('overwhelmed') || r.includes('burned out'))) {
-        patterns.push({
-          title: "Dedicated & Hardworking",
-          description: "Your experience with overwhelm shows how committed you are to doing good work. This dedication is admirable and speaks to your strong work ethic.",
-          insight: "Your commitment to excellence is inspiring. Let's channel that energy in a more sustainable way.",
-          icon: <Briefcase className="h-5 w-5" />,
-          severity: "high"
-        });
-      }
-      
-      if (responses.workResponses?.some((r: any) => r.includes('speaking up') || r.includes('judged'))) {
-        patterns.push({
-          title: "Thoughtful Communicator",
-          description: "Your awareness of how you communicate shows emotional intelligence and consideration for others. This mindfulness is a strength.",
-          insight: "Your thoughtfulness in communication shows deep empathy - now let's help you advocate for yourself too.",
-          icon: <Users className="h-5 w-5" />,
-          severity: "medium"
-        });
-      }
+    // Only generate insights if we have responses
+    if (Object.keys(responses).length > 0) {
+      generateInsights();
+    } else {
+      setIsLoading(false);
     }
-
-    // Identity patterns analysis
-    if (responses.primaryConcern === 'identity') {
-      if (responses.identityResponses?.some((r: any) => r.includes('lost') || r.includes('hide'))) {
-        patterns.push({
-          title: "Rich Inner World",
-          description: "Feeling lost sometimes indicates you have a complex, rich inner world with many facets. This depth is actually quite special.",
-          insight: "Your complexity isn't confusion - it's depth. Let's help you navigate this beautiful inner landscape.",
-          icon: <Compass className="h-5 w-5" />,
-          severity: "high"
-        });
-      }
-      
-      if (responses.identityResponses?.some((r: any) => r.includes('expectations') || r.includes('accepted'))) {
-        patterns.push({
-          title: "Adaptable & Considerate",
-          description: "Your awareness of others' expectations shows social intelligence and adaptability. These are valuable skills in relationships and work.",
-          insight: "Your ability to understand others is remarkable. Now let's help you understand yourself just as clearly.",
-          icon: <Brain className="h-5 w-5" />,
-          severity: "medium"
-        });
-      }
-    }
-
-    // Loneliness patterns analysis
-    if (responses.primaryConcern === 'loneliness') {
-      if (responses.lonelinessResponses?.some((r: any) => r.includes('alone') || r.includes('misunderstood'))) {
-        patterns.push({
-          title: "Deep Emotional Awareness",
-          description: "Feeling misunderstood often means you have unique perspectives and deep emotional awareness. This sensitivity is a gift, even when it feels isolating.",
-          insight: "Your depth of feeling means you experience life more richly than most. This isn't loneliness - it's depth waiting for the right connections.",
-          icon: <Heart className="h-5 w-5" />,
-          severity: "high"
-        });
-      }
-      
-      if (responses.lonelinessResponses?.some((r: any) => r.includes('burden') || r.includes('vulnerable'))) {
-        patterns.push({
-          title: "Protective & Self-Aware",
-          description: "Your awareness of vulnerability shows emotional intelligence and a protective instinct that has served you well. This self-awareness is actually quite mature.",
-          insight: "Your protective instincts show wisdom. Now let's help you feel safe enough to let others care for you too.",
-          icon: <Users className="h-5 w-5" />,
-          severity: "medium"
-        });
-      }
-    }
-
-    return patterns;
-  };
-
-  const patterns = analyzePatterns();
-  
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'high': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'medium': return 'bg-blue-100 text-blue-800 border-blue-200';
-      default: return 'bg-green-100 text-green-800 border-green-200';
-    }
-  };
-
-  const generateActionSteps = () => {
-    const steps = [];
-    
-    if (patterns.some(p => p.severity === 'high')) {
-      steps.push({
-        title: "Start with Self-Compassion",
-        description: "Begin each day by speaking to yourself as you would a beloved friend",
-        action: "Try this: When you notice self-criticism, pause and ask 'What would I tell a friend in this situation?'"
-      });
-      
-      steps.push({
-        title: "Create a Daily Grounding Practice",
-        description: "Spend 5-10 minutes daily connecting with your breath and body",
-        action: "Start with: 4 deep breaths when you wake up, noticing how your body feels"
-      });
-    }
-    
-    if (patterns.some(p => p.title.includes('People-Pleasing') || p.title.includes('Over-Responsibility'))) {
-      steps.push({
-        title: "Practice Saying No (Gently)",
-        description: "Start with small boundaries to build your 'no' muscle",
-        action: "This week: Say 'Let me think about it' instead of immediately saying yes to requests"
-      });
-    }
-    
-    if (patterns.some(p => p.title.includes('Perfectionism') || p.title.includes('Standards'))) {
-      steps.push({
-        title: "Celebrate 'Good Enough'",
-        description: "Practice recognizing when something is sufficient rather than perfect",
-        action: "Daily: Identify one thing you did 'good enough' and celebrate it"
-      });
-    }
-    
-    if (patterns.some(p => p.title.includes('Loneliness') || p.title.includes('Connection'))) {
-      steps.push({
-        title: "Connect with One Person",
-        description: "Reach out to someone who makes you feel understood",
-        action: "This week: Send a text to someone you trust, sharing one thing you're feeling"
-      });
-    }
-    
-    steps.push({
-      title: "Journal Your Insights",
-      description: "Write down your thoughts and feelings without judgment",
-      action: "Tonight: Write for 10 minutes about what you learned about yourself today"
-    });
-    
-    return steps.slice(0, 4); // Limit to 4 steps to not overwhelm
-  };
+  }, [responses]);
 
   const personalizedMessage = () => {
-    const concernCount = patterns.length;
-    if (concernCount === 0) {
-      return "Thank you for sharing with us. Every journey to better mental health starts with a single step, and you've already taken that step by being here.";
+    if (aiInsights) {
+      return aiInsights.supportiveMessage;
     }
     
-    return `What strikes me most about your responses is the incredible self-awareness and emotional intelligence you demonstrate. You've identified ${concernCount} key area${concernCount > 1 ? 's' : ''} where you'd like to grow, and that level of insight is actually quite remarkable. Many people go through life without this kind of clarity about their inner world.`;
+    return "Thank you for sharing with us. Every journey to better mental health starts with a single step, and you've already taken that step by being here.";
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+        <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[60vh]">
+          <Card className="shadow-lg p-8 text-center">
+            <CardContent>
+              <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-purple-600" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing Your Responses</h2>
+              <p className="text-gray-600">Our AI is generating personalized insights just for you...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Card className="shadow-lg border-red-200">
+            <CardContent className="pt-6 text-center">
+              <h2 className="text-2xl font-bold text-red-800 mb-4">Something went wrong</h2>
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()} className="bg-purple-600 hover:bg-purple-700">
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
@@ -239,7 +121,7 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {patterns.length > 0 ? (
+        {aiInsights && aiInsights.insights.length > 0 ? (
           <>
             <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardContent className="pt-6">
@@ -252,51 +134,53 @@ const AssessmentSummary = () => {
             </Card>
 
             <div className="grid gap-6">
-              {patterns.map((pattern, index) => (
+              {aiInsights.insights.map((insight, index) => (
                 <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader className="flex flex-row items-center space-y-0 space-x-4">
                     <div className="p-2 bg-purple-100 rounded-lg">
-                      {pattern.icon}
+                      <Heart className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-xl text-gray-900">{pattern.title}</CardTitle>
-                      <Badge className={`mt-2 ${getSeverityColor(pattern.severity)}`}>
-                        {pattern.severity === 'high' ? 'Core Strength' : 'Beautiful Quality'}
+                      <CardTitle className="text-xl text-gray-900">{insight.title}</CardTitle>
+                      <Badge className="mt-2 bg-purple-100 text-purple-800 border-purple-200">
+                        Core Strength
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-gray-700 leading-relaxed">{pattern.description}</p>
+                    <p className="text-gray-700 leading-relaxed">{insight.description}</p>
                     <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                      <p className="text-blue-800 italic font-medium">💙 {pattern.insight}</p>
+                      <p className="text-blue-800 italic font-medium">💙 {insight.reframe}</p>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <Card className="shadow-lg bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-              <CardHeader>
-                <CardTitle className="text-2xl text-green-800 flex items-center gap-2">
-                  <ArrowRight className="h-6 w-6" />
-                  Your Personalized Next Steps
-                </CardTitle>
-                <p className="text-green-700">Small, gentle steps that honor where you are right now</p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4">
-                  {generateActionSteps().map((step, index) => (
-                    <div key={index} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-400">
-                      <h4 className="font-semibold text-gray-900 mb-2">{step.title}</h4>
-                      <p className="text-gray-600 mb-2">{step.description}</p>
-                      <div className="bg-green-50 p-3 rounded border">
-                        <p className="text-green-800 text-sm font-medium">✨ {step.action}</p>
+            {aiInsights.actionSteps.length > 0 && (
+              <Card className="shadow-lg bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-green-800 flex items-center gap-2">
+                    <ArrowRight className="h-6 w-6" />
+                    Your Personalized Next Steps
+                  </CardTitle>
+                  <p className="text-green-700">Small, gentle steps that honor where you are right now</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
+                    {aiInsights.actionSteps.map((step, index) => (
+                      <div key={index} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-400">
+                        <h4 className="font-semibold text-gray-900 mb-2">{step.title}</h4>
+                        <p className="text-gray-600 mb-2">{step.description}</p>
+                        <div className="bg-green-50 p-3 rounded border">
+                          <p className="text-green-800 text-sm font-medium">✨ {step.action}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardContent className="pt-6 text-center">
