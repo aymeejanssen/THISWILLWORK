@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -322,60 +321,110 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Enhanced AI Therapy Trial Button with foggy, cloudy, organic design */}
+        {/* Enhanced Bubbly AI Therapy Trial Button */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-200/20 via-pink-200/20 to-yellow-200/20 blur-3xl"></div>
           <CardContent className="pt-8 pb-8 text-center space-y-6 relative z-10">
             <div className="flex justify-center">
               <div className="relative">
-                {/* Outermost foggy cloud layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/15 via-pink-300/15 to-yellow-300/15 blur-3xl scale-[2.5] animate-pulse opacity-40 rounded-[60% 40% 70% 30% / 60% 30% 70% 40%]" style={{animationDelay: '0s', animationDuration: '4s'}}></div>
+                {/* Outermost bubble layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/10 via-pink-300/10 to-yellow-300/10 blur-3xl scale-[3] animate-pulse opacity-30" 
+                     style={{
+                       borderRadius: '60% 40% 70% 30% / 60% 30% 70% 40%',
+                       animationDelay: '0s', 
+                       animationDuration: '5s'
+                     }}></div>
                 
-                {/* Second cloud layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 via-pink-400/20 to-yellow-400/20 blur-2xl scale-[2] animate-pulse opacity-50 rounded-[40% 60% 30% 70% / 70% 40% 60% 30%]" style={{animationDelay: '1s', animationDuration: '3s'}}></div>
+                {/* Second bubble layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/15 via-pink-400/15 to-yellow-400/15 blur-2xl scale-[2.5] animate-pulse opacity-40" 
+                     style={{
+                       borderRadius: '70% 30% 60% 40% / 40% 70% 30% 60%',
+                       animationDelay: '1s', 
+                       animationDuration: '4s'
+                     }}></div>
                 
-                {/* Third cloud layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/25 via-pink-500/25 to-yellow-500/25 blur-xl scale-[1.6] animate-pulse opacity-60 rounded-[70% 30% 60% 40% / 40% 70% 30% 60%]" style={{animationDelay: '2s', animationDuration: '3.5s'}}></div>
+                {/* Third bubble layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-yellow-500/20 blur-xl scale-[2] animate-pulse opacity-50" 
+                     style={{
+                       borderRadius: '50% 50% 60% 40% / 60% 40% 50% 50%',
+                       animationDelay: '2s', 
+                       animationDuration: '3.5s'
+                     }}></div>
                 
-                {/* Inner glow layers */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/30 via-pink-400/30 to-yellow-400/30 blur-lg scale-[1.3] animate-pulse opacity-70 rounded-[50% 50% 60% 40% / 60% 40% 50% 50%]" style={{animationDelay: '0.5s', animationDuration: '2.8s'}}></div>
+                {/* Fourth bubble layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/25 via-pink-400/25 to-yellow-400/25 blur-lg scale-[1.6] animate-pulse opacity-60" 
+                     style={{
+                       borderRadius: '45% 55% 35% 65% / 55% 35% 65% 45%',
+                       animationDelay: '0.5s', 
+                       animationDuration: '3s'
+                     }}></div>
                 
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/35 via-pink-300/35 to-yellow-300/35 blur-md scale-[1.15] animate-pulse opacity-80 rounded-[45% 55% 35% 65% / 55% 35% 65% 45%]" style={{animationDelay: '1.5s', animationDuration: '2.5s'}}></div>
+                {/* Inner bubble layer */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/30 via-pink-300/30 to-yellow-300/30 blur-md scale-[1.3] animate-pulse opacity-70" 
+                     style={{
+                       borderRadius: '65% 35% 55% 45% / 35% 65% 45% 55%',
+                       animationDelay: '1.5s', 
+                       animationDuration: '2.8s'
+                     }}></div>
                 
-                {/* Main organic button */}
+                {/* Main bubbly button */}
                 <Button 
                   onClick={handleStartFreeTrial}
-                  className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-36 h-36 flex items-center justify-center shadow-2xl border-4 border-white/30 backdrop-blur-sm hover:scale-105 transform transition-all duration-700 group overflow-hidden"
+                  className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-40 h-40 flex items-center justify-center shadow-2xl border-4 border-white/40 backdrop-blur-sm hover:scale-110 transform transition-all duration-700 group overflow-hidden"
                   style={{
-                    borderRadius: '45% 55% 60% 40% / 55% 45% 40% 60%',
-                    animation: 'float 6s ease-in-out infinite'
+                    borderRadius: '50% 40% 60% 50% / 45% 60% 40% 55%',
+                    animation: 'float 4s ease-in-out infinite'
                   }}
                   size="lg"
                 >
-                  {/* Inner organic gradient overlays */}
-                  <div className="absolute inset-1 bg-gradient-to-br from-white/15 to-transparent rounded-[40% 60% 55% 45% / 50% 40% 60% 50%]"></div>
-                  <div className="absolute inset-2 bg-gradient-to-br from-transparent to-white/10 rounded-[35% 65% 45% 55% / 45% 55% 35% 65%]"></div>
+                  {/* Bubbly gradient overlays */}
+                  <div className="absolute inset-1 bg-gradient-to-br from-white/20 to-transparent" 
+                       style={{borderRadius: '45% 55% 65% 35% / 60% 40% 55% 45%}}></div>
+                  <div className="absolute inset-2 bg-gradient-to-tr from-transparent to-white/15" 
+                       style={{borderRadius: '55% 45% 35% 65% / 40% 60% 65% 35%}}></div>
+                  <div className="absolute inset-3 bg-gradient-to-bl from-white/10 to-transparent" 
+                       style={{borderRadius: '40% 60% 50% 50% / 55% 45% 50% 50%}}></div>
                   
-                  {/* Floating internal clouds */}
-                  <div className="absolute top-4 left-6 w-4 h-4 bg-white/20 rounded-full blur-sm animate-pulse" style={{animationDelay: '0.5s'}}></div>
-                  <div className="absolute bottom-6 right-4 w-3 h-3 bg-white/15 rounded-full blur-sm animate-pulse" style={{animationDelay: '1.2s'}}></div>
-                  <div className="absolute top-8 right-8 w-2 h-2 bg-white/25 rounded-full blur-sm animate-pulse" style={{animationDelay: '2s'}}></div>
+                  {/* Floating bubbles inside button */}
+                  <div className="absolute top-6 left-8 w-6 h-6 bg-white/25 animate-pulse" 
+                       style={{borderRadius: '60% 40% 70% 30%', animationDelay: '0.2s', animationDuration: '3s'}}></div>
+                  <div className="absolute bottom-8 right-6 w-4 h-4 bg-white/20 animate-pulse" 
+                       style={{borderRadius: '70% 30% 40% 60%', animationDelay: '1s', animationDuration: '2.5s'}}></div>
+                  <div className="absolute top-10 right-10 w-3 h-3 bg-white/30 animate-pulse" 
+                       style={{borderRadius: '50% 50% 60% 40%', animationDelay: '1.8s', animationDuration: '2s'}}></div>
+                  <div className="absolute bottom-6 left-6 w-5 h-5 bg-white/15 animate-pulse" 
+                       style={{borderRadius: '30% 70% 50% 50%', animationDelay: '0.8s', animationDuration: '3.5s'}}></div>
+                  <div className="absolute top-8 left-12 w-2 h-2 bg-white/35 animate-pulse" 
+                       style={{borderRadius: '80% 20% 60% 40%', animationDelay: '2.2s', animationDuration: '1.8s'}}></div>
                   
                   {/* Brain icon with soft glow */}
                   <div className="relative z-10">
-                    <div className="absolute inset-0 text-white/40 blur-md">
-                      <Brain className="h-16 w-16" />
+                    <div className="absolute inset-0 text-white/40 blur-lg">
+                      <Brain className="h-18 w-18" />
                     </div>
-                    <div className="absolute inset-0 text-white/60 blur-sm">
-                      <Brain className="h-16 w-16" />
+                    <div className="absolute inset-0 text-white/60 blur-md">
+                      <Brain className="h-18 w-18" />
                     </div>
-                    <Brain className="h-16 w-16 relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg" />
+                    <Brain className="h-18 w-18 relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg" />
                   </div>
                 </Button>
                 
-                {/* Floating badge with organic shape */}
-                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                  <Badge className="bg-white/95 backdrop-blur-md text-purple-800 text-sm px-6 py-3 shadow-xl border border-purple-200/30 rounded-[30% 70% 60% 40% / 40% 60% 70% 30%]">
+                {/* Floating external bubbles around the button */}
+                <div className="absolute -top-4 -left-2 w-8 h-8 bg-gradient-to-br from-purple-400/30 to-pink-400/30 animate-pulse"
+                     style={{borderRadius: '60% 40% 50% 50%', animationDelay: '0.5s', animationDuration: '4s'}}></div>
+                <div className="absolute -bottom-6 -right-4 w-6 h-6 bg-gradient-to-br from-pink-400/25 to-yellow-400/25 animate-pulse"
+                     style={{borderRadius: '70% 30% 60% 40%', animationDelay: '1.2s', animationDuration: '3.5s'}}></div>
+                <div className="absolute top-12 -right-8 w-4 h-4 bg-gradient-to-br from-yellow-400/35 to-purple-400/35 animate-pulse"
+                     style={{borderRadius: '50% 50% 70% 30%', animationDelay: '2s', animationDuration: '2.8s'}}></div>
+                <div className="absolute -top-8 right-6 w-5 h-5 bg-gradient-to-br from-purple-300/40 to-pink-300/40 animate-pulse"
+                     style={{borderRadius: '40% 60% 45% 55%', animationDelay: '0.8s', animationDuration: '3.2s'}}></div>
+                <div className="absolute bottom-16 -left-6 w-7 h-7 bg-gradient-to-br from-pink-300/20 to-yellow-300/20 animate-pulse"
+                     style={{borderRadius: '65% 35% 55% 45%', animationDelay: '1.8s', animationDuration: '2.5s'}}></div>
+                
+                {/* Floating badge with bubbly shape */}
+                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                  <Badge className="bg-white/95 backdrop-blur-md text-purple-800 text-sm px-6 py-3 shadow-xl border border-purple-200/30"
+                         style={{borderRadius: '40% 60% 50% 50% / 60% 40% 70% 30%}}>
                     <Clock className="h-3 w-3 mr-2" />
                     Try AI Therapy Free - 5 min
                   </Badge>
@@ -418,189 +467,6 @@ const AssessmentSummary = () => {
                   <span>Understanding trauma responses in adulthood</span>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Enhanced Pricing Plans - showing all features */}
-        <Card className="shadow-lg border-purple-200">
-          <CardHeader>
-            <CardTitle className="text-2xl text-gray-900 text-center">Choose Your Plan</CardTitle>
-            <p className="text-center text-gray-600">Start your personalized {primaryConcern} sessions</p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center p-6 border rounded-xl hover:border-purple-300 transition-colors hover:shadow-lg">
-                <div className="bg-purple-100 p-3 rounded-full w-fit mx-auto mb-4">
-                  <Calendar className="h-6 w-6 text-purple-600" />
-                </div>
-                <h4 className="font-bold text-xl mb-2">Weekly Support</h4>
-                <div className="text-3xl font-bold text-purple-600 my-3">29.99 AED</div>
-                <p className="text-sm text-gray-600 mb-4">4 sessions per month</p>
-                
-                <div className="space-y-2 mb-6 text-left">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Once a week sessions</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>30-minute conversations</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Flexible scheduling</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Personal growth tracking</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Basic emotional support</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Stress management techniques</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Goal setting guidance</span>
-                  </div>
-                </div>
-                
-                <Button variant="outline" className="w-full" onClick={handleStartSession}>
-                  Choose Plan
-                </Button>
-              </div>
-              
-              <div className="text-center p-6 border rounded-xl hover:border-purple-300 transition-colors hover:shadow-lg">
-                <div className="bg-blue-100 p-3 rounded-full w-fit mx-auto mb-4">
-                  <Zap className="h-6 w-6 text-blue-600" />
-                </div>
-                <h4 className="font-bold text-xl mb-2">Regular Care</h4>
-                <div className="text-3xl font-bold text-purple-600 my-3">49.99 AED</div>
-                <p className="text-sm text-gray-600 mb-4">12 sessions per month</p>
-                
-                <div className="space-y-2 mb-6 text-left">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>3 times per week sessions</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>30-minute sessions</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Any time, any day</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Faster progress tracking</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Priority support</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Advanced coping strategies</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Relationship guidance</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Trauma-informed approach</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Mood pattern analysis</span>
-                  </div>
-                </div>
-                
-                <Button variant="outline" className="w-full" onClick={handleStartSession}>
-                  Choose Plan
-                </Button>
-              </div>
-              
-              <div className="text-center p-6 border-2 border-purple-500 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 relative hover:shadow-xl transition-shadow">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-purple-600 text-white px-4 py-2 shadow-lg">
-                    <Star className="h-3 w-3 mr-1" />
-                    Most Popular
-                  </Badge>
-                </div>
-                <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-3 rounded-full w-fit mx-auto mb-4">
-                  <Brain className="h-6 w-6 text-purple-600" />
-                </div>
-                <h4 className="font-bold text-xl mb-2">Unlimited Support</h4>
-                <div className="text-3xl font-bold text-purple-600 my-3">99.99 AED</div>
-                <p className="text-sm text-gray-600 mb-4">Unlimited access</p>
-                
-                <div className="space-y-2 mb-6 text-left">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>24/7 availability</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Unlimited conversations</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Always there when you need support</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Immediate anxiety relief</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Companion during lonely moments</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Timeless sessions</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Crisis intervention support</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Personalized therapy plans</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Progress insights & reports</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Advanced emotional coaching</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Sleep & wellness guidance</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Family relationship support</span>
-                  </div>
-                </div>
-                
-                <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={handleStartSession}>
-                  Choose Plan
-                </Button>
-              </div>
-            </div>
-            
-            <div className="text-center mt-8">
-              <Button variant="link" onClick={handleStartSession} className="text-purple-600 hover:text-purple-700">
-                View detailed plan comparison →
-              </Button>
             </div>
           </CardContent>
         </Card>
