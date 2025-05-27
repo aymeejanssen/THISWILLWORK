@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Heart, Users, User, Briefcase, Compass, Brain, ArrowRight, Check, Shield, UserPlus } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
+import { useNavigate } from 'react-router-dom';
 
 interface OnboardingFlowProps {
   onClose: () => void;
@@ -14,7 +15,8 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedConcern, setSelectedConcern] = useState('');
   const [responses, setResponses] = useState<string[]>([]);
-  const { updateResponses } = useAssessment();
+  const { updateResponses, completeAssessment } = useAssessment();
+  const navigate = useNavigate();
 
   const concerns = [
     {
@@ -230,7 +232,10 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
     
     const questions = getQuestions(selectedConcern);
     if (newResponses.length >= questions.length) {
-      onClose();
+      // Complete the assessment and navigate to summary
+      completeAssessment();
+      onClose(); // Close the modal
+      navigate('/assessment-summary'); // Navigate to summary page
     } else {
       setCurrentStep(currentStep + 1);
     }

@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface AssessmentContextType {
   responses: Record<string, any>;
@@ -23,7 +22,6 @@ export const useAssessment = () => {
 export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const navigate = useNavigate();
 
   const updateResponses = (key: string, value: any) => {
     console.log('AssessmentContext: Updating responses', { key, value });
@@ -36,6 +34,7 @@ export const AssessmentProvider = ({ children }: { children: ReactNode }) => {
 
   const completeAssessment = () => {
     console.log('AssessmentContext: Assessment completed with responses:', responses);
+    // Mark assessment as completed - this could be used for additional logic if needed
   };
 
   const resetAssessment = () => {
