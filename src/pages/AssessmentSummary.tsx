@@ -335,7 +335,7 @@ const AssessmentSummary = () => {
               </Button>
             </div>
             
-            <p className="text-sm text-gray-600 font-medium">try free conversation - 5 min</p>
+            <p className="text-sm text-gray-600 font-medium">Try free conversation - 5 min</p>
             
             <div>
               <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your Online Coach</h3>
