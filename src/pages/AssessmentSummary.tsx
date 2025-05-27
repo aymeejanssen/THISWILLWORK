@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -321,115 +322,17 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Enhanced Bubbly AI Therapy Trial Button */}
-        <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-200/20 via-pink-200/20 to-yellow-200/20 blur-3xl"></div>
-          <CardContent className="pt-8 pb-8 text-center space-y-6 relative z-10">
+        {/* Try AI Therapy Button */}
+        <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden">
+          <CardContent className="pt-8 pb-8 text-center space-y-6">
             <div className="flex justify-center">
-              <div className="relative">
-                {/* Outermost bubble layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/10 via-pink-300/10 to-yellow-300/10 blur-3xl scale-[3] animate-pulse opacity-30" 
-                     style={{
-                       borderRadius: '60% 40% 70% 30% / 60% 30% 70% 40%',
-                       animationDelay: '0s', 
-                       animationDuration: '5s'
-                     }}></div>
-                
-                {/* Second bubble layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/15 via-pink-400/15 to-yellow-400/15 blur-2xl scale-[2.5] animate-pulse opacity-40" 
-                     style={{
-                       borderRadius: '70% 30% 60% 40% / 40% 70% 30% 60%',
-                       animationDelay: '1s', 
-                       animationDuration: '4s'
-                     }}></div>
-                
-                {/* Third bubble layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-yellow-500/20 blur-xl scale-[2] animate-pulse opacity-50" 
-                     style={{
-                       borderRadius: '50% 50% 60% 40% / 60% 40% 50% 50%',
-                       animationDelay: '2s', 
-                       animationDuration: '3.5s'
-                     }}></div>
-                
-                {/* Fourth bubble layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/25 via-pink-400/25 to-yellow-400/25 blur-lg scale-[1.6] animate-pulse opacity-60" 
-                     style={{
-                       borderRadius: '45% 55% 35% 65% / 55% 35% 65% 45%',
-                       animationDelay: '0.5s', 
-                       animationDuration: '3s'
-                     }}></div>
-                
-                {/* Inner bubble layer */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-300/30 via-pink-300/30 to-yellow-300/30 blur-md scale-[1.3] animate-pulse opacity-70" 
-                     style={{
-                       borderRadius: '65% 35% 55% 45% / 35% 65% 45% 55%',
-                       animationDelay: '1.5s', 
-                       animationDuration: '2.8s'
-                     }}></div>
-                
-                {/* Main bubbly button */}
-                <Button 
-                  onClick={handleStartFreeTrial}
-                  className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-40 h-40 flex items-center justify-center shadow-2xl border-4 border-white/40 backdrop-blur-sm hover:scale-110 transform transition-all duration-700 group overflow-hidden"
-                  style={{
-                    borderRadius: '50% 40% 60% 50% / 45% 60% 40% 55%',
-                    animation: 'float 4s ease-in-out infinite'
-                  }}
-                  size="lg"
-                >
-                  {/* Bubbly gradient overlays */}
-                  <div className="absolute inset-1 bg-gradient-to-br from-white/20 to-transparent" 
-                       style={{borderRadius: '45% 55% 65% 35% / 60% 40% 55% 45%}}></div>
-                  <div className="absolute inset-2 bg-gradient-to-tr from-transparent to-white/15" 
-                       style={{borderRadius: '55% 45% 35% 65% / 40% 60% 65% 35%}}></div>
-                  <div className="absolute inset-3 bg-gradient-to-bl from-white/10 to-transparent" 
-                       style={{borderRadius: '40% 60% 50% 50% / 55% 45% 50% 50%}}></div>
-                  
-                  {/* Floating bubbles inside button */}
-                  <div className="absolute top-6 left-8 w-6 h-6 bg-white/25 animate-pulse" 
-                       style={{borderRadius: '60% 40% 70% 30%', animationDelay: '0.2s', animationDuration: '3s'}}></div>
-                  <div className="absolute bottom-8 right-6 w-4 h-4 bg-white/20 animate-pulse" 
-                       style={{borderRadius: '70% 30% 40% 60%', animationDelay: '1s', animationDuration: '2.5s'}}></div>
-                  <div className="absolute top-10 right-10 w-3 h-3 bg-white/30 animate-pulse" 
-                       style={{borderRadius: '50% 50% 60% 40%', animationDelay: '1.8s', animationDuration: '2s'}}></div>
-                  <div className="absolute bottom-6 left-6 w-5 h-5 bg-white/15 animate-pulse" 
-                       style={{borderRadius: '30% 70% 50% 50%', animationDelay: '0.8s', animationDuration: '3.5s'}}></div>
-                  <div className="absolute top-8 left-12 w-2 h-2 bg-white/35 animate-pulse" 
-                       style={{borderRadius: '80% 20% 60% 40%', animationDelay: '2.2s', animationDuration: '1.8s'}}></div>
-                  
-                  {/* Brain icon with soft glow */}
-                  <div className="relative z-10">
-                    <div className="absolute inset-0 text-white/40 blur-lg">
-                      <Brain className="h-18 w-18" />
-                    </div>
-                    <div className="absolute inset-0 text-white/60 blur-md">
-                      <Brain className="h-18 w-18" />
-                    </div>
-                    <Brain className="h-18 w-18 relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-lg" />
-                  </div>
-                </Button>
-                
-                {/* Floating external bubbles around the button */}
-                <div className="absolute -top-4 -left-2 w-8 h-8 bg-gradient-to-br from-purple-400/30 to-pink-400/30 animate-pulse"
-                     style={{borderRadius: '60% 40% 50% 50%', animationDelay: '0.5s', animationDuration: '4s'}}></div>
-                <div className="absolute -bottom-6 -right-4 w-6 h-6 bg-gradient-to-br from-pink-400/25 to-yellow-400/25 animate-pulse"
-                     style={{borderRadius: '70% 30% 60% 40%', animationDelay: '1.2s', animationDuration: '3.5s'}}></div>
-                <div className="absolute top-12 -right-8 w-4 h-4 bg-gradient-to-br from-yellow-400/35 to-purple-400/35 animate-pulse"
-                     style={{borderRadius: '50% 50% 70% 30%', animationDelay: '2s', animationDuration: '2.8s'}}></div>
-                <div className="absolute -top-8 right-6 w-5 h-5 bg-gradient-to-br from-purple-300/40 to-pink-300/40 animate-pulse"
-                     style={{borderRadius: '40% 60% 45% 55%', animationDelay: '0.8s', animationDuration: '3.2s'}}></div>
-                <div className="absolute bottom-16 -left-6 w-7 h-7 bg-gradient-to-br from-pink-300/20 to-yellow-300/20 animate-pulse"
-                     style={{borderRadius: '65% 35% 55% 45%', animationDelay: '1.8s', animationDuration: '2.5s'}}></div>
-                
-                {/* Floating badge with bubbly shape */}
-                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                  <Badge className="bg-white/95 backdrop-blur-md text-purple-800 text-sm px-6 py-3 shadow-xl border border-purple-200/30"
-                         style={{borderRadius: '40% 60% 50% 50% / 60% 40% 70% 30%}}>
-                    <Clock className="h-3 w-3 mr-2" />
-                    Try AI Therapy Free - 5 min
-                  </Badge>
-                </div>
-              </div>
+              <Button 
+                onClick={handleStartFreeTrial}
+                className="bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300"
+                size="lg"
+              >
+                <Brain className="h-12 w-12" />
+              </Button>
             </div>
             
             <div>
@@ -439,6 +342,11 @@ const AssessmentSummary = () => {
                 No commitment needed - just click and start talking.
               </p>
             </div>
+            
+            <Badge className="bg-white text-purple-800 text-sm px-4 py-2">
+              <Clock className="h-3 w-3 mr-2" />
+              Try AI Therapy Free - 5 min
+            </Badge>
             
             <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
               <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
@@ -471,7 +379,7 @@ const AssessmentSummary = () => {
           </CardContent>
         </Card>
 
-        {/* Existing AI Insights */}
+        {/* AI Insights */}
         {aiInsights && aiInsights.insights.length > 0 && (
           <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
             <CardHeader>
