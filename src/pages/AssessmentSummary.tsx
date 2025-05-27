@@ -179,7 +179,6 @@ const AssessmentSummary = () => {
                 "Faster progress tracking",
                 "Priority support"
               ]}
-              isPopular={true}
             />
             
             <PricingCard
@@ -194,6 +193,7 @@ const AssessmentSummary = () => {
                 "Companion during lonely moments",
                 "Timeless sessions"
               ]}
+              isPopular={true}
             />
           </div>
 
