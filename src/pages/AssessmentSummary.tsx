@@ -256,7 +256,6 @@ const AssessmentSummary = () => {
                 "Personalized therapy plans",
                 "Progress insights & reports",
                 "Advanced emotional coaching",
-                "Sleep & wellness guidance",
                 "Family relationship support"
               ]}
               isPopular={true}
