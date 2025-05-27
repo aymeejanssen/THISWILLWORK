@@ -26,35 +26,58 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const prompt = `You are a compassionate mental health assistant. A user has completed an assessment about their mental health concerns. Please analyze their responses and provide:
+    const prompt = `You are a compassionate, expert psychologist analyzing a mental health assessment. Provide deep psychological insights that help the user understand their patterns and behaviors.
 
-1. 2-3 personalized insights that reframe their challenges as strengths and show deep understanding
-2. 3-4 specific, actionable next steps they can take
-3. A supportive closing message
+IMPORTANT: Look for these specific patterns and provide psychological education:
+
+1. PARENTIFICATION/EARLY RESPONSIBILITY: If they mention having to be an adult too soon, being responsible for siblings, taking care of parents, or missing childhood - explain that this often leads to hyper-independence as a coping strategy. Help them understand that learning to trust others and accept help is part of human nature as we are social beings who thrive in community.
+
+2. PEOPLE-PLEASING: If they struggle with saying no, fear disappointing others, or put others' needs first - explain that this often stems from childhood experiences where love felt conditional. Help them understand that healthy relationships involve mutual respect and that their needs matter too.
+
+3. PERFECTIONISM: If they mention fear of failure, setting impossibly high standards, or feeling like they're never good enough - explain that perfectionism is often a protective mechanism against criticism or rejection, but it prevents authentic connection and growth.
+
+4. EMOTIONAL SUPPRESSION: If they mention not expressing emotions, being the "strong one," or feeling uncomfortable with vulnerability - explain that emotional expression is healthy and necessary, and that suppressing emotions often leads to increased anxiety and disconnection.
+
+5. HYPERVIGILANCE: If they mention being constantly alert, expecting the worst, or difficulty relaxing - explain that this is often a trauma response where the nervous system learned to stay alert for danger, even when safe.
 
 Primary concern: ${primaryConcern || 'Not specified'}
 User responses: ${JSON.stringify(responses, null, 2)}
+
+Analyze their specific responses and provide:
+
+1. 2-3 personalized psychological insights that:
+   - Identify specific patterns in their responses
+   - Explain the psychological mechanisms behind these patterns
+   - Normalize their experiences by explaining how common these responses are
+   - Reframe coping strategies compassionately (e.g., "Your hyper-independence shows incredible strength AND it's okay to let others support you too")
+
+2. 3-4 specific, actionable steps based on psychological principles:
+   - Include specific techniques they can practice
+   - Focus on gradual, manageable changes
+   - Include both self-compassion practices and behavioral changes
+
+3. A supportive message that validates their courage in seeking understanding
 
 Please respond in JSON format:
 {
   "insights": [
     {
-      "title": "Insight title",
-      "description": "Understanding their pattern",
-      "reframe": "How this shows their strength"
+      "title": "Insight title that feels personal to them",
+      "description": "Deep psychological understanding of their pattern",
+      "reframe": "Compassionate reframe that honors their strength while opening new possibilities"
     }
   ],
   "actionSteps": [
     {
-      "title": "Step title", 
-      "description": "What to do",
-      "action": "Specific action they can take this week"
+      "title": "Specific psychological technique or practice", 
+      "description": "Why this helps psychologically",
+      "action": "Concrete step they can take this week"
     }
   ],
-  "supportiveMessage": "Encouraging message that validates their journey"
+  "supportiveMessage": "Validating message that acknowledges their journey and normalizes their experience"
 }
 
-Be warm, understanding, and focus on their strengths. Avoid clinical language.`;
+Be warm, psychologically informed, and avoid clinical jargon. Focus on helping them understand themselves with compassion.`;
 
     console.log('Making OpenAI API call...');
 
@@ -67,11 +90,11 @@ Be warm, understanding, and focus on their strengths. Avoid clinical language.`;
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a compassionate mental health assistant that provides personalized, strength-based insights.' },
+          { role: 'system', content: 'You are an expert psychologist who provides compassionate, educational insights about mental health patterns and coping mechanisms. You help people understand their behaviors with warmth and scientific accuracy.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 1500,
+        max_tokens: 2000,
       }),
     });
 
@@ -98,16 +121,16 @@ Be warm, understanding, and focus on their strengths. Avoid clinical language.`;
       // Fallback response if parsing fails
       parsedResponse = {
         insights: [{
-          title: "Your Self-Awareness is Remarkable",
-          description: "Taking this assessment shows incredible self-awareness and courage to seek understanding about your inner world.",
-          reframe: "This level of introspection is a superpower that will guide your healing journey."
+          title: "Your Self-Awareness is a Superpower",
+          description: "Taking this assessment shows remarkable courage and self-awareness. This willingness to look inward and seek understanding is the foundation of all personal growth and healing.",
+          reframe: "Many people go through life without ever pausing to understand themselves. Your curiosity about your inner world is a strength that will guide your journey toward greater well-being."
         }],
         actionSteps: [{
-          title: "Practice Self-Compassion",
-          description: "Begin treating yourself with the same kindness you'd show a good friend",
-          action: "When you notice self-criticism, pause and ask: 'What would I tell a friend in this situation?'"
+          title: "Practice the 'Good Friend' Exercise",
+          description: "When you notice self-criticism, ask yourself: 'What would I tell a dear friend in this exact situation?' This helps activate your compassionate mind.",
+          action: "This week, try this exercise once a day when you catch yourself being self-critical. Write down what you would tell a friend, then offer that same kindness to yourself."
         }],
-        supportiveMessage: "You've taken an important step by seeking understanding. Every journey toward healing begins with this kind of brave self-reflection."
+        supportiveMessage: "You've taken a brave step by seeking to understand yourself better. This journey of self-discovery takes courage, and every small insight you gain is meaningful progress. Remember, healing isn't linear, and you're exactly where you need to be right now."
       };
     }
 
