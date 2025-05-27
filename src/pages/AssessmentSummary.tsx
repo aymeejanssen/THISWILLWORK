@@ -308,6 +308,102 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
+        {/* AI Therapy Trial Button */}
+        <Card className="shadow-lg border-purple-300 bg-gradient-to-r from-purple-100 to-pink-100">
+          <CardContent className="pt-6 text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="relative">
+                <Button 
+                  onClick={handleStartFreeTrial}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-full w-20 h-20 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 border-4 border-white"
+                  size="lg"
+                >
+                  <Brain className="h-10 w-10" />
+                </Button>
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                  <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1">Try AI Therapy Free - 5 min</Badge>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Experience AI Therapy</h3>
+              <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto">
+                Try our AI therapy companion for free! Have a real conversation about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
+                No commitment needed - just click and start talking.
+              </p>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border border-purple-200">
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Available 24/7 for panic attacks or anxiety</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Companion when you're feeling lonely</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Emotional education and awareness building</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span>Understanding trauma responses in adulthood</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pricing Plans */}
+        <Card className="shadow-lg border-purple-200">
+          <CardHeader>
+            <CardTitle className="text-2xl text-gray-900 text-center">Choose Your Plan</CardTitle>
+            <p className="text-center text-gray-600">Start your personalized {primaryConcern} sessions</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="text-center p-4 border rounded-lg hover:border-purple-300 transition-colors">
+                <h4 className="font-bold text-lg">Weekly Support</h4>
+                <div className="text-2xl font-bold text-purple-600 my-2">29.99 AED</div>
+                <p className="text-sm text-gray-600 mb-3">4 sessions per month</p>
+                <Button variant="outline" className="w-full" onClick={handleStartSession}>
+                  Choose Plan
+                </Button>
+              </div>
+              
+              <div className="text-center p-4 border rounded-lg hover:border-purple-300 transition-colors">
+                <h4 className="font-bold text-lg">Regular Care</h4>
+                <div className="text-2xl font-bold text-purple-600 my-2">49.99 AED</div>
+                <p className="text-sm text-gray-600 mb-3">12 sessions per month</p>
+                <Button variant="outline" className="w-full" onClick={handleStartSession}>
+                  Choose Plan
+                </Button>
+              </div>
+              
+              <div className="text-center p-4 border-2 border-purple-500 rounded-lg bg-purple-50 relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-purple-600 text-white px-3 py-1">Most Popular</Badge>
+                </div>
+                <h4 className="font-bold text-lg">Unlimited Support</h4>
+                <div className="text-2xl font-bold text-purple-600 my-2">99.99 AED</div>
+                <p className="text-sm text-gray-600 mb-3">Unlimited access</p>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={handleStartSession}>
+                  Choose Plan
+                </Button>
+              </div>
+            </div>
+            
+            <div className="text-center mt-6">
+              <Button variant="link" onClick={handleStartSession} className="text-purple-600">
+                View detailed plan comparison →
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Existing AI Insights */}
         {aiInsights && aiInsights.insights.length > 0 && (
           <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
             <CardHeader>
@@ -350,66 +446,6 @@ const AssessmentSummary = () => {
             </CardContent>
           </Card>
         )}
-
-        <Card className="shadow-lg border-purple-300 bg-gradient-to-r from-purple-100 to-pink-100">
-          <CardContent className="pt-6 text-center space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">Ready to Go Deeper?</h3>
-            <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto">
-              Start your first <span className="font-semibold text-purple-700">{primaryConcern}</span> session and begin meaningful conversations that get to the root of your challenges. 
-              We'll work at your pace, include practical exercises, and provide clear explanations to help you understand 
-              why you feel certain ways and how past experiences shape your adult responses.
-            </p>
-            
-            <div className="bg-white p-6 rounded-lg border border-purple-200">
-              <h4 className="font-semibold text-gray-900 mb-3">What makes our approach different:</h4>
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Available 24/7 for panic attacks or anxiety</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Companion when you're feeling lonely</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Emotional education and awareness building</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Understanding trauma responses in adulthood</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <div className="relative">
-                <Button 
-                  onClick={handleStartFreeTrial}
-                  className="bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
-                  size="lg"
-                >
-                  <MessageCircle className="h-8 w-8" />
-                </Button>
-                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                  <Badge className="bg-green-100 text-green-800 text-xs">Try Free for 5 minutes</Badge>
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">or</p>
-                <Button 
-                  onClick={handleStartSession}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg"
-                  size="lg"
-                >
-                  Start Your First {primaryConcern.charAt(0).toUpperCase() + primaryConcern.slice(1)} Session
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         <div className="flex justify-center gap-4">
           <Button onClick={() => navigate('/')} variant="outline" size="lg">
