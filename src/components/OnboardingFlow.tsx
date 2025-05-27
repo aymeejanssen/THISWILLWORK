@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -157,9 +155,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you feel stuck in your career path and unsure how to change it?"
       ],
       identity: [
-        "How would you describe who you are at your core?",
-        "What makes you feel most like yourself?",
-        "What do you wish people understood about you?"
+        "Do you feel clear about who you are at this stage of your life?",
+        "Do you ever feel like you're living a version of yourself that others expect, not who you really are?",
+        "Have you ever struggled to express your true thoughts, beliefs, or personality openly?",
+        "Do you often question your life path, direction, or purpose?",
+        "Do you feel pressure to follow a career, role, or lifestyle that doesn't reflect you?",
+        "Have you ever felt disconnected from your cultural, religious, or family identity?",
+        "Do you feel safe expressing your gender or sexual identity openly?",
+        "Have you ever hidden parts of your identity out of fear of judgment or rejection?",
+        "Do you question your sexual orientation or feel confused about your attractions?",
+        "Have you ever felt like you don't belong anywhere—socially, culturally, or emotionally?",
+        "Do you feel like you're still trying to find out who you really are?",
+        "Do you feel ashamed or uncertain about expressing your true self?"
       ],
       loneliness: [
         "When do you feel most alone, even when others are around?",
