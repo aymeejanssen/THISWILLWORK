@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -184,9 +183,18 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
         "Do you crave deeper connection but feel unsure how to create it?"
       ],
       grief: [
-        "What loss or change has been most difficult for you to process?",
-        "How has this loss affected your daily life and relationships?",
-        "What would healing or acceptance look like for you?"
+        "Have you lost someone close to you, such as a family member, partner, or friend?",
+        "Was the loss sudden, traumatic, or difficult to process?",
+        "Do you feel like you've had the space or support to grieve properly?",
+        "Do you still carry unspoken words or emotions related to your loss?",
+        "Has your life felt different or emptier since the loss?",
+        "Do you feel like others expect you to \"move on\" before you're ready?",
+        "Do certain dates, places, or memories trigger intense feelings of grief?",
+        "Do you avoid thinking or talking about your loss because it's too painful?",
+        "Have you ever lost someone emotionally, through abandonment, estrangement, or disconnection?",
+        "Have you experienced grief from a non-death loss, such as a breakup, miscarriage, or lost dream?",
+        "Do you feel isolated in your grief, as if no one truly understands it?",
+        "Do you sometimes feel guilt, anger, or confusion related to your loss?"
       ],
       trauma: [
         "How do past difficult experiences affect your daily life now?",
