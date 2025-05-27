@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
+import ChatInterface from '../components/ChatInterface';
 
 interface AIInsight {
   title: string;
@@ -32,6 +33,8 @@ const AssessmentSummary = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showPricing, setShowPricing] = useState(false);
+  const [showFreeTrialChat, setShowFreeTrialChat] = useState(false);
+  const [trialTimeRemaining, setTrialTimeRemaining] = useState(300); // 5 minutes in seconds
 
   // Get the primary concern from responses
   const primaryConcern = responses.primaryConcern || 'general wellness';
@@ -69,6 +72,28 @@ const AssessmentSummary = () => {
 
   const handleStartSession = () => {
     setShowPricing(true);
+  };
+
+  const handleStartFreeTrial = () => {
+    setShowFreeTrialChat(true);
+    // Start 5-minute countdown
+    const timer = setInterval(() => {
+      setTrialTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setShowFreeTrialChat(false);
+          setShowPricing(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   const PricingCard = ({ title, price, sessions, features, isPopular = false }: {
@@ -134,6 +159,34 @@ const AssessmentSummary = () => {
           </Card>
         </div>
       </div>
+    );
+  }
+
+  if (showFreeTrialChat) {
+    return (
+      <>
+        <div className="fixed top-4 right-4 z-50">
+          <Card className="bg-purple-600 text-white border-purple-500">
+            <CardContent className="pt-4 pb-4 px-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                <span className="text-sm font-medium">Trial: {formatTime(trialTimeRemaining)}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <ChatInterface 
+          onClose={() => {
+            setShowFreeTrialChat(false);
+            setShowPricing(true);
+          }}
+          userProfile={{ 
+            name: 'Trial User',
+            currentStruggles: [primaryConcern],
+            preferredLanguage: 'English'
+          }}
+        />
+      </>
     );
   }
 
@@ -329,14 +382,32 @@ const AssessmentSummary = () => {
               </div>
             </div>
 
-            <Button 
-              onClick={handleStartSession}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg"
-              size="lg"
-            >
-              Start Your First {primaryConcern.charAt(0).toUpperCase() + primaryConcern.slice(1)} Session
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="relative">
+                <Button 
+                  onClick={handleStartFreeTrial}
+                  className="bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+                  size="lg"
+                >
+                  <MessageCircle className="h-8 w-8" />
+                </Button>
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                  <Badge className="bg-green-100 text-green-800 text-xs">Try Free for 5 minutes</Badge>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-2">or</p>
+                <Button 
+                  onClick={handleStartSession}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg"
+                  size="lg"
+                >
+                  Start Your First {primaryConcern.charAt(0).toUpperCase() + primaryConcern.slice(1)} Session
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
