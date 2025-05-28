@@ -77,6 +77,7 @@ const AssessmentSummary = () => {
 
   const handleStartFreeTrial = () => {
     setShowFreeTrialChat(true);
+    setTrialTimeRemaining(300); // Reset to 5 minutes
     // Start 5-minute countdown
     const timer = setInterval(() => {
       setTrialTimeRemaining((prev) => {
