@@ -279,7 +279,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
       <div className="p-8 max-h-[80vh] overflow-y-auto">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            What would you like to focus on today?
+            What would you like to focus on?
           </h2>
           <p className="text-gray-600 text-lg">
             Choose the area that feels most important to explore right now
