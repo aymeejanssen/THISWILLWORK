@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
+import LanguageSelector from "../components/LanguageSelector";
 
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -17,6 +18,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-wellness-purple via-wellness-pink to-wellness-yellow">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector />
+      </div>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="text-center max-w-4xl mx-auto">
@@ -63,7 +69,7 @@ const Index = () => {
               <div className="text-white/80">AI Support</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">50+</div>
+              <div className="text-3xl font-bold text-white mb-2">20+</div>
               <div className="text-white/80">Languages</div>
             </div>
             <div className="text-center">
@@ -111,7 +117,7 @@ const Index = () => {
 
         {/* Trust Indicators */}
         <div className="mt-20 text-center">
-          <p className="text-white/80 mb-8">Trusted by people from over 50 countries</p>
+          <p className="text-white/80 mb-8">Trusted by people from over 20+ countries</p>
           <div className="flex justify-center items-center gap-8 opacity-60">
             <div className="w-12 h-12 bg-white/20 rounded-lg"></div>
             <div className="w-12 h-12 bg-white/20 rounded-lg"></div>
