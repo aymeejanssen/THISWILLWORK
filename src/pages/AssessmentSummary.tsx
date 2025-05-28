@@ -204,9 +204,9 @@ const AssessmentSummary = () => {
             >
               ← Back to Summary
             </Button>
-            <h1 className="text-4xl font-bold text-gray-900">Choose Your Healing Journey</h1>
+            <h1 className="text-4xl font-bold text-gray-900">Choose Your AI Coaching Plan</h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Start your personalized {primaryConcern} sessions and get the support you deserve
+              Start your personalized {primaryConcern} sessions with your AI wellness coach
             </p>
           </div>
 
@@ -216,7 +216,7 @@ const AssessmentSummary = () => {
               price="49.99 AED"
               sessions="4 sessions per month"
               features={[
-                "Once a week sessions",
+                "Once a week AI sessions",
                 "30-minute conversations",
                 "Flexible scheduling",
                 "Personal growth tracking",
@@ -231,11 +231,11 @@ const AssessmentSummary = () => {
               price="79.99 AED"
               sessions="3 times per week"
               features={[
-                "12 sessions per month",
+                "12 AI sessions per month",
                 "30-minute sessions",
                 "Any time, any day",
                 "Faster progress tracking",
-                "Priority support",
+                "Priority AI support",
                 "Advanced coping strategies",
                 "Relationship guidance",
                 "Trauma-informed approach",
@@ -248,14 +248,14 @@ const AssessmentSummary = () => {
               price="129.99 AED"
               sessions="Unlimited access"
               features={[
-                "24/7 availability",
+                "24/7 AI availability",
                 "Unlimited conversations",
                 "Always there when you need support",
                 "Immediate anxiety relief",
-                "Companion during lonely moments",
+                "AI companion during lonely moments",
                 "Timeless sessions",
                 "Crisis intervention support",
-                "Personalized therapy plans",
+                "Personalized coaching plans",
                 "Progress insights & reports",
                 "Advanced emotional coaching",
                 "Family relationship support"
@@ -266,14 +266,14 @@ const AssessmentSummary = () => {
 
           <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
             <CardContent className="pt-6 text-center">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">What You'll Experience</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What You'll Experience with AI Coaching</h3>
               <div className="grid md:grid-cols-2 gap-6 text-left">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <Brain className="h-5 w-5 text-purple-600 mt-1" />
                     <div>
-                      <h4 className="font-semibold">Deep Conversations</h4>
-                      <p className="text-sm text-gray-600">Get to the root of your challenges through meaningful dialogue</p>
+                      <h4 className="font-semibold">Deep AI Conversations</h4>
+                      <p className="text-sm text-gray-600">Get to the root of your challenges through meaningful AI dialogue</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -288,15 +288,15 @@ const AssessmentSummary = () => {
                   <div className="flex items-start gap-3">
                     <Heart className="h-5 w-5 text-purple-600 mt-1" />
                     <div>
-                      <h4 className="font-semibold">Practical Exercises</h4>
-                      <p className="text-sm text-gray-600">Guided activities to help you process and heal</p>
+                      <h4 className="font-semibold">AI-Guided Exercises</h4>
+                      <p className="text-sm text-gray-600">Intelligent activities to help you process and heal</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <UserCircle className="h-5 w-5 text-purple-600 mt-1" />
                     <div>
-                      <h4 className="font-semibold">Clear Explanations</h4>
-                      <p className="text-sm text-gray-600">Understand why you feel certain ways and how past experiences shape your responses</p>
+                      <h4 className="font-semibold">Clear AI Explanations</h4>
+                      <p className="text-sm text-gray-600">Understand why you feel certain ways with AI insights</p>
                     </div>
                   </div>
                 </div>
@@ -316,13 +316,13 @@ const AssessmentSummary = () => {
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm font-medium">Assessment Complete</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Your AI Journey Starts Here</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
             You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
           </p>
         </div>
 
-        {/* Chat with Online Coach Button */}
+        {/* Chat with AI Coach Button */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden">
           <CardContent className="pt-8 pb-8 text-center space-y-6">
             <div className="flex justify-center">
@@ -336,12 +336,12 @@ const AssessmentSummary = () => {
               </Button>
             </div>
             
-            <p className="text-sm text-gray-600 font-medium">Try free conversation - 5 min</p>
+            <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
             
             <div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your Online Coach</h3>
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your AI Wellness Coach</h3>
               <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto text-lg">
-                Start a real conversation with your personal wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
+                Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
                 Click the button above to begin - no commitment needed!
               </p>
             </div>
@@ -358,19 +358,19 @@ const AssessmentSummary = () => {
                   <div className="bg-blue-100 p-1 rounded-full">
                     <Heart className="h-4 w-4 text-blue-600" />
                   </div>
-                  <span>Companion when you're feeling lonely</span>
+                  <span>AI companion when you're feeling lonely</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="bg-purple-100 p-1 rounded-full">
                     <Brain className="h-4 w-4 text-purple-600" />
                   </div>
-                  <span>Emotional education and awareness building</span>
+                  <span>AI emotional education and awareness building</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="bg-pink-100 p-1 rounded-full">
                     <Headphones className="h-4 w-4 text-pink-600" />
                   </div>
-                  <span>Understanding trauma responses in adulthood</span>
+                  <span>AI understanding of trauma responses</span>
                 </div>
               </div>
             </div>
@@ -380,9 +380,9 @@ const AssessmentSummary = () => {
         {/* Pricing Cards Section */}
         <div className="space-y-8">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl font-bold text-gray-900">Choose Your Healing Journey</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Choose Your AI Coaching Plan</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Start your personalized {primaryConcern} sessions and get the support you deserve
+              Start your personalized {primaryConcern} sessions with your AI wellness coach
             </p>
           </div>
 
@@ -392,7 +392,7 @@ const AssessmentSummary = () => {
               price="49.99 AED"
               sessions="4 sessions per month"
               features={[
-                "Once a week sessions",
+                "Once a week AI sessions",
                 "30-minute conversations",
                 "Flexible scheduling",
                 "Personal growth tracking",
@@ -407,11 +407,11 @@ const AssessmentSummary = () => {
               price="79.99 AED"
               sessions="3 times per week"
               features={[
-                "12 sessions per month",
+                "12 AI sessions per month",
                 "30-minute sessions",
                 "Any time, any day",
                 "Faster progress tracking",
-                "Priority support",
+                "Priority AI support",
                 "Advanced coping strategies",
                 "Relationship guidance",
                 "Trauma-informed approach",
@@ -424,14 +424,14 @@ const AssessmentSummary = () => {
               price="129.99 AED"
               sessions="Unlimited access"
               features={[
-                "24/7 availability",
+                "24/7 AI availability",
                 "Unlimited conversations",
                 "Always there when you need support",
                 "Immediate anxiety relief",
-                "Companion during lonely moments",
+                "AI companion during lonely moments",
                 "Timeless sessions",
                 "Crisis intervention support",
-                "Personalized therapy plans",
+                "Personalized AI coaching plans",
                 "Progress insights & reports",
                 "Advanced emotional coaching",
                 "Family relationship support"

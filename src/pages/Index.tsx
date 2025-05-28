@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Heart, Globe, Users, ArrowRight, Sparkles, Shield } from 'lucide-react';
+import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
 
 const Index = () => {
@@ -37,7 +37,7 @@ const Index = () => {
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in">
             Your personal AI companion for mental wellness. Get culturally-aware support 
-            in your language, connect with verified therapists, and start your journey to better mental health.
+            in your language, available 24/7 for judgment-free guidance and emotional healing.
           </p>
 
           {/* CTA Button */}
@@ -88,23 +88,23 @@ const Index = () => {
 
           <div className="group bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <div className="w-16 h-16 bg-gradient-to-br from-wellness-pink to-wellness-yellow rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Users className="h-8 w-8 text-white" />
+              <Brain className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Verified Therapists</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Intelligent Coaching</h3>
             <p className="text-gray-600 leading-relaxed">
-              Connect with licensed mental health professionals who understand your 
-              cultural context. Browse profiles, read reviews, and book sessions.
+              Receive personalized guidance and coping strategies powered by advanced AI. 
+              Get practical exercises and insights tailored to your unique situation.
             </p>
           </div>
 
           <div className="group bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <div className="w-16 h-16 bg-gradient-to-br from-wellness-purple to-wellness-teal rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Globe className="h-8 w-8 text-white" />
+              <MessageCircle className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Global & Cultural</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Instant Conversations</h3>
             <p className="text-gray-600 leading-relaxed">
-              Get support in your native language with cultural sensitivity. Our platform 
-              understands diverse backgrounds and provides relevant, respectful guidance.
+              Start meaningful conversations anytime you need support. No appointments, 
+              no waiting - your AI wellness companion is always ready to listen and help.
             </p>
           </div>
         </div>
