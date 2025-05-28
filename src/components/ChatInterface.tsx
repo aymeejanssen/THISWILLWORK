@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,18 +14,16 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [isListening, setIsListening] = useState(false);
-  const [useVoice, setUseVoice] = useState(true);
   const [selectedVoice, setSelectedVoice] = useState<string>('nova');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const recognitionRef = useRef<any>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // OpenAI TTS voices - much more natural than browser voices
+  // OpenAI TTS voices - 5 best options
   const openAIVoices = [
     { id: 'nova', name: 'Nova (Warm & Empathetic)', description: 'Warm, caring female voice' },
     { id: 'alloy', name: 'Alloy (Neutral)', description: 'Balanced, professional voice' },
     { id: 'echo', name: 'Echo (Gentle)', description: 'Soft, gentle male voice' },
-    { id: 'fable', name: 'Fable (Wise)', description: 'Mature, wise voice' },
     { id: 'onyx', name: 'Onyx (Deep)', description: 'Deep, calming male voice' },
     { id: 'shimmer', name: 'Shimmer (Bright)', description: 'Bright, encouraging female voice' }
   ];
@@ -92,8 +89,8 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       };
     }
 
-    // Speak the initial greeting if voice is enabled and there's a greeting
-    if (useVoice && initialGreeting) {
+    // Speak the initial greeting if there's a greeting
+    if (initialGreeting) {
       setTimeout(() => {
         speakText(initialGreeting);
       }, 1500);
@@ -111,7 +108,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   }, []);
 
   const speakText = async (text: string) => {
-    if (!useVoice || isSpeaking) return;
+    if (isSpeaking) return;
 
     try {
       setIsSpeaking(true);
@@ -211,12 +208,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       };
       setMessages(prev => [...prev, aiResponse]);
       
-      // Speak the AI response if voice is enabled
-      if (useVoice) {
-        setTimeout(() => {
-          speakText(randomResponse);
-        }, 500);
-      }
+      // Speak the AI response
+      setTimeout(() => {
+        speakText(randomResponse);
+      }, 500);
     }, 1200);
   };
 
