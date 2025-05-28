@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, User, X, Heart, Mic, MicOff, Type } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageCircle, User, X, Heart, Mic, MicOff, Type, Volume2 } from "lucide-react";
 
 interface ChatInterfaceProps {
   onClose: () => void;
@@ -13,6 +14,8 @@ interface ChatInterfaceProps {
 const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [isListening, setIsListening] = useState(false);
   const [useVoice, setUseVoice] = useState(true);
+  const [selectedVoice, setSelectedVoice] = useState<string>('');
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const recognitionRef = useRef<any>(null);
   const speechSynthesisRef = useRef<SpeechSynthesis | null>(null);
 
@@ -79,12 +82,50 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
     speechSynthesisRef.current = window.speechSynthesis;
 
+    // Load available voices
+    const loadVoices = () => {
+      if (speechSynthesisRef.current) {
+        const voices = speechSynthesisRef.current.getVoices();
+        const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+        setAvailableVoices(englishVoices);
+        
+        // Auto-select a good motherly voice if none selected
+        if (!selectedVoice && englishVoices.length > 0) {
+          const motherlyVoices = englishVoices.filter(voice => 
+            voice.name.includes('Samantha') || 
+            voice.name.includes('Victoria') ||
+            voice.name.includes('Karen') ||
+            voice.name.includes('Susan') ||
+            voice.name.includes('Fiona') ||
+            voice.name.includes('Female')
+          );
+          
+          const femaleVoices = englishVoices.filter(voice => 
+            voice.name.toLowerCase().includes('female') ||
+            (!voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('man'))
+          );
+          
+          if (motherlyVoices.length > 0) {
+            setSelectedVoice(motherlyVoices[0].name);
+          } else if (femaleVoices.length > 0) {
+            setSelectedVoice(femaleVoices[0].name);
+          } else if (englishVoices.length > 0) {
+            setSelectedVoice(englishVoices[0].name);
+          }
+        }
+      }
+    };
+
+    loadVoices();
+    if (speechSynthesisRef.current) {
+      speechSynthesisRef.current.onvoiceschanged = loadVoices;
+    }
+
     // Speak the initial greeting if voice is enabled and there's a greeting
     if (useVoice && speechSynthesisRef.current && initialGreeting) {
-      // Small delay to ensure the interface is ready
       setTimeout(() => {
         speakText(initialGreeting);
-      }, 500);
+      }, 1000); // Longer delay to ensure voices are loaded
     }
 
     return () => {
@@ -99,67 +140,30 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
   const speakText = (text: string) => {
     if (speechSynthesisRef.current && useVoice) {
-      // Cancel any ongoing speech
       speechSynthesisRef.current.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Make voice much more soothing, motherly and comfortable
-      utterance.rate = 0.75; // Slower, more gentle pace
-      utterance.pitch = 0.9; // Slightly lower pitch for warmth and comfort
-      utterance.volume = 0.85; // Softer volume
+      // Make voice soothing and motherly
+      utterance.rate = 0.75;
+      utterance.pitch = 0.9;
+      utterance.volume = 0.85;
       
-      // Try to use the most natural, motherly voice available
-      const voices = speechSynthesisRef.current.getVoices();
-      
-      // Look for the most soothing female voices first
-      const motherlyVoices = voices.filter(voice => 
-        voice.lang.startsWith('en') && (
-          voice.name.includes('Samantha') || 
-          voice.name.includes('Victoria') ||
-          voice.name.includes('Karen') ||
-          voice.name.includes('Susan') ||
-          voice.name.includes('Fiona') ||
-          voice.name.includes('Moira') ||
-          voice.name.includes('Tessa') ||
-          voice.name.includes('Veena') ||
-          voice.name.includes('Female') ||
-          voice.name.includes('Woman')
-        )
-      );
-      
-      // Fallback to any natural-sounding female voice
-      const femaleVoices = voices.filter(voice => 
-        voice.lang.startsWith('en') && (
-          voice.name.toLowerCase().includes('female') ||
-          voice.name.toLowerCase().includes('woman') ||
-          (!voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('man'))
-        )
-      );
-      
-      // Set the most motherly voice available
-      if (motherlyVoices.length > 0) {
-        utterance.voice = motherlyVoices[0];
-      } else if (femaleVoices.length > 0) {
-        utterance.voice = femaleVoices[0];
-      } else {
-        // Last resort - any English voice that sounds natural
-        const naturalVoices = voices.filter(voice => 
-          voice.lang.startsWith('en') && (
-            voice.name.includes('Enhanced') ||
-            voice.name.includes('Premium') ||
-            voice.name.includes('Natural')
-          )
-        );
-        if (naturalVoices.length > 0) {
-          utterance.voice = naturalVoices[0];
+      // Use selected voice
+      if (selectedVoice) {
+        const voice = availableVoices.find(v => v.name === selectedVoice);
+        if (voice) {
+          utterance.voice = voice;
         }
       }
       
-      console.log('Using soothing voice:', utterance.voice?.name || 'default', 'Rate:', utterance.rate, 'Pitch:', utterance.pitch);
-      
+      console.log('Using voice:', utterance.voice?.name || 'default');
       speechSynthesisRef.current.speak(utterance);
     }
+  };
+
+  const testVoice = () => {
+    speakText("Hi there! This is how I sound. I'm here to support you with warmth and understanding.");
   };
 
   const startListening = () => {
@@ -201,12 +205,11 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       
       // Speak the AI response if voice is enabled
       if (useVoice) {
-        // Small delay to make conversation feel more natural
         setTimeout(() => {
           speakText(randomResponse);
         }, 300);
       }
-    }, 1200); // Slightly longer delay for more natural conversation rhythm
+    }, 1200);
   };
 
   const toggleInputMode = () => {
@@ -240,6 +243,34 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
               {useVoice ? '🎤 Voice Mode' : '⌨️ Text Mode'}
             </Badge>
           </div>
+          
+          {/* Voice Selection */}
+          {useVoice && availableVoices.length > 0 && (
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm text-white/80">Voice:</span>
+              <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                <SelectTrigger className="w-48 bg-white/20 border-white/30 text-white">
+                  <SelectValue placeholder="Choose voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableVoices.map((voice) => (
+                    <SelectItem key={voice.name} value={voice.name}>
+                      {voice.name} ({voice.lang})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={testVoice}
+                size="sm"
+                variant="ghost"
+                className="text-white hover:bg-white/20"
+              >
+                <Volume2 className="h-4 w-4" />
+                Test
+              </Button>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="flex-1 flex flex-col p-0">
