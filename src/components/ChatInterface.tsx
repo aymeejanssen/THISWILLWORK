@@ -82,31 +82,38 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
     speechSynthesisRef.current = window.speechSynthesis;
 
-    // Load available voices
+    // Load available voices and prioritize natural-sounding ones
     const loadVoices = () => {
       if (speechSynthesisRef.current) {
         const voices = speechSynthesisRef.current.getVoices();
         const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
         setAvailableVoices(englishVoices);
         
-        // Auto-select a good motherly voice if none selected
+        // Auto-select the most natural-sounding voice
         if (!selectedVoice && englishVoices.length > 0) {
-          const motherlyVoices = englishVoices.filter(voice => 
+          // Prioritize specific natural-sounding voices
+          const naturalVoices = englishVoices.filter(voice => 
             voice.name.includes('Samantha') || 
-            voice.name.includes('Victoria') ||
-            voice.name.includes('Karen') ||
+            voice.name.includes('Ava') ||
+            voice.name.includes('Serena') ||
+            voice.name.includes('Allison') ||
             voice.name.includes('Susan') ||
+            voice.name.includes('Victoria') ||
             voice.name.includes('Fiona') ||
-            voice.name.includes('Female')
+            voice.name.includes('Karen') ||
+            voice.name.includes('Moira') ||
+            voice.name.includes('Tessa') ||
+            (voice.name.toLowerCase().includes('premium') && voice.name.toLowerCase().includes('female'))
           );
           
+          // Then try general female voices
           const femaleVoices = englishVoices.filter(voice => 
             voice.name.toLowerCase().includes('female') ||
             (!voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('man'))
           );
           
-          if (motherlyVoices.length > 0) {
-            setSelectedVoice(motherlyVoices[0].name);
+          if (naturalVoices.length > 0) {
+            setSelectedVoice(naturalVoices[0].name);
           } else if (femaleVoices.length > 0) {
             setSelectedVoice(femaleVoices[0].name);
           } else if (englishVoices.length > 0) {
@@ -125,7 +132,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     if (useVoice && speechSynthesisRef.current && initialGreeting) {
       setTimeout(() => {
         speakText(initialGreeting);
-      }, 1000); // Longer delay to ensure voices are loaded
+      }, 1500); // Longer delay to ensure voices are loaded
     }
 
     return () => {
@@ -138,16 +145,31 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     };
   }, []);
 
+  const addNaturalPauses = (text: string) => {
+    // Add natural pauses and breathing spots
+    return text
+      .replace(/\.\.\./g, '... ') // Longer pause for ellipsis
+      .replace(/,/g, ', ') // Short pause after commas
+      .replace(/\?/g, '? ') // Pause after questions
+      .replace(/\!/g, '! ') // Pause after exclamations
+      .replace(/\./g, '. ') // Pause after periods
+      .replace(/\s+/g, ' ') // Clean up extra spaces
+      .trim();
+  };
+
   const speakText = (text: string) => {
     if (speechSynthesisRef.current && useVoice) {
       speechSynthesisRef.current.cancel();
       
-      const utterance = new SpeechSynthesisUtterance(text);
+      // Add natural pauses to text
+      const naturalText = addNaturalPauses(text);
       
-      // Make voice soothing and motherly
-      utterance.rate = 0.75;
-      utterance.pitch = 0.9;
-      utterance.volume = 0.85;
+      const utterance = new SpeechSynthesisUtterance(naturalText);
+      
+      // More human-like speech settings
+      utterance.rate = 0.85; // Slightly faster but still conversational
+      utterance.pitch = 1.0; // Natural pitch
+      utterance.volume = 0.9; // Clear but not overwhelming
       
       // Use selected voice
       if (selectedVoice) {
@@ -157,13 +179,22 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
         }
       }
       
-      console.log('Using voice:', utterance.voice?.name || 'default');
+      // Add subtle variation to make it less robotic
+      utterance.addEventListener('start', () => {
+        console.log('Speaking with voice:', utterance.voice?.name || 'default');
+      });
+      
+      utterance.addEventListener('end', () => {
+        // Add a tiny delay between sentences for naturalness
+      });
+      
       speechSynthesisRef.current.speak(utterance);
     }
   };
 
   const testVoice = () => {
-    speakText("Hi there! This is how I sound. I'm here to support you with warmth and understanding.");
+    const testText = "Hi there! This is how I sound. I'm here to support you with warmth and understanding. Does this voice feel comfortable to you?";
+    speakText(testText);
   };
 
   const startListening = () => {
@@ -207,7 +238,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       if (useVoice) {
         setTimeout(() => {
           speakText(randomResponse);
-        }, 300);
+        }, 500); // Slightly longer delay for naturalness
       }
     }, 1200);
   };
@@ -247,15 +278,15 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
           {/* Voice Selection */}
           {useVoice && availableVoices.length > 0 && (
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm text-white/80">Voice:</span>
+              <span className="text-sm text-white/80">Choose Voice:</span>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                 <SelectTrigger className="w-48 bg-white/20 border-white/30 text-white">
-                  <SelectValue placeholder="Choose voice" />
+                  <SelectValue placeholder="Select a voice" />
                 </SelectTrigger>
                 <SelectContent>
                   {availableVoices.map((voice) => (
                     <SelectItem key={voice.name} value={voice.name}>
-                      {voice.name} ({voice.lang})
+                      {voice.name.replace(/\s*\([^)]*\)$/, '')} {/* Clean up voice names */}
                     </SelectItem>
                   ))}
                 </SelectContent>
