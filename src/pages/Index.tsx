@@ -23,7 +23,7 @@ const Index = () => {
           {/* Floating Badge */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-8 animate-fade-in">
             <Sparkles className="h-4 w-4 text-white" />
-            <span className="text-white text-sm font-medium">AI-Powered Mental Wellness</span>
+            <span className="text-white text-sm font-medium">The New Generation of Mental Wellness</span>
           </div>
 
           {/* Main Heading */}
