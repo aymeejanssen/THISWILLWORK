@@ -20,33 +20,46 @@ serve(async (req) => {
     }
 
     console.log('Generating speech for text:', text.substring(0, 100), '...')
+    console.log('Using voice:', voice)
+
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured')
+    }
 
     // Generate speech from text using OpenAI
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: 'tts-1',
         input: text,
-        voice: voice || 'nova', // Default to Nova voice (warm, empathetic)
+        voice: voice || 'nova',
         response_format: 'mp3',
       }),
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      console.error('OpenAI API error:', error)
-      throw new Error('Failed to generate speech')
+      const errorText = await response.text()
+      console.error('OpenAI API error:', errorText)
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
     }
 
     // Convert audio buffer to base64
     const arrayBuffer = await response.arrayBuffer()
-    const base64Audio = btoa(
-      String.fromCharCode(...new Uint8Array(arrayBuffer))
-    )
+    const uint8Array = new Uint8Array(arrayBuffer)
+    
+    // Convert to base64 in chunks to avoid stack overflow
+    let base64Audio = ''
+    const chunkSize = 32768
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, i + chunkSize)
+      const chunkString = String.fromCharCode.apply(null, Array.from(chunk))
+      base64Audio += btoa(chunkString)
+    }
 
     console.log('Speech generated successfully, audio length:', base64Audio.length)
 
