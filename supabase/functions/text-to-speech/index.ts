@@ -48,18 +48,21 @@ serve(async (req) => {
       throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
     }
 
-    // Convert audio buffer to base64
+    // Get the audio as array buffer
     const arrayBuffer = await response.arrayBuffer()
-    const uint8Array = new Uint8Array(arrayBuffer)
     
-    // Convert to base64 in chunks to avoid stack overflow
-    let base64Audio = ''
-    const chunkSize = 32768
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.subarray(i, i + chunkSize)
-      const chunkString = String.fromCharCode.apply(null, Array.from(chunk))
-      base64Audio += btoa(chunkString)
+    // Convert to base64 using btoa with proper string conversion
+    const bytes = new Uint8Array(arrayBuffer)
+    let binaryString = ''
+    
+    // Build binary string in chunks to avoid call stack issues
+    const chunkSize = 8192
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize)
+      binaryString += String.fromCharCode(...chunk)
     }
+    
+    const base64Audio = btoa(binaryString)
 
     console.log('Speech generated successfully, audio length:', base64Audio.length)
 
