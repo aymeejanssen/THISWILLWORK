@@ -106,43 +106,59 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Make voice more natural and human-like
-      utterance.rate = 0.85; // Slightly slower for more natural conversation
-      utterance.pitch = 0.95; // Slightly lower pitch for warmth
-      utterance.volume = 0.9;
+      // Make voice much more soothing, motherly and comfortable
+      utterance.rate = 0.75; // Slower, more gentle pace
+      utterance.pitch = 0.9; // Slightly lower pitch for warmth and comfort
+      utterance.volume = 0.85; // Softer volume
       
-      // Try to use a more natural voice if available
+      // Try to use the most natural, motherly voice available
       const voices = speechSynthesisRef.current.getVoices();
       
-      // Look for high-quality voices (often contain "premium", "enhanced", or specific names)
-      const preferredVoices = voices.filter(voice => 
+      // Look for the most soothing female voices first
+      const motherlyVoices = voices.filter(voice => 
         voice.lang.startsWith('en') && (
           voice.name.includes('Samantha') || 
-          voice.name.includes('Alex') ||
-          voice.name.includes('Premium') ||
-          voice.name.includes('Enhanced') ||
-          voice.name.includes('Natural') ||
-          voice.name.includes('Neural')
+          voice.name.includes('Victoria') ||
+          voice.name.includes('Karen') ||
+          voice.name.includes('Susan') ||
+          voice.name.includes('Fiona') ||
+          voice.name.includes('Moira') ||
+          voice.name.includes('Tessa') ||
+          voice.name.includes('Veena') ||
+          voice.name.includes('Female') ||
+          voice.name.includes('Woman')
         )
       );
       
-      // Fallback to any English voice that sounds natural
-      const englishVoices = voices.filter(voice => 
-        voice.lang.startsWith('en') && voice.name.includes('Female')
+      // Fallback to any natural-sounding female voice
+      const femaleVoices = voices.filter(voice => 
+        voice.lang.startsWith('en') && (
+          voice.name.toLowerCase().includes('female') ||
+          voice.name.toLowerCase().includes('woman') ||
+          (!voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('man'))
+        )
       );
       
-      // Set the best available voice
-      if (preferredVoices.length > 0) {
-        utterance.voice = preferredVoices[0];
-      } else if (englishVoices.length > 0) {
-        utterance.voice = englishVoices[0];
-      } else if (voices.length > 0) {
-        // Fallback to first English voice
-        const fallbackVoice = voices.find(voice => voice.lang.startsWith('en'));
-        if (fallbackVoice) utterance.voice = fallbackVoice;
+      // Set the most motherly voice available
+      if (motherlyVoices.length > 0) {
+        utterance.voice = motherlyVoices[0];
+      } else if (femaleVoices.length > 0) {
+        utterance.voice = femaleVoices[0];
+      } else {
+        // Last resort - any English voice that sounds natural
+        const naturalVoices = voices.filter(voice => 
+          voice.lang.startsWith('en') && (
+            voice.name.includes('Enhanced') ||
+            voice.name.includes('Premium') ||
+            voice.name.includes('Natural')
+          )
+        );
+        if (naturalVoices.length > 0) {
+          utterance.voice = naturalVoices[0];
+        }
       }
       
-      console.log('Using voice:', utterance.voice?.name || 'default');
+      console.log('Using soothing voice:', utterance.voice?.name || 'default', 'Rate:', utterance.rate, 'Pitch:', utterance.pitch);
       
       speechSynthesisRef.current.speak(utterance);
     }
