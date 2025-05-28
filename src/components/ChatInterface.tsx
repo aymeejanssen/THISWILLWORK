@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,11 +21,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       return ""; // No greeting for trial users
     }
 
-    const name = userProfile.name || 'friend';
-    const struggles = userProfile.currentStruggles?.join(', ') || 'life challenges';
-    const language = userProfile.preferredLanguage || 'English';
+    const name = userProfile.name || 'dear';
+    const struggles = userProfile.currentStruggles?.join(', ') || 'what you\'re going through';
     
-    return `Hello ${name}! I'm so glad you're here and ready to begin this journey with me. I understand you're working through ${struggles}, and I want you to know that your feelings are completely valid. I'll be communicating with you in ${language} and I'm here to listen with cultural sensitivity and understanding. This is your safe space - feel free to share whatever is on your heart today. What would you like to talk about first?`;
+    return `Hi ${name}... I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. There's no pressure here - just take your time and share whatever feels right for you today. What's been on your mind lately?`;
   };
 
   const initialGreeting = getPersonalizedGreeting();
@@ -43,10 +41,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [inputMessage, setInputMessage] = useState('');
 
   const sampleResponses = [
-    "I hear you, and I understand that work burnout can feel really overwhelming. It's like carrying a heavy weight that just keeps getting heavier, isn't it? Let's explore what's making you feel this way...",
-    "It sounds like you're going through a difficult time with relationships, and that can be so hard. Your feelings are completely valid, and you're not alone in this. Can you tell me more about what you're experiencing?",
-    "Questions about cultural identity can feel really complex and sometimes isolating. I appreciate you sharing this with me. Tell me more about what you're experiencing...",
-    "Self-doubt is something so many people struggle with, even though it might feel like you're the only one. You're definitely not alone in feeling this way. What thoughts have been coming up for you lately?"
+    "That sounds really tough... I can hear how much this is weighing on you. Work burnout is exhausting in so many ways. What's been the hardest part for you lately?",
+    "I'm really sorry you're going through this with relationships. That kind of pain runs deep, doesn't it? You're being so brave by talking about it. Tell me more about what you're feeling...",
+    "Questions about who we are can feel so heavy sometimes. It's like you're searching for yourself while the world keeps moving around you. What's been coming up for you about this?",
+    "Those doubts can be so loud, can't they? Like a voice that just won't quiet down. But you know what? You showed up here today, and that tells me something important about your strength. What's that voice been telling you?"
   ];
 
   // Initialize speech recognition and synthesis
