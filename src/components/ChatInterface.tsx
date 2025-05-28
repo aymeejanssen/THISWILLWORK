@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageCircle, User, X, Heart, Mic, MicOff, Type, Volume2 } from "lucide-react";
+import { supabase } from '../integrations/supabase/client';
 
 interface ChatInterfaceProps {
   onClose: () => void;
@@ -14,10 +16,20 @@ interface ChatInterfaceProps {
 const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [isListening, setIsListening] = useState(false);
   const [useVoice, setUseVoice] = useState(true);
-  const [selectedVoice, setSelectedVoice] = useState<string>('');
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<string>('nova');
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const speechSynthesisRef = useRef<SpeechSynthesis | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // OpenAI TTS voices - much more natural than browser voices
+  const openAIVoices = [
+    { id: 'nova', name: 'Nova (Warm & Empathetic)', description: 'Warm, caring female voice' },
+    { id: 'alloy', name: 'Alloy (Neutral)', description: 'Balanced, professional voice' },
+    { id: 'echo', name: 'Echo (Gentle)', description: 'Soft, gentle male voice' },
+    { id: 'fable', name: 'Fable (Wise)', description: 'Mature, wise voice' },
+    { id: 'onyx', name: 'Onyx (Deep)', description: 'Deep, calming male voice' },
+    { id: 'shimmer', name: 'Shimmer (Bright)', description: 'Bright, encouraging female voice' }
+  ];
 
   const getPersonalizedGreeting = () => {
     if (!userProfile) {
@@ -50,7 +62,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     "Those doubts can be so loud, can't they? Like a voice that just won't quiet down. But you know what? You showed up here today, and that tells me something important about your strength. What's that voice been telling you?"
   ];
 
-  // Initialize speech recognition and synthesis
+  // Initialize speech recognition
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
@@ -80,115 +92,80 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       };
     }
 
-    speechSynthesisRef.current = window.speechSynthesis;
-
-    // Load available voices and prioritize natural-sounding ones
-    const loadVoices = () => {
-      if (speechSynthesisRef.current) {
-        const voices = speechSynthesisRef.current.getVoices();
-        const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
-        setAvailableVoices(englishVoices);
-        
-        // Auto-select the most natural-sounding voice
-        if (!selectedVoice && englishVoices.length > 0) {
-          // Prioritize specific natural-sounding voices
-          const naturalVoices = englishVoices.filter(voice => 
-            voice.name.includes('Samantha') || 
-            voice.name.includes('Ava') ||
-            voice.name.includes('Serena') ||
-            voice.name.includes('Allison') ||
-            voice.name.includes('Susan') ||
-            voice.name.includes('Victoria') ||
-            voice.name.includes('Fiona') ||
-            voice.name.includes('Karen') ||
-            voice.name.includes('Moira') ||
-            voice.name.includes('Tessa') ||
-            (voice.name.toLowerCase().includes('premium') && voice.name.toLowerCase().includes('female'))
-          );
-          
-          // Then try general female voices
-          const femaleVoices = englishVoices.filter(voice => 
-            voice.name.toLowerCase().includes('female') ||
-            (!voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('man'))
-          );
-          
-          if (naturalVoices.length > 0) {
-            setSelectedVoice(naturalVoices[0].name);
-          } else if (femaleVoices.length > 0) {
-            setSelectedVoice(femaleVoices[0].name);
-          } else if (englishVoices.length > 0) {
-            setSelectedVoice(englishVoices[0].name);
-          }
-        }
-      }
-    };
-
-    loadVoices();
-    if (speechSynthesisRef.current) {
-      speechSynthesisRef.current.onvoiceschanged = loadVoices;
-    }
-
     // Speak the initial greeting if voice is enabled and there's a greeting
-    if (useVoice && speechSynthesisRef.current && initialGreeting) {
+    if (useVoice && initialGreeting) {
       setTimeout(() => {
         speakText(initialGreeting);
-      }, 1500); // Longer delay to ensure voices are loaded
+      }, 1500);
     }
 
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
-      if (speechSynthesisRef.current) {
-        speechSynthesisRef.current.cancel();
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
       }
     };
   }, []);
 
-  const addNaturalPauses = (text: string) => {
-    // Add natural pauses and breathing spots
-    return text
-      .replace(/\.\.\./g, '... ') // Longer pause for ellipsis
-      .replace(/,/g, ', ') // Short pause after commas
-      .replace(/\?/g, '? ') // Pause after questions
-      .replace(/\!/g, '! ') // Pause after exclamations
-      .replace(/\./g, '. ') // Pause after periods
-      .replace(/\s+/g, ' ') // Clean up extra spaces
-      .trim();
-  };
+  const speakText = async (text: string) => {
+    if (!useVoice || isSpeaking) return;
 
-  const speakText = (text: string) => {
-    if (speechSynthesisRef.current && useVoice) {
-      speechSynthesisRef.current.cancel();
-      
-      // Add natural pauses to text
-      const naturalText = addNaturalPauses(text);
-      
-      const utterance = new SpeechSynthesisUtterance(naturalText);
-      
-      // More human-like speech settings
-      utterance.rate = 0.85; // Slightly faster but still conversational
-      utterance.pitch = 1.0; // Natural pitch
-      utterance.volume = 0.9; // Clear but not overwhelming
-      
-      // Use selected voice
-      if (selectedVoice) {
-        const voice = availableVoices.find(v => v.name === selectedVoice);
-        if (voice) {
-          utterance.voice = voice;
-        }
+    try {
+      setIsSpeaking(true);
+      console.log('Generating speech for:', text.substring(0, 50) + '...');
+
+      // Stop any current audio
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
       }
-      
-      // Add subtle variation to make it less robotic
-      utterance.addEventListener('start', () => {
-        console.log('Speaking with voice:', utterance.voice?.name || 'default');
+
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: { 
+          text, 
+          voice: selectedVoice 
+        }
       });
-      
-      utterance.addEventListener('end', () => {
-        // Add a tiny delay between sentences for naturalness
-      });
-      
-      speechSynthesisRef.current.speak(utterance);
+
+      if (error) {
+        console.error('TTS error:', error);
+        setIsSpeaking(false);
+        return;
+      }
+
+      if (data?.audioContent) {
+        // Create audio from base64
+        const audioBlob = new Blob([
+          Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))
+        ], { type: 'audio/mp3' });
+        
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        currentAudioRef.current = audio;
+
+        audio.onended = () => {
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+          currentAudioRef.current = null;
+        };
+
+        audio.onerror = () => {
+          console.error('Audio playback error');
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+          currentAudioRef.current = null;
+        };
+
+        await audio.play();
+      } else {
+        setIsSpeaking(false);
+      }
+    } catch (error) {
+      console.error('Error generating speech:', error);
+      setIsSpeaking(false);
     }
   };
 
@@ -238,7 +215,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       if (useVoice) {
         setTimeout(() => {
           speakText(randomResponse);
-        }, 500); // Slightly longer delay for naturalness
+        }, 500);
       }
     }, 1200);
   };
@@ -248,8 +225,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     if (isListening) {
       stopListening();
     }
-    if (speechSynthesisRef.current) {
-      speechSynthesisRef.current.cancel();
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+      setIsSpeaking(false);
     }
   };
 
@@ -271,22 +250,25 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
               {userProfile ? 'Personalized Support Session' : 'Demo Mode - Experience the conversation'}
             </Badge>
             <Badge className={`${useVoice ? 'bg-green-500/80' : 'bg-blue-500/80'} text-white border-white/30`}>
-              {useVoice ? '🎤 Voice Mode' : '⌨️ Text Mode'}
+              {useVoice ? '🎤 Human Voice Mode' : '⌨️ Text Mode'}
             </Badge>
           </div>
           
           {/* Voice Selection */}
-          {useVoice && availableVoices.length > 0 && (
+          {useVoice && (
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm text-white/80">Choose Voice:</span>
+              <span className="text-sm text-white/80">AI Voice:</span>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                 <SelectTrigger className="w-48 bg-white/20 border-white/30 text-white">
                   <SelectValue placeholder="Select a voice" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableVoices.map((voice) => (
-                    <SelectItem key={voice.name} value={voice.name}>
-                      {voice.name.replace(/\s*\([^)]*\)$/, '')} {/* Clean up voice names */}
+                  {openAIVoices.map((voice) => (
+                    <SelectItem key={voice.id} value={voice.id}>
+                      <div className="flex flex-col">
+                        <span>{voice.name}</span>
+                        <span className="text-xs text-gray-500">{voice.description}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -296,9 +278,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
                 size="sm"
                 variant="ghost"
                 className="text-white hover:bg-white/20"
+                disabled={isSpeaking}
               >
                 <Volume2 className="h-4 w-4" />
-                Test
+                {isSpeaking ? 'Speaking...' : 'Test'}
               </Button>
             </div>
           )}
@@ -325,6 +308,16 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
                 </div>
               </div>
             ))}
+            {isSpeaking && (
+              <div className="flex justify-start">
+                <div className="bg-blue-50 border border-blue-200 px-4 py-2 rounded-2xl max-w-xs">
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Volume2 className="h-4 w-4 animate-pulse" />
+                    <span className="text-sm">Speaking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Input Area */}
@@ -340,18 +333,20 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
                         ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
                         : 'bg-wellness-purple hover:bg-wellness-purple/90'
                     }`}
+                    disabled={isSpeaking}
                   >
                     {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
                   </Button>
                 </div>
                 <p className="text-sm text-gray-600 text-center">
-                  {isListening ? 'Listening... Tap to stop' : 'Tap to speak your thoughts'}
+                  {isSpeaking ? 'AI is speaking...' : isListening ? 'Listening... Tap to stop' : 'Tap to speak your thoughts'}
                 </p>
                 <Button 
                   onClick={toggleInputMode}
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2"
+                  disabled={isSpeaking}
                 >
                   <Type className="h-4 w-4" />
                   I prefer to type right now
@@ -367,10 +362,12 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     className="flex-1"
+                    disabled={isSpeaking}
                   />
                   <Button 
                     onClick={() => handleSendMessage()}
                     className="bg-wellness-purple hover:bg-wellness-purple/90"
+                    disabled={isSpeaking}
                   >
                     <MessageCircle className="h-4 w-4" />
                   </Button>
@@ -380,9 +377,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2 mx-auto"
+                  disabled={isSpeaking}
                 >
                   <Mic className="h-4 w-4" />
-                  Switch to voice mode
+                  Switch to human voice mode
                 </Button>
               </div>
             )}
