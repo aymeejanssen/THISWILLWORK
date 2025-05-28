@@ -213,7 +213,7 @@ const AssessmentSummary = () => {
           <div className="grid md:grid-cols-3 gap-6">
             <PricingCard
               title="Weekly Support"
-              price="49.99 AED"
+              price="99 AED"
               sessions="4 sessions per month"
               features={[
                 "Once a week AI sessions",
@@ -228,7 +228,7 @@ const AssessmentSummary = () => {
             
             <PricingCard
               title="Regular Care"
-              price="79.99 AED"
+              price="219 AED"
               sessions="3 times per week"
               features={[
                 "12 AI sessions per month",
@@ -245,7 +245,7 @@ const AssessmentSummary = () => {
             
             <PricingCard
               title="Unlimited Support"
-              price="129.99 AED"
+              price="499 AED"
               sessions="Unlimited access"
               features={[
                 "24/7 AI availability",
@@ -389,7 +389,7 @@ const AssessmentSummary = () => {
           <div className="grid md:grid-cols-3 gap-6">
             <PricingCard
               title="Weekly Support"
-              price="49.99 AED"
+              price="99 AED"
               sessions="4 sessions per month"
               features={[
                 "Once a week AI sessions",
@@ -404,7 +404,7 @@ const AssessmentSummary = () => {
             
             <PricingCard
               title="Regular Care"
-              price="79.99 AED"
+              price="219 AED"
               sessions="3 times per week"
               features={[
                 "12 AI sessions per month",
@@ -421,7 +421,7 @@ const AssessmentSummary = () => {
             
             <PricingCard
               title="Unlimited Support"
-              price="129.99 AED"
+              price="499 AED"
               sessions="Unlimited access"
               features={[
                 "24/7 AI availability",
