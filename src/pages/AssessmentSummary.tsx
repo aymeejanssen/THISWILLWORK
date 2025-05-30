@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -313,69 +312,55 @@ const AssessmentSummary = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-4">
-            <CheckCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">Assessment Complete</span>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900">Your AI Journey Starts Here</h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
-          </p>
-        </div>
-
-        {/* Two-column layout for desktop, stacked for mobile */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left side - What We See In You */}
+        {/* AI Insights Section - moved to top */}
+        {aiInsights && aiInsights.insights.length > 0 && (
           <div className="space-y-6">
-            {aiInsights && aiInsights.insights.length > 0 && (
-              <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-                <CardHeader>
-                  <CardTitle className="text-3xl text-gray-900 mb-2">What We See In You</CardTitle>
-                  <p className="text-gray-600 text-lg">Our AI analysis has identified these key insights about your situation</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {aiInsights.insights.map((insight, index) => (
-                      <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-purple-100 rounded-full">
-                            <Heart className="h-5 w-5 text-purple-600" />
+            <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+              <CardHeader>
+                <CardTitle className="text-3xl text-gray-900 mb-2">What We See In You</CardTitle>
+                <p className="text-gray-600 text-lg">Our AI analysis has identified these key insights about your situation</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {aiInsights.insights.map((insight, index) => (
+                    <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-purple-100 rounded-full">
+                          <Heart className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-xl text-purple-800 mb-3">{insight.title}</h4>
+                          <div className="text-gray-700 leading-relaxed mb-4 space-y-2">
+                            <p className="mb-3">{insight.description}</p>
+                            <ul className="space-y-2 text-sm">
+                              <li className="flex items-start gap-2">
+                                <span className="text-purple-600 mt-1">•</span>
+                                <span>This pattern is commonly seen in individuals with similar experiences</span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-purple-600 mt-1">•</span>
+                                <span>It represents both resilience and an opportunity for growth</span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-purple-600 mt-1">•</span>
+                                <span>With awareness and support, this can become a pathway to healing</span>
+                              </li>
+                            </ul>
                           </div>
-                          <div>
-                            <h4 className="font-bold text-xl text-purple-800 mb-3">{insight.title}</h4>
-                            <div className="text-gray-700 leading-relaxed mb-4 space-y-2">
-                              <p className="mb-3">{insight.description}</p>
-                              <ul className="space-y-2 text-sm">
-                                <li className="flex items-start gap-2">
-                                  <span className="text-purple-600 mt-1">•</span>
-                                  <span>This pattern is commonly seen in individuals with similar experiences</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                  <span className="text-purple-600 mt-1">•</span>
-                                  <span>It represents both resilience and an opportunity for growth</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                  <span className="text-purple-600 mt-1">•</span>
-                                  <span>With awareness and support, this can become a pathway to healing</span>
-                                </li>
-                              </ul>
-                            </div>
-                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                              <h5 className="font-semibold text-blue-800 mb-2">Reframing Perspective</h5>
-                              <p className="text-blue-700">{insight.reframe}</p>
-                            </div>
+                          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <h5 className="font-semibold text-blue-800 mb-2">Reframing Perspective</h5>
+                            <p className="text-blue-700">{insight.reframe}</p>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Your First Steps - AI Action Steps */}
-            {aiInsights && aiInsights.actionSteps.length > 0 && (
+            {aiInsights.actionSteps.length > 0 && (
               <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
                 <CardHeader>
                   <CardTitle className="text-xl text-blue-800">Your First Steps</CardTitle>
@@ -394,6 +379,26 @@ const AssessmentSummary = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+        )}
+
+        {/* Header Section */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-4">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Assessment Complete</span>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900">Your AI Journey Starts Here</h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
+          </p>
+        </div>
+
+        {/* Two-column layout for desktop, stacked for mobile */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left side - spacer or additional content */}
+          <div className="space-y-6">
+            {/* This space can be used for additional content if needed */}
           </div>
 
           {/* Right side - Chat with AI Coach */}
