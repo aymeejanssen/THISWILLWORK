@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Heart, Users, User, Briefcase, Compass, Brain, ArrowRight, Check, Shield, UserPlus } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { useNavigate } from 'react-router-dom';
+import VoiceInput from './VoiceInput';
 
 interface OnboardingFlowProps {
   onClose: () => void;
@@ -332,6 +333,7 @@ const OnboardingFlow = ({ onClose }: OnboardingFlowProps) => {
 
 const QuestionInput = ({ onSubmit }: { onSubmit: (response: string) => void }) => {
   const [response, setResponse] = useState('');
+  const [isListening, setIsListening] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -341,16 +343,28 @@ const QuestionInput = ({ onSubmit }: { onSubmit: (response: string) => void }) =
     }
   };
 
+  const handleVoiceTranscript = (transcript: string) => {
+    console.log('Voice transcript received:', transcript);
+    setResponse(prev => prev + ' ' + transcript);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Textarea
         value={response}
         onChange={(e) => setResponse(e.target.value)}
-        placeholder="Take your time to reflect and share what feels true for you..."
+        placeholder="Type your answer here, or use the microphone to speak..."
         className="min-h-[120px] resize-none"
         autoFocus
       />
-      <div className="flex justify-end">
+      
+      <div className="flex justify-between items-center">
+        <VoiceInput
+          onTranscript={handleVoiceTranscript}
+          isListening={isListening}
+          onListeningChange={setIsListening}
+        />
+        
         <Button
           type="submit"
           disabled={!response.trim()}
@@ -360,6 +374,12 @@ const QuestionInput = ({ onSubmit }: { onSubmit: (response: string) => void }) =
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
+      
+      {isListening && (
+        <div className="text-sm text-gray-600 italic">
+          🎤 Listening... Speak your answer now
+        </div>
+      )}
     </form>
   );
 };
