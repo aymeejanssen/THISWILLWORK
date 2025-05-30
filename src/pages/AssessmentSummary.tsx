@@ -309,7 +309,7 @@ const AssessmentSummary = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-4">
             <CheckCircle className="h-4 w-4" />
@@ -321,136 +321,135 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Chat with AI Coach Button - Moved higher up */}
-        <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden">
-          <CardContent className="pt-8 pb-8 text-center space-y-6">
-            <div className="flex justify-center">
-              <Button 
-                onClick={handleStartFreeTrial}
-                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-2xl font-bold"
-                size="lg"
-              >
-                Click
-                <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
-              </Button>
-            </div>
-            
-            <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
-            
-            <div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your AI Wellness Coach</h3>
-              <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto text-lg">
-                Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
-                Click the button above to begin - no commitment needed!
-              </p>
-            </div>
-            
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-1 rounded-full">
-                    <Shield className="h-4 w-4 text-green-600" />
-                  </div>
-                  <span>Available 24/7 for panic attacks or anxiety</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-100 p-1 rounded-full">
-                    <Heart className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <span>AI companion when you're feeling lonely</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-purple-100 p-1 rounded-full">
-                    <Brain className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <span>AI emotional education and awareness building</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-pink-100 p-1 rounded-full">
-                    <Headphones className="h-4 w-4 text-pink-600" />
-                  </div>
-                  <span>AI understanding of trauma responses</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* What We See In You - with bullet points */}
-        {aiInsights && aiInsights.insights.length > 0 && (
-          <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-            <CardHeader>
-              <CardTitle className="text-3xl text-gray-900 text-center mb-2">What We See In You</CardTitle>
-              <p className="text-center text-gray-600 text-lg">Our AI analysis has identified these key insights about your situation</p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-8">
-                {aiInsights.insights.map((insight, index) => (
-                  <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-purple-100 rounded-full">
-                        <Heart className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-xl text-purple-800 mb-3">{insight.title}</h4>
-                        <div className="text-gray-700 leading-relaxed mb-4 space-y-2">
-                          <p className="mb-3">{insight.description}</p>
-                          <ul className="space-y-2 text-sm">
-                            <li className="flex items-start gap-2">
-                              <span className="text-purple-600 mt-1">•</span>
-                              <span>This pattern is often observed in individuals who have experienced similar challenges</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-purple-600 mt-1">•</span>
-                              <span>It represents both a strength and an area for personal growth</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-purple-600 mt-1">•</span>
-                              <span>This connects to deeper emotional patterns that may influence your daily responses</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-purple-600 mt-1">•</span>
-                              <span>With gentle awareness and targeted support, this can become a powerful opportunity for healing</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-purple-600 mt-1">•</span>
-                              <span>Understanding this pattern is the first step toward creating meaningful and lasting change</span>
-                            </li>
-                          </ul>
-                        </div>
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                          <h5 className="font-semibold text-blue-800 mb-2">Reframing Perspective</h5>
-                          <p className="text-blue-700">{insight.reframe}</p>
+        {/* Two-column layout for desktop, stacked for mobile */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left side - What We See In You */}
+          <div className="space-y-6">
+            {aiInsights && aiInsights.insights.length > 0 && (
+              <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="text-3xl text-gray-900 mb-2">What We See In You</CardTitle>
+                  <p className="text-gray-600 text-lg">Our AI analysis has identified these key insights about your situation</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {aiInsights.insights.map((insight, index) => (
+                      <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-purple-100 rounded-full">
+                            <Heart className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-xl text-purple-800 mb-3">{insight.title}</h4>
+                            <div className="text-gray-700 leading-relaxed mb-4 space-y-2">
+                              <p className="mb-3">{insight.description}</p>
+                              <ul className="space-y-2 text-sm">
+                                <li className="flex items-start gap-2">
+                                  <span className="text-purple-600 mt-1">•</span>
+                                  <span>This pattern is often observed in individuals who have experienced similar challenges</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <span className="text-purple-600 mt-1">•</span>
+                                  <span>It represents both a strength and an area for personal growth</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <span className="text-purple-600 mt-1">•</span>
+                                  <span>With gentle awareness and targeted support, this can become a powerful opportunity for healing</span>
+                                </li>
+                              </ul>
+                            </div>
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                              <h5 className="font-semibold text-blue-800 mb-2">Reframing Perspective</h5>
+                              <p className="text-blue-700">{insight.reframe}</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Your First Steps - AI Action Steps */}
-        {aiInsights && aiInsights.actionSteps.length > 0 && (
-          <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-            <CardHeader>
-              <CardTitle className="text-xl text-blue-800">Your First Steps</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {aiInsights.actionSteps.map((step, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="p-1 bg-blue-100 rounded-full">
-                      <ArrowRight className="h-3 w-3 text-blue-600" />
-                    </div>
-                    <p className="text-gray-700 text-sm">• {step.action}</p>
+            {/* Your First Steps - AI Action Steps */}
+            {aiInsights && aiInsights.actionSteps.length > 0 && (
+              <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-xl text-blue-800">Your First Steps</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {aiInsights.actionSteps.map((step, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <div className="p-1 bg-blue-100 rounded-full">
+                          <ArrowRight className="h-3 w-3 text-blue-600" />
+                        </div>
+                        <p className="text-gray-700 text-sm">• {step.action}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right side - Chat with AI Coach */}
+          <div className="space-y-6">
+            <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden">
+              <CardContent className="pt-8 pb-8 text-center space-y-6">
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleStartFreeTrial}
+                    className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-2xl font-bold"
+                    size="lg"
+                  >
+                    Click
+                    <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
+                  </Button>
+                </div>
+                
+                <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
+                
+                <div>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your AI Wellness Coach</h3>
+                  <p className="text-gray-700 leading-relaxed text-lg">
+                    Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
+                    Click the button above to begin - no commitment needed!
+                  </p>
+                </div>
+                
+                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
+                  <div className="grid grid-cols-1 gap-4 text-sm text-gray-700">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-green-100 p-1 rounded-full">
+                        <Shield className="h-4 w-4 text-green-600" />
+                      </div>
+                      <span>Available 24/7 for panic attacks or anxiety</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-100 p-1 rounded-full">
+                        <Heart className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <span>AI companion when you're feeling lonely</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-purple-100 p-1 rounded-full">
+                        <Brain className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <span>AI emotional education and awareness building</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-pink-100 p-1 rounded-full">
+                        <Headphones className="h-4 w-4 text-pink-600" />
+                      </div>
+                      <span>AI understanding of trauma responses</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Pricing Cards Section */}
         <div className="space-y-8">
