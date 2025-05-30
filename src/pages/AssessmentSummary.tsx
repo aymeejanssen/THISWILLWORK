@@ -408,16 +408,15 @@ const AssessmentSummary = () => {
                 <div className="flex justify-center">
                   <Button 
                     onClick={handleStartFreeTrial}
-                    className="relative bg-gradient-to-br from-purple-400 via-pink-300 to-teal-300 hover:from-purple-500 hover:via-pink-400 hover:to-teal-400 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-lg font-bold"
+                    className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-2xl font-bold"
                     size="lg"
                   >
-                    <span className="text-center leading-tight">
-                      Try Free<br />
-                      <span className="text-sm font-medium">5 minutes</span>
-                    </span>
+                    Click
                     <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
                   </Button>
                 </div>
+                
+                <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
                 
                 <div>
                   <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your AI Wellness Coach</h3>
