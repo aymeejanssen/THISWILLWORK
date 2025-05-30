@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -322,6 +321,39 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
+        {/* What We See In You - Moved to top and expanded */}
+        {aiInsights && aiInsights.insights.length > 0 && (
+          <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <CardHeader>
+              <CardTitle className="text-3xl text-gray-900 text-center mb-2">What We See In You</CardTitle>
+              <p className="text-center text-gray-600 text-lg">Our AI analysis has identified these key insights about your situation</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                {aiInsights.insights.map((insight, index) => (
+                  <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-purple-100 rounded-full">
+                        <Heart className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-xl text-purple-800 mb-3">{insight.title}</h4>
+                        <p className="text-gray-700 leading-relaxed mb-4">
+                          {insight.description} This pattern is often observed in individuals who have experienced similar challenges, and it represents both a strength and an area for personal growth. Through our analysis, we've noticed that this aspect of your experience connects to deeper emotional patterns that may be influencing how you perceive and respond to situations in your daily life. With gentle awareness and targeted support, this insight can be transformed into a powerful opportunity for healing and personal development. The emotional weight associated with this pattern likely fluctuates depending on external circumstances, but our AI coach can help you develop strategies to maintain balance regardless of what's happening around you. Understanding this pattern is the first step toward creating meaningful and lasting change in how you navigate your personal journey.
+                        </p>
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                          <h5 className="font-semibold text-blue-800 mb-2">Reframing Perspective</h5>
+                          <p className="text-blue-700">{insight.reframe}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Chat with AI Coach Button */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden">
           <CardContent className="pt-8 pb-8 text-center space-y-6">
@@ -376,6 +408,27 @@ const AssessmentSummary = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Your First Steps - AI Action Steps */}
+        {aiInsights && aiInsights.actionSteps.length > 0 && (
+          <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="text-xl text-blue-800">Your First Steps</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {aiInsights.actionSteps.map((step, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="p-1 bg-blue-100 rounded-full">
+                      <ArrowRight className="h-3 w-3 text-blue-600" />
+                    </div>
+                    <p className="text-gray-700 text-sm">• {step.action}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Pricing Cards Section */}
         <div className="space-y-8">
@@ -440,49 +493,6 @@ const AssessmentSummary = () => {
             />
           </div>
         </div>
-
-        {aiInsights && aiInsights.insights.length > 0 && (
-          <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-            <CardHeader>
-              <CardTitle className="text-2xl text-gray-900 text-center">What We See In You</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {aiInsights.insights.slice(0, 2).map((insight, index) => (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-white rounded-lg">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Heart className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">• {insight.title}</h4>
-                      <p className="text-gray-700 text-sm">{insight.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {aiInsights && aiInsights.actionSteps.length > 0 && (
-          <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-            <CardHeader>
-              <CardTitle className="text-xl text-blue-800">Your First Steps</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {aiInsights.actionSteps.slice(0, 2).map((step, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="p-1 bg-blue-100 rounded-full">
-                      <ArrowRight className="h-3 w-3 text-blue-600" />
-                    </div>
-                    <p className="text-gray-700 text-sm">• {step.action}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <div className="flex justify-center gap-4">
           <Button onClick={() => navigate('/')} variant="outline" size="lg">
