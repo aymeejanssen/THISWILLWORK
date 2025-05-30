@@ -105,7 +105,7 @@ const AssessmentSummary = () => {
     features: string[];
     isPopular?: boolean;
   }) => (
-    <Card className={`relative ${isPopular ? 'border-purple-500 border-2' : ''}`}>
+    <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
       {isPopular && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
           <Badge className="bg-purple-600 text-white px-4 py-1">Most Popular</Badge>
@@ -116,13 +116,15 @@ const AssessmentSummary = () => {
         <div className="text-3xl font-bold text-purple-600">{price}</div>
         <p className="text-gray-600">{sessions}</p>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {features.map((feature, index) => (
-          <div key={index} className="flex items-start gap-2">
-            <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
-            <span className="text-sm text-gray-700">{feature}</span>
-          </div>
-        ))}
+      <CardContent className="flex flex-col flex-grow">
+        <div className="space-y-3 flex-grow">
+          {features.map((feature, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
+              <span className="text-sm text-gray-700">{feature}</span>
+            </div>
+          ))}
+        </div>
         <Button className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
           Choose Plan
         </Button>
