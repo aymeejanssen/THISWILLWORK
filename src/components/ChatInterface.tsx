@@ -1,11 +1,13 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, User, X, Heart, Mic, MicOff, Volume2 } from "lucide-react";
+import { MessageCircle, User, X, Heart, Mic, MicOff, Volume2, Headphones, Edit } from "lucide-react";
 import { supabase } from '../integrations/supabase/client';
+import VoiceOnlyChat from './VoiceOnlyChat';
 
 interface ChatInterfaceProps {
   onClose: () => void;
@@ -13,6 +15,7 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
+  const [chatMode, setChatMode] = useState<'select' | 'text' | 'voice'>('select');
   const [isListening, setIsListening] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<string>('nova');
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -90,7 +93,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     }
 
     // Speak the initial greeting if there's a greeting
-    if (initialGreeting) {
+    if (initialGreeting && chatMode === 'text') {
       setTimeout(() => {
         speakText(initialGreeting);
       }, 1500);
@@ -105,7 +108,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
         currentAudioRef.current = null;
       }
     };
-  }, []);
+  }, [chatMode]);
 
   const speakText = async (text: string) => {
     if (isSpeaking) return;
@@ -215,6 +218,58 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     }, 1200);
   };
 
+  // Show voice-only chat if voice mode is selected
+  if (chatMode === 'voice') {
+    return <VoiceOnlyChat onClose={onClose} userProfile={userProfile} />;
+  }
+
+  // Show mode selection screen
+  if (chatMode === 'select') {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <Card className="w-full max-w-md">
+          <CardHeader className="wellness-gradient text-white rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Heart className="h-6 w-6" />
+                Choose Your Experience
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">How would you like to connect?</h3>
+              <p className="text-gray-600">Choose the mode that feels most comfortable for you</p>
+            </div>
+
+            <Button
+              onClick={() => setChatMode('voice')}
+              className="w-full h-20 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white flex flex-col items-center justify-center space-y-2"
+            >
+              <Headphones className="h-6 w-6" />
+              <span className="font-semibold">Talk Only</span>
+              <span className="text-xs opacity-90">Pure voice conversation - no text</span>
+            </Button>
+
+            <Button
+              onClick={() => setChatMode('text')}
+              variant="outline"
+              className="w-full h-20 flex flex-col items-center justify-center space-y-2 border-2 hover:bg-gray-50"
+            >
+              <Edit className="h-6 w-6" />
+              <span className="font-semibold">Write & Speak</span>
+              <span className="text-xs text-gray-600">Text with voice responses</span>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Text chat mode (existing functionality)
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl h-[600px] flex flex-col">
