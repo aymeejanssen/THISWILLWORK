@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -24,18 +24,27 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
   onListeningChange,
   className
 }) => {
-  const [recognition, setRecognition] = useState<any>(null);
   const [isSupported, setIsSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
+    // Only initialize once
+    if (isInitializedRef.current) return;
+    
     // Check if speech recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognition) {
+      console.log('Initializing speech recognition...');
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = true;
       recognitionInstance.interimResults = true;
       recognitionInstance.lang = 'en-US';
+
+      recognitionInstance.onstart = () => {
+        console.log('Speech recognition started');
+      };
 
       recognitionInstance.onresult = (event: any) => {
         let finalTranscript = '';
@@ -55,7 +64,9 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
 
       recognitionInstance.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
-        onListeningChange(false);
+        if (event.error !== 'aborted') {
+          onListeningChange(false);
+        }
       };
 
       recognitionInstance.onend = () => {
@@ -63,24 +74,58 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
         onListeningChange(false);
       };
 
-      setRecognition(recognitionInstance);
+      recognitionRef.current = recognitionInstance;
       setIsSupported(true);
+      isInitializedRef.current = true;
     } else {
       console.warn('Speech recognition not supported in this browser');
       setIsSupported(false);
     }
-  }, [onTranscript, onListeningChange]);
 
-  const toggleListening = () => {
+    // Cleanup function
+    return () => {
+      if (recognitionRef.current && isListening) {
+        console.log('Cleaning up speech recognition...');
+        try {
+          recognitionRef.current.stop();
+        } catch (error) {
+          console.error('Error stopping recognition during cleanup:', error);
+        }
+      }
+    };
+  }, []); // Empty dependency array - only run once
+
+  // Handle listening state changes
+  useEffect(() => {
+    const recognition = recognitionRef.current;
     if (!recognition) return;
 
     if (isListening) {
-      recognition.stop();
-      onListeningChange(false);
+      try {
+        console.log('Starting speech recognition...');
+        recognition.start();
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        onListeningChange(false);
+      }
     } else {
-      recognition.start();
-      onListeningChange(true);
+      try {
+        console.log('Stopping speech recognition...');
+        recognition.stop();
+      } catch (error) {
+        console.error('Error stopping recognition:', error);
+      }
     }
+  }, [isListening, onListeningChange]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      console.error('Recognition not initialized');
+      return;
+    }
+
+    console.log('Toggling listening state from:', isListening);
+    onListeningChange(!isListening);
   };
 
   if (!isSupported) {
