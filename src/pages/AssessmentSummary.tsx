@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -254,7 +255,7 @@ const AssessmentSummary = () => {
                 "AI companion during lonely moments",
                 "Timeless sessions",
                 "Crisis intervention support",
-                "Personalized coaching plans",
+                "Personalized AI coaching plans",
                 "Progress insights & reports",
                 "Advanced emotional coaching",
                 "Family relationship support"
@@ -346,15 +347,15 @@ const AssessmentSummary = () => {
                               <ul className="space-y-2 text-sm">
                                 <li className="flex items-start gap-2">
                                   <span className="text-purple-600 mt-1">•</span>
-                                  <span>This pattern is often observed in individuals who have experienced similar challenges</span>
+                                  <span>This pattern is commonly seen in individuals with similar experiences</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                   <span className="text-purple-600 mt-1">•</span>
-                                  <span>It represents both a strength and an area for personal growth</span>
+                                  <span>It represents both resilience and an opportunity for growth</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                   <span className="text-purple-600 mt-1">•</span>
-                                  <span>With gentle awareness and targeted support, this can become a powerful opportunity for healing</span>
+                                  <span>With awareness and support, this can become a pathway to healing</span>
                                 </li>
                               </ul>
                             </div>
