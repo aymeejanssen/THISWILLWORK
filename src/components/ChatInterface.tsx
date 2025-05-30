@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -263,8 +262,8 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
             >
               <Edit className="h-7 w-7 flex-shrink-0" />
               <div className="text-center">
-                <div className="font-semibold text-base">Write & Speak</div>
-                <div className="text-xs text-gray-600">Text with voice responses</div>
+                <div className="font-semibold text-base">Write Only</div>
+                <div className="text-xs text-gray-600">Pure text conversation</div>
               </div>
             </Button>
           </CardContent>
@@ -291,39 +290,9 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
             <Badge className="bg-white/20 text-white border-white/30 w-fit">
               {userProfile ? 'Personalized Support Session' : 'Demo Mode - Experience the conversation'}
             </Badge>
-            <Badge className="bg-green-500/80 text-white border-white/30">
-              🎤 Voice Mode
+            <Badge className="bg-blue-500/80 text-white border-white/30">
+              ✍️ Text Mode
             </Badge>
-          </div>
-          
-          {/* Voice Selection */}
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-sm text-white/80">AI Voice:</span>
-            <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-              <SelectTrigger className="w-48 bg-white/20 border-white/30 text-white">
-                <SelectValue placeholder="Select a voice" />
-              </SelectTrigger>
-              <SelectContent>
-                {openAIVoices.map((voice) => (
-                  <SelectItem key={voice.id} value={voice.id}>
-                    <div className="flex flex-col">
-                      <span>{voice.name}</span>
-                      <span className="text-xs text-gray-500">{voice.description}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button 
-              onClick={testVoice}
-              size="sm"
-              variant="ghost"
-              className="text-white hover:bg-white/20"
-              disabled={isSpeaking}
-            >
-              <Volume2 className="h-4 w-4" />
-              {isSpeaking ? 'Speaking...' : 'Test'}
-            </Button>
           </div>
         </CardHeader>
 
@@ -348,55 +317,24 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
                 </div>
               </div>
             ))}
-            {isSpeaking && (
-              <div className="flex justify-start">
-                <div className="bg-blue-50 border border-blue-200 px-4 py-2 rounded-2xl max-w-xs">
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <Volume2 className="h-4 w-4 animate-pulse" />
-                    <span className="text-sm">Speaking...</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Input Area */}
           <div className="p-6 border-t bg-white">
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex gap-2 items-center">
-                <Button
-                  onClick={isListening ? stopListening : startListening}
-                  className={`rounded-full w-16 h-16 ${
-                    isListening 
-                      ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-                      : 'bg-wellness-purple hover:bg-wellness-purple/90'
-                  }`}
-                  disabled={isSpeaking}
-                >
-                  {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-                </Button>
-              </div>
-              <p className="text-sm text-gray-600 text-center">
-                {isSpeaking ? 'AI is speaking...' : isListening ? 'Listening... Tap to stop' : 'Tap to speak your thoughts'}
-              </p>
-              
-              <div className="flex gap-2 w-full">
-                <Input
-                  placeholder={userProfile ? "Or type what's on your heart..." : "Or type your message... (This is a demo)"}
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="flex-1"
-                  disabled={isSpeaking}
-                />
-                <Button 
-                  onClick={() => handleSendMessage()}
-                  className="bg-wellness-purple hover:bg-wellness-purple/90"
-                  disabled={isSpeaking}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="flex gap-2 w-full">
+              <Input
+                placeholder={userProfile ? "Type what's on your heart..." : "Type your message... (This is a demo)"}
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                className="flex-1"
+              />
+              <Button 
+                onClick={() => handleSendMessage()}
+                className="bg-wellness-purple hover:bg-wellness-purple/90"
+              >
+                <MessageCircle className="h-4 w-4" />
+              </Button>
             </div>
             
             <p className="text-xs text-gray-500 mt-2 text-center">
