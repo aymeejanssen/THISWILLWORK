@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -246,21 +247,25 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
             <Button
               onClick={() => setChatMode('voice')}
-              className="w-full h-20 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white flex flex-col items-center justify-center space-y-2"
+              className="w-full h-24 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white flex flex-col items-center justify-center gap-2 p-4"
             >
-              <Headphones className="h-6 w-6" />
-              <span className="font-semibold">Talk Only</span>
-              <span className="text-xs opacity-90">Pure voice conversation - no text</span>
+              <Headphones className="h-7 w-7 flex-shrink-0" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Talk Only</div>
+                <div className="text-xs opacity-90">Pure voice conversation - no text</div>
+              </div>
             </Button>
 
             <Button
               onClick={() => setChatMode('text')}
               variant="outline"
-              className="w-full h-20 flex flex-col items-center justify-center space-y-2 border-2 hover:bg-gray-50"
+              className="w-full h-24 flex flex-col items-center justify-center gap-2 border-2 hover:bg-gray-50 p-4"
             >
-              <Edit className="h-6 w-6" />
-              <span className="font-semibold">Write & Speak</span>
-              <span className="text-xs text-gray-600">Text with voice responses</span>
+              <Edit className="h-7 w-7 flex-shrink-0" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Write & Speak</div>
+                <div className="text-xs text-gray-600">Text with voice responses</div>
+              </div>
             </Button>
           </CardContent>
         </Card>
