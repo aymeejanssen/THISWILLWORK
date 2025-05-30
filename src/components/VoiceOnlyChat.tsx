@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,17 +28,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     { id: 'onyx', name: 'Onyx (Deep)', description: 'Deep, calming male voice' },
     { id: 'shimmer', name: 'Shimmer (Bright)', description: 'Bright, encouraging female voice' }
   ];
-
-  const getPersonalizedGreeting = () => {
-    if (!userProfile) {
-      return "Hi there! I'm your AI wellness companion. I'm here to listen and support you through whatever you're experiencing. What's on your mind today?";
-    }
-
-    const name = userProfile.name || 'dear';
-    const struggles = userProfile.currentStruggles?.join(', ') || 'what you\'re going through';
-    
-    return `Hi ${name}... I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
-  };
 
   // Sample AI responses for conversation flow
   const sampleResponses = [
@@ -277,7 +265,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
         <CardContent className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-purple-50/30 to-teal-50/30">
           {!conversationStarted ? (
-            <div className="text-center space-y-6">
+            <div className="flex flex-col items-center justify-center h-full space-y-6">
               <Button 
                 onClick={startConversation}
                 className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 text-xl font-bold"
@@ -291,7 +279,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   "Start"
                 )}
               </Button>
-              <p className="text-gray-600 text-lg">Tap to begin your voice conversation</p>
+              <p className="text-gray-600 text-lg text-center">Tap to begin your voice conversation</p>
             </div>
           ) : (
             <div className="text-center space-y-8">
