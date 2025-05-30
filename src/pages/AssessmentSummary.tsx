@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,7 @@ const AssessmentSummary = () => {
   const [showPricing, setShowPricing] = useState(false);
   const [showFreeTrialChat, setShowFreeTrialChat] = useState(false);
   const [trialTimeRemaining, setTrialTimeRemaining] = useState(300); // 5 minutes in seconds
+  const [timerStarted, setTimerStarted] = useState(false);
 
   // Get the primary concern from responses
   const primaryConcern = responses.primaryConcern || 'general wellness';
@@ -75,20 +77,24 @@ const AssessmentSummary = () => {
   };
 
   const handleStartFreeTrial = () => {
+    if (!timerStarted) {
+      setTimerStarted(true);
+      // Start 5-minute countdown only when button is clicked
+      const timer = setInterval(() => {
+        setTrialTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setShowFreeTrialChat(false);
+            setShowPricing(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
     setShowFreeTrialChat(true);
     setTrialTimeRemaining(300); // Reset to 5 minutes
-    // Start 5-minute countdown
-    const timer = setInterval(() => {
-      setTrialTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setShowFreeTrialChat(false);
-          setShowPricing(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
   };
 
   const formatTime = (seconds: number) => {
@@ -168,16 +174,18 @@ const AssessmentSummary = () => {
   if (showFreeTrialChat) {
     return (
       <>
-        <div className="fixed top-4 right-4 z-50">
-          <Card className="bg-purple-600 text-white border-purple-500">
-            <CardContent className="pt-4 pb-4 px-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span className="text-sm font-medium">Trial: {formatTime(trialTimeRemaining)}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {timerStarted && (
+          <div className="fixed top-4 right-4 z-50">
+            <Card className="bg-purple-600 text-white border-purple-500">
+              <CardContent className="pt-4 pb-4 px-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span className="text-sm font-medium">Trial: {formatTime(trialTimeRemaining)}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         <ChatInterface 
           onClose={() => {
             setShowFreeTrialChat(false);
@@ -394,15 +402,9 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Two-column layout for desktop, stacked for mobile */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left side - spacer or additional content */}
-          <div className="space-y-6">
-            {/* This space can be used for additional content if needed */}
-          </div>
-
-          {/* Right side - Chat with AI Coach */}
-          <div className="space-y-6">
+        {/* Centered Chat with AI Coach Section */}
+        <div className="flex justify-center">
+          <div className="w-full max-w-lg">
             <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden">
               <CardContent className="pt-8 pb-8 text-center space-y-6">
                 <div className="flex justify-center">
