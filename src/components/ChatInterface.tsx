@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -247,7 +246,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
             <Button
               onClick={() => setChatMode('voice')}
-              className="w-full h-20 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white flex flex-col items-center justify-center space-y-2"
+              className="w-full h-20 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white flex flex-col items-center justify-center space-y-2"
             >
               <Headphones className="h-6 w-6" />
               <span className="font-semibold">Talk Only</span>
