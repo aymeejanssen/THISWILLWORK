@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
@@ -18,7 +19,7 @@ const Index = () => {
     {
       name: "Sarah M.",
       location: "New York, USA",
-      review: "I used to cry myself to sleep every night, feeling completely alone with my anxiety. MindEase became my lifeline, having someone to talk to at 3 AM when the world felt too heavy changed everything for me.",
+      review: "I often would feel anxious at night and overthink and cry myself to sleep, feeling completely alone with my worries. MindEase became my lifeline, having someone to talk to at 3 AM when the world felt too heavy changed everything for me.",
       rating: 5
     },
     {
