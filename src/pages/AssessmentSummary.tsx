@@ -259,10 +259,10 @@ const AssessmentSummary = () => {
         {/* Full Width Chat with AI Coach Section - New Layout */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
           <CardContent className="pt-4 pb-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Side - Button and Text */}
-              <div className="text-center lg:text-left space-y-3">
-                <div className="flex justify-center lg:justify-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Side - Click Button and Text */}
+              <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg text-center space-y-4">
+                <div className="flex justify-center">
                   <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-20 h-20 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-lg font-bold" size="lg">
                     Click
                     <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
@@ -273,39 +273,39 @@ const AssessmentSummary = () => {
                 
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Chat with Your AI Wellness Coach</h3>
-                  <p className="text-gray-700 leading-relaxed text-sm">
+                  <p className="text-gray-700 leading-tight text-sm">
                     Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges.
                   </p>
-                  <p className="text-gray-700 leading-relaxed text-sm mt-1">
+                  <p className="text-gray-700 leading-tight text-sm mt-1">
                     Click the button above to begin - no commitment needed!
                   </p>
                 </div>
               </div>
               
               {/* Right Side - Features */}
-              <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-purple-200 shadow-lg">
-                <div className="space-y-3 text-xs text-gray-700">
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
+                <div className="space-y-4 text-sm text-gray-700">
                   <div className="flex items-start gap-3">
                     <div className="bg-green-100 p-1 rounded-full flex-shrink-0">
-                      <Shield className="h-3 w-3 text-green-600" />
+                      <Shield className="h-4 w-4 text-green-600" />
                     </div>
                     <span>Available 24/7 for panic attacks or anxiety</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="bg-blue-100 p-1 rounded-full flex-shrink-0">
-                      <Heart className="h-3 w-3 text-blue-600" />
+                      <Heart className="h-4 w-4 text-blue-600" />
                     </div>
                     <span>AI companion when you're feeling lonely</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="bg-purple-100 p-1 rounded-full flex-shrink-0">
-                      <Brain className="h-3 w-3 text-purple-600" />
+                      <Brain className="h-4 w-4 text-purple-600" />
                     </div>
                     <span>AI emotional education and awareness building</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="bg-pink-100 p-1 rounded-full flex-shrink-0">
-                      <Headphones className="h-3 w-3 text-pink-600" />
+                      <Headphones className="h-4 w-4 text-pink-600" />
                     </div>
                     <span>AI understanding of trauma responses</span>
                   </div>
