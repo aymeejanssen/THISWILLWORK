@@ -279,7 +279,9 @@ const AssessmentSummary = () => {
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Chat with Your AI Wellness Coach</h3>
               <p className="text-gray-700 leading-relaxed text-sm">
-                Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
+                Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges.
+              </p>
+              <p className="text-gray-700 leading-relaxed text-sm mt-1">
                 Click the button above to begin - no commitment needed!
               </p>
             </div>
