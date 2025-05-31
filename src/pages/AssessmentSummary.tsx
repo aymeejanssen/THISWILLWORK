@@ -259,7 +259,7 @@ const AssessmentSummary = () => {
         {/* Full Width Chat with AI Coach Section - New Layout */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
           <CardContent className="pt-4 pb-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-2 gap-8">
               {/* Left Side - Click Button and Text */}
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg text-center space-y-4">
                 <div className="flex justify-center">
