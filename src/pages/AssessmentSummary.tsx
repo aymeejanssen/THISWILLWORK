@@ -7,7 +7,6 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
-
 interface AIInsight {
   title: string;
   description: string;
@@ -109,8 +108,7 @@ const AssessmentSummary = () => {
     sessions: string;
     features: string[];
     isPopular?: boolean;
-  }) => (
-    <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
+  }) => <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
       {isPopular && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
           <Badge className="bg-purple-600 text-white px-4 py-1">Most Popular</Badge>
         </div>}
@@ -130,8 +128,7 @@ const AssessmentSummary = () => {
           Choose Plan
         </Button>
       </CardContent>
-    </Card>
-  );
+    </Card>;
   if (isLoading) {
     return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[60vh]">
@@ -245,8 +242,7 @@ const AssessmentSummary = () => {
         </div>
       </div>;
   }
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+  return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header Section */}
         <div className="text-center space-y-2">
@@ -254,7 +250,7 @@ const AssessmentSummary = () => {
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm font-medium">Assessment Complete</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">Your AI Journey Starts Here</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
             You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
           </p>
@@ -264,11 +260,7 @@ const AssessmentSummary = () => {
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
           <CardContent className="pt-4 pb-4 text-center space-y-3">
             <div className="flex justify-center">
-              <Button 
-                onClick={handleStartFreeTrial} 
-                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-20 h-20 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-lg font-bold" 
-                size="lg"
-              >
+              <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-20 h-20 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-lg font-bold" size="lg">
                 Click
                 <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
               </Button>
@@ -318,8 +310,7 @@ const AssessmentSummary = () => {
         </Card>
 
         {/* AI Insights Section */}
-        {aiInsights && aiInsights.insights.length > 0 && (
-          <div className="space-y-6">
+        {aiInsights && aiInsights.insights.length > 0 && <div className="space-y-6">
             <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardHeader>
                 <CardTitle className="text-3xl text-gray-900 mb-2">Summarizing your answers</CardTitle>
@@ -378,8 +369,7 @@ const AssessmentSummary = () => {
                   </div>
                 </CardContent>
               </Card>}
-          </div>
-        )}
+          </div>}
 
         {/* Pricing Cards Section */}
         <div className="space-y-6">
@@ -408,8 +398,6 @@ const AssessmentSummary = () => {
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AssessmentSummary;
