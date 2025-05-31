@@ -322,7 +322,7 @@ const AssessmentSummary = () => {
           <div className="space-y-6">
             <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardHeader>
-                <CardTitle className="text-3xl text-gray-900 mb-2">Summarizing your {primaryConcern}</CardTitle>
+                <CardTitle className="text-3xl text-gray-900 mb-2">Summarizing your answers</CardTitle>
                 <p className="text-gray-600 text-lg">Our AI analysis has identified these key insights about your situation</p>
               </CardHeader>
               <CardContent>
