@@ -7,6 +7,7 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
+
 interface AIInsight {
   title: string;
   description: string;
@@ -262,6 +263,13 @@ const AssessmentSummary = () => {
             <div className="grid grid-cols-2 gap-8">
               {/* Left Side - Click Button and Text */}
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg text-center space-y-4">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Chat with Your AI Wellness Coach</h3>
+                  <p className="text-gray-700 leading-tight text-sm mb-4">
+                    Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges.
+                  </p>
+                </div>
+                
                 <div className="flex justify-center">
                   <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-28 h-28 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-xl font-bold" size="lg">
                     Click
@@ -270,14 +278,6 @@ const AssessmentSummary = () => {
                 </div>
                 
                 <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
-                
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Chat with Your AI Wellness Coach</h3>
-                  <p className="text-gray-700 leading-tight text-sm">
-                    Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges.
-                  </p>
-                  
-                </div>
               </div>
               
               {/* Right Side - Features */}
@@ -317,7 +317,8 @@ const AssessmentSummary = () => {
         </Card>
 
         {/* AI Insights Section */}
-        {aiInsights && aiInsights.insights.length > 0 && <div className="space-y-6">
+        {aiInsights && aiInsights.insights.length > 0 && (
+          <div className="space-y-6">
             <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardHeader>
                 <CardTitle className="text-3xl text-gray-900 mb-2 text-center">Summarizing your answers</CardTitle>
@@ -376,7 +377,8 @@ const AssessmentSummary = () => {
                   </div>
                 </CardContent>
               </Card>}
-          </div>}
+          </div>
+        )}
 
         {/* Pricing Cards Section */}
         <div className="space-y-6">
