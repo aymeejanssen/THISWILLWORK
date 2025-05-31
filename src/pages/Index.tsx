@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
@@ -74,7 +72,7 @@ const Index = () => {
             <Button 
               onClick={handleBeginJourney}
               size="lg"
-              className="bg-white text-wellness-purple hover:bg-white/90 px-16 py-8 text-2xl font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group transform hover:scale-105 animate-pulse border-4 border-white/30"
+              className="bg-white text-wellness-purple hover:bg-white/90 px-16 py-8 text-2xl font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group transform hover:scale-105 border-4 border-white/30"
             >
               Begin My Journey
               <ArrowRight className="ml-3 h-8 w-8 group-hover:translate-x-2 transition-transform" />
@@ -193,4 +191,3 @@ const Index = () => {
 };
 
 export default Index;
-
