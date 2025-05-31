@@ -19,13 +19,13 @@ const Index = () => {
     {
       name: "Sarah M.",
       location: "New York, USA",
-      review: "I used to cry myself to sleep every night, feeling completely alone with my anxiety. MindEase became my lifeline - having someone to talk to at 3 AM when the world felt too heavy changed everything for me.",
+      review: "I used to cry myself to sleep every night, feeling completely alone with my anxiety. MindEase became my lifeline, having someone to talk to at 3 AM when the world felt too heavy changed everything for me.",
       rating: 5
     },
     {
       name: "Ahmed K.",
       location: "Dubai, UAE",
-      review: "As someone who struggled to find culturally-aware mental health support in my language, MindEase was a game changer. It understands my background and helps me work through challenges in a way that feels authentic.",
+      review: "As someone who struggled to find culturally aware mental health support in my language, MindEase was a game changer. It understands my background and helps me work through challenges in a way that feels authentic.",
       rating: 5
     },
     {
