@@ -333,10 +333,10 @@ const AssessmentSummary = () => {
                           <Heart className="h-5 w-5 text-purple-600" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-xl text-purple-800 mb-3">{insight.title}</h4>
-                          <div className="text-gray-700 leading-relaxed mb-4 space-y-2">
-                            <p className="mb-3">{insight.description}</p>
-                            <ul className="space-y-2 text-sm">
+                          <h4 className="font-bold text-xl text-purple-800 mb-2">{insight.title}</h4>
+                          <div className="text-gray-700 leading-relaxed mb-3 space-y-1">
+                            <p className="mb-2">{insight.description}</p>
+                            <ul className="space-y-1 text-sm">
                               <li className="flex items-start gap-2">
                                 <span className="text-purple-600 mt-1">•</span>
                                 <span>This pattern is commonly seen in individuals with similar experiences</span>
