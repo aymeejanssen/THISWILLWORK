@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +48,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [selectedVoice, setSelectedVoice] = useState<string>('nova');
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
+  const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
@@ -57,6 +57,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const finalTranscriptRef = useRef<string>('');
   const isRestartingRecognitionRef = useRef<boolean>(false);
   const currentAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
 
   // OpenAI TTS voices - 5 best options
   const openAIVoices = [
@@ -66,6 +67,33 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     { id: 'onyx', name: 'Onyx (Deep)', description: 'Deep, calming male voice' },
     { id: 'shimmer', name: 'Shimmer (Bright)', description: 'Bright, encouraging female voice' }
   ];
+
+  // Request microphone permission
+  const requestMicrophonePermission = async () => {
+    try {
+      console.log('Requesting microphone permission...');
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          sampleRate: 44100,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      
+      mediaStreamRef.current = stream;
+      setMicrophonePermission('granted');
+      console.log('Microphone permission granted');
+      toast.success("Microphone access granted!");
+      return true;
+    } catch (error) {
+      console.error('Microphone permission denied:', error);
+      setMicrophonePermission('denied');
+      toast.error("Microphone access is required for voice conversation. Please allow microphone access and try again.");
+      return false;
+    }
+  };
 
   const forceStopAssistantSpeaking = useCallback(() => {
     console.log('Force stopping assistant speaking...');
@@ -81,12 +109,13 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   }, []);
 
   const restartSpeechRecognition = useCallback(() => {
-    if (!conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || isProcessingResponse) {
+    if (!conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || isProcessingResponse || microphonePermission !== 'granted') {
       console.log('Not restarting recognition - conditions not met:', {
         conversationStarted,
         isMicrophoneEnabled,
         isAssistantSpeaking,
-        isProcessingResponse
+        isProcessingResponse,
+        microphonePermission
       });
       return;
     }
@@ -96,7 +125,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     
     setTimeout(() => {
       try {
-        if (recognitionRef.current && conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking) {
+        if (recognitionRef.current && conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && microphonePermission === 'granted') {
           recognitionRef.current.start();
           console.log('Speech recognition restarted successfully');
         }
@@ -105,7 +134,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       }
       isRestartingRecognitionRef.current = false;
     }, 500);
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse]);
+  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
 
   const generateAIResponse = async (userMessage: string) => {
     if (!userMessage.trim() || isProcessingResponse) return;
@@ -164,7 +193,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   };
 
   const startSpeechRecognition = useCallback(() => {
-    if (!recognitionRef.current || !conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || isRestartingRecognitionRef.current) {
+    if (!recognitionRef.current || !conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || isRestartingRecognitionRef.current || microphonePermission !== 'granted') {
       return;
     }
 
@@ -174,7 +203,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     } catch (error) {
       console.log('Recognition already running or error:', error);
     }
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking]);
+  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, microphonePermission]);
 
   const stopSpeechRecognition = useCallback(() => {
     if (recognitionRef.current) {
@@ -249,7 +278,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       setIsUserSpeaking(false);
       
       // Only restart if conversation is ongoing, mic is enabled, and AI is not speaking
-      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse) {
+      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
         console.log('Attempting to restart recognition after natural end...');
         restartSpeechRecognition();
       }
@@ -259,7 +288,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       console.error("Speech recognition error:", event.error);
       setIsUserSpeaking(false);
       
-      if (event.error !== 'aborted' && event.error !== 'no-speech') {
+      if (event.error === 'not-allowed') {
+        setMicrophonePermission('denied');
+        toast.error("Microphone access denied. Please allow microphone access in your browser settings.");
+      } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
         toast.error(`Speech recognition error: ${event.error}`);
       }
     };
@@ -274,13 +306,16 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       if (silenceTimeoutRef.current) {
         clearTimeout(silenceTimeoutRef.current);
       }
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      }
       forceStopAssistantSpeaking();
     };
-  }, [userProfile?.preferredLanguage, startSpeechRecognition, stopSpeechRecognition, restartSpeechRecognition, forceStopAssistantSpeaking]);
+  }, [userProfile?.preferredLanguage, startSpeechRecognition, stopSpeechRecognition, restartSpeechRecognition, forceStopAssistantSpeaking, microphonePermission]);
 
   const toggleMicrophone = () => {
     setIsMicrophoneEnabled(!isMicrophoneEnabled);
-    if (!isMicrophoneEnabled && conversationStarted) {
+    if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
       }, 200);
@@ -303,6 +338,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   };
 
   const startConversation = async () => {
+    // First request microphone permission
+    if (microphonePermission !== 'granted') {
+      const hasPermission = await requestMicrophonePermission();
+      if (!hasPermission) {
+        return;
+      }
+    }
+
     setIsConnecting(true);
     // Simulate connection delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -320,7 +363,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
 
     // Start speech recognition
-    if (isMicrophoneEnabled) {
+    if (isMicrophoneEnabled && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
         toast.success("Voice recognition started. Start speaking!");
@@ -340,6 +383,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
+    }
+    
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current = null;
     }
     
     finalTranscriptRef.current = '';
@@ -374,7 +422,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         console.error('Error generating speech:', error);
         setIsAssistantSpeaking(false);
         // Restart recognition even if speech fails
-        if (conversationStarted && isMicrophoneEnabled) {
+        if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
           setTimeout(() => restartSpeechRecognition(), 500);
         }
         return;
@@ -414,7 +462,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           
           // Force a small delay then restart recognition
           setTimeout(() => {
-            if (conversationStarted && isMicrophoneEnabled && !isProcessingResponse) {
+            if (conversationStarted && isMicrophoneEnabled && !isProcessingResponse && microphonePermission === 'granted') {
               console.log('Restarting recognition after AI speech ended');
               restartSpeechRecognition();
             }
@@ -427,7 +475,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         console.error('No audio content received');
         setIsAssistantSpeaking(false);
         // Restart recognition even if no audio
-        if (conversationStarted && isMicrophoneEnabled) {
+        if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
           setTimeout(() => restartSpeechRecognition(), 500);
         }
       }
@@ -435,7 +483,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       console.error('Error with speech synthesis:', error);
       setIsAssistantSpeaking(false);
       // Restart recognition on error
-      if (conversationStarted && isMicrophoneEnabled) {
+      if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
         setTimeout(() => restartSpeechRecognition(), 500);
       }
     }
@@ -485,6 +533,15 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         <CardContent className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-purple-50/30 to-teal-50/30">
           {!conversationStarted ? (
             <div className="flex flex-col items-center justify-center h-full space-y-6">
+              {/* Microphone permission status */}
+              {microphonePermission === 'denied' && (
+                <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
+                  <p className="text-red-700 text-sm text-center">
+                    Microphone access is required for voice conversation. Please enable microphone access in your browser settings and refresh the page.
+                  </p>
+                </div>
+              )}
+
               {/* Voice Selection */}
               <div className="mb-6 w-full max-w-sm">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -519,7 +576,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               <Button 
                 onClick={startConversation}
                 className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 text-xl font-bold"
-                disabled={isConnecting}
+                disabled={isConnecting || microphonePermission === 'denied'}
               >
                 {isConnecting ? (
                   <div className="flex flex-col items-center">
@@ -530,7 +587,12 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   "Start"
                 )}
               </Button>
-              <p className="text-gray-600 text-lg text-center">Tap to begin your voice conversation</p>
+              <p className="text-gray-600 text-lg text-center">
+                {microphonePermission === 'denied' 
+                  ? "Please allow microphone access to start" 
+                  : "Tap to begin your voice conversation"
+                }
+              </p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-between h-full w-full">
@@ -571,10 +633,17 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                       </div>
                     )}
 
-                    {!isUserSpeaking && !isAssistantSpeaking && !isProcessingResponse && isMicrophoneEnabled && (
+                    {!isUserSpeaking && !isAssistantSpeaking && !isProcessingResponse && isMicrophoneEnabled && microphonePermission === 'granted' && (
                       <div className="flex items-center justify-center">
                         <div className="h-3 w-3 bg-gray-400 rounded-full mr-2"></div>
                         <span className="text-sm text-gray-600">Ready to listen...</span>
+                      </div>
+                    )}
+
+                    {microphonePermission === 'denied' && (
+                      <div className="flex items-center justify-center">
+                        <div className="h-3 w-3 bg-red-500 rounded-full mr-2"></div>
+                        <span className="text-sm text-red-600">Microphone access denied</span>
                       </div>
                     )}
                   </div>
@@ -588,6 +657,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   size="icon"
                   onClick={toggleMicrophone}
                   className={`text-gray-700 hover:bg-gray-100 ${!isMicrophoneEnabled ? 'bg-red-100 text-red-600' : ''}`}
+                  disabled={microphonePermission === 'denied'}
                 >
                   {isMicrophoneEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
                 </Button>
@@ -653,6 +723,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 variant="outline"
                 size="sm"
                 onClick={toggleMicrophone}
+                disabled={microphonePermission === 'denied'}
               >
                 {isMicrophoneEnabled ? "Disable" : "Enable"}
               </Button>
@@ -667,6 +738,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 {isSpeakerEnabled ? "Disable" : "Enable"}
               </Button>
             </div>
+
+            {microphonePermission === 'denied' && (
+              <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded">
+                <p className="text-yellow-800 text-sm">
+                  Microphone access was denied. Please refresh the page and allow microphone access when prompted.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </Card>
