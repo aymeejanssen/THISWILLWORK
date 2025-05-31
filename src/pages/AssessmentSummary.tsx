@@ -283,8 +283,8 @@ const AssessmentSummary = () => {
               </div>
               
               {/* Right Side - Features */}
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
-                <div className="space-y-4 text-sm text-gray-700">
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg flex items-center">
+                <div className="space-y-4 text-sm text-gray-700 w-full">
                   <div className="flex items-start gap-3">
                     <div className="bg-green-100 p-1 rounded-full flex-shrink-0">
                       <Shield className="h-4 w-4 text-green-600" />
