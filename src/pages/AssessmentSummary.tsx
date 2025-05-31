@@ -7,6 +7,7 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
+
 interface AIInsight {
   title: string;
   description: string;
@@ -184,7 +185,7 @@ const AssessmentSummary = () => {
   if (showPricing) {
     return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
         <div className="max-w-6xl mx-auto space-y-8">
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-2">
             <Button variant="ghost" onClick={() => setShowPricing(false)} className="mb-4">
               ← Back to Summary
             </Button>
@@ -246,10 +247,10 @@ const AssessmentSummary = () => {
   }
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header Section */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-4">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-2">
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm font-medium">Assessment Complete</span>
           </div>
@@ -261,11 +262,11 @@ const AssessmentSummary = () => {
 
         {/* Full Width Chat with AI Coach Section - Compressed */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
-          <CardContent className="pt-6 pb-6 text-center space-y-4">
+          <CardContent className="pt-4 pb-4 text-center space-y-3">
             <div className="flex justify-center">
               <Button 
                 onClick={handleStartFreeTrial} 
-                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-28 h-28 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-xl font-bold" 
+                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-20 h-20 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-lg font-bold" 
                 size="lg"
               >
                 Click
@@ -276,36 +277,36 @@ const AssessmentSummary = () => {
             <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
             
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Chat with Your AI Wellness Coach</h3>
-              <p className="text-gray-700 leading-relaxed text-base">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Chat with Your AI Wellness Coach</h3>
+              <p className="text-gray-700 leading-relaxed text-sm">
                 Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
                 Click the button above to begin - no commitment needed!
               </p>
             </div>
             
-            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-purple-200 shadow-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm text-gray-700">
-                <div className="flex items-center gap-3">
+            <div className="bg-white/80 backdrop-blur-sm p-3 rounded-xl border border-purple-200 shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-xs text-gray-700">
+                <div className="flex items-center gap-2">
                   <div className="bg-green-100 p-1 rounded-full">
-                    <Shield className="h-4 w-4 text-green-600" />
+                    <Shield className="h-3 w-3 text-green-600" />
                   </div>
                   <span>Available 24/7 for panic attacks or anxiety</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className="bg-blue-100 p-1 rounded-full">
-                    <Heart className="h-4 w-4 text-blue-600" />
+                    <Heart className="h-3 w-3 text-blue-600" />
                   </div>
                   <span>AI companion when you're feeling lonely</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className="bg-purple-100 p-1 rounded-full">
-                    <Brain className="h-4 w-4 text-purple-600" />
+                    <Brain className="h-3 w-3 text-purple-600" />
                   </div>
                   <span>AI emotional education and awareness building</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className="bg-pink-100 p-1 rounded-full">
-                    <Headphones className="h-4 w-4 text-pink-600" />
+                    <Headphones className="h-3 w-3 text-pink-600" />
                   </div>
                   <span>AI understanding of trauma responses</span>
                 </div>
@@ -379,8 +380,8 @@ const AssessmentSummary = () => {
         )}
 
         {/* Pricing Cards Section */}
-        <div className="space-y-8">
-          <div className="text-center space-y-4">
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
             <h2 className="text-3xl font-bold text-gray-900">Choose Your AI Coaching Plan</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Start your personalized {primaryConcern} sessions with your AI wellness coach
