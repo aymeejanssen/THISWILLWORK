@@ -7,28 +7,26 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
-
 interface AIInsight {
   title: string;
   description: string;
   reframe: string;
 }
-
 interface AIActionStep {
   title: string;
   description: string;
   action: string;
 }
-
 interface AIResponse {
   insights: AIInsight[];
   actionSteps: AIActionStep[];
   supportiveMessage: string;
 }
-
 const AssessmentSummary = () => {
   const navigate = useNavigate();
-  const { responses } = useAssessment();
+  const {
+    responses
+  } = useAssessment();
   const [aiInsights, setAiInsights] = useState<AIResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,21 +37,23 @@ const AssessmentSummary = () => {
 
   // Get the primary concern from responses
   const primaryConcern = responses.primaryConcern || 'general wellness';
-
   useEffect(() => {
     const generateInsights = async () => {
       try {
         console.log('Calling AI function with responses:', responses);
-        
-        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-          body: { responses, primaryConcern }
+        const {
+          data,
+          error
+        } = await supabase.functions.invoke('generate-assessment-insights', {
+          body: {
+            responses,
+            primaryConcern
+          }
         });
-
         if (error) {
           console.error('Supabase function error:', error);
           throw error;
         }
-
         console.log('AI insights generated:', data);
         setAiInsights(data);
       } catch (err) {
@@ -63,24 +63,21 @@ const AssessmentSummary = () => {
         setIsLoading(false);
       }
     };
-
     if (Object.keys(responses).length > 0) {
       generateInsights();
     } else {
       setIsLoading(false);
     }
   }, [responses, primaryConcern]);
-
   const handleStartSession = () => {
     setShowPricing(true);
   };
-
   const handleStartFreeTrial = () => {
     if (!timerStarted) {
       setTimerStarted(true);
       // Start 5-minute countdown only when button is clicked
       const timer = setInterval(() => {
-        setTrialTimeRemaining((prev) => {
+        setTrialTimeRemaining(prev => {
           if (prev <= 1) {
             clearInterval(timer);
             setShowFreeTrialChat(false);
@@ -91,30 +88,30 @@ const AssessmentSummary = () => {
         });
       }, 1000);
     }
-    
     setShowFreeTrialChat(true);
     setTrialTimeRemaining(300); // Reset to 5 minutes
   };
-
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
-
-  const PricingCard = ({ title, price, sessions, features, isPopular = false }: {
+  const PricingCard = ({
+    title,
+    price,
+    sessions,
+    features,
+    isPopular = false
+  }: {
     title: string;
     price: string;
     sessions: string;
     features: string[];
     isPopular?: boolean;
-  }) => (
-    <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
-      {isPopular && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+  }) => <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
+      {isPopular && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
           <Badge className="bg-purple-600 text-white px-4 py-1">Most Popular</Badge>
-        </div>
-      )}
+        </div>}
       <CardHeader className="text-center">
         <CardTitle className="text-xl">{title}</CardTitle>
         <div className="text-3xl font-bold text-purple-600">{price}</div>
@@ -122,23 +119,18 @@ const AssessmentSummary = () => {
       </CardHeader>
       <CardContent className="flex flex-col flex-grow">
         <div className="space-y-3 flex-grow">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-start gap-2">
+          {features.map((feature, index) => <div key={index} className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
               <span className="text-sm text-gray-700">{feature}</span>
-            </div>
-          ))}
+            </div>)}
         </div>
         <Button className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
           Choose Plan
         </Button>
       </CardContent>
-    </Card>
-  );
-
+    </Card>;
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+    return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[60vh]">
           <Card className="shadow-lg p-8 text-center">
             <CardContent>
@@ -148,13 +140,10 @@ const AssessmentSummary = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+    return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
         <div className="max-w-4xl mx-auto">
           <Card className="shadow-lg border-red-200">
             <CardContent className="pt-6 text-center">
@@ -166,15 +155,11 @@ const AssessmentSummary = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (showFreeTrialChat) {
-    return (
-      <>
-        {timerStarted && (
-          <div className="fixed top-4 right-4 z-50">
+    return <>
+        {timerStarted && <div className="fixed top-4 right-4 z-50">
             <Card className="bg-purple-600 text-white border-purple-500">
               <CardContent className="pt-4 pb-4 px-4">
                 <div className="flex items-center gap-2">
@@ -183,33 +168,22 @@ const AssessmentSummary = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
-        <ChatInterface 
-          onClose={() => {
-            setShowFreeTrialChat(false);
-            setShowPricing(true);
-          }}
-          userProfile={{ 
-            name: 'Trial User',
-            currentStruggles: [primaryConcern],
-            preferredLanguage: 'English'
-          }}
-        />
-      </>
-    );
+          </div>}
+        <ChatInterface onClose={() => {
+        setShowFreeTrialChat(false);
+        setShowPricing(true);
+      }} userProfile={{
+        name: 'Trial User',
+        currentStruggles: [primaryConcern],
+        preferredLanguage: 'English'
+      }} />
+      </>;
   }
-
   if (showPricing) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+    return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => setShowPricing(false)}
-              className="mb-4"
-            >
+            <Button variant="ghost" onClick={() => setShowPricing(false)} className="mb-4">
               ← Back to Summary
             </Button>
             <h1 className="text-4xl font-bold text-gray-900">Choose Your AI Coaching Plan</h1>
@@ -219,57 +193,11 @@ const AssessmentSummary = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <PricingCard
-              title="Weekly Support"
-              price="99 AED"
-              sessions="4 sessions per month"
-              features={[
-                "Once a week AI sessions",
-                "30-minute conversations",
-                "Flexible scheduling",
-                "Personal growth tracking",
-                "Basic emotional support",
-                "Stress management techniques",
-                "Goal setting guidance"
-              ]}
-            />
+            <PricingCard title="Weekly Support" price="99 AED" sessions="4 sessions per month" features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]} />
             
-            <PricingCard
-              title="Regular Care"
-              price="219 AED"
-              sessions="3 times per week"
-              features={[
-                "12 AI sessions per month",
-                "30-minute sessions",
-                "Any time, any day",
-                "Faster progress tracking",
-                "Priority AI support",
-                "Advanced coping strategies",
-                "Relationship guidance",
-                "Trauma-informed approach",
-                "Mood pattern analysis"
-              ]}
-            />
+            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} />
             
-            <PricingCard
-              title="Unlimited Support"
-              price="499 AED"
-              sessions="Unlimited access"
-              features={[
-                "24/7 AI availability",
-                "Unlimited conversations",
-                "Always there when you need support",
-                "Immediate anxiety relief",
-                "AI companion during lonely moments",
-                "Timeless sessions",
-                "Crisis intervention support",
-                "Personalized AI coaching plans",
-                "Progress insights & reports",
-                "Advanced emotional coaching",
-                "Family relationship support"
-              ]}
-              isPopular={true}
-            />
+            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} isPopular={true} />
           </div>
 
           <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
@@ -312,12 +240,9 @@ const AssessmentSummary = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+  return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-4">
@@ -333,13 +258,9 @@ const AssessmentSummary = () => {
 
         {/* Full Width Chat with AI Coach Section - Moved to Top */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
-          <CardContent className="pt-8 pb-8 text-center space-y-6">
+          <CardContent className="pt-8 pb-8 text-center space-y-6 py-0">
             <div className="flex justify-center">
-              <Button 
-                onClick={handleStartFreeTrial}
-                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-2xl font-bold"
-                size="lg"
-              >
+              <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-2xl font-bold" size="lg">
                 Click
                 <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
               </Button>
@@ -387,8 +308,7 @@ const AssessmentSummary = () => {
         </Card>
 
         {/* AI Insights Section */}
-        {aiInsights && aiInsights.insights.length > 0 && (
-          <div className="space-y-6">
+        {aiInsights && aiInsights.insights.length > 0 && <div className="space-y-6">
             <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardHeader>
                 <CardTitle className="text-3xl text-gray-900 mb-2">What We See In You</CardTitle>
@@ -396,8 +316,7 @@ const AssessmentSummary = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {aiInsights.insights.map((insight, index) => (
-                    <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
+                  {aiInsights.insights.map((insight, index) => <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
                       <div className="flex items-start gap-4">
                         <div className="p-3 bg-purple-100 rounded-full">
                           <Heart className="h-5 w-5 text-purple-600" />
@@ -427,34 +346,28 @@ const AssessmentSummary = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </CardContent>
             </Card>
 
             {/* Your First Steps - AI Action Steps */}
-            {aiInsights.actionSteps.length > 0 && (
-              <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+            {aiInsights.actionSteps.length > 0 && <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
                 <CardHeader>
                   <CardTitle className="text-xl text-blue-800">Your First Steps</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {aiInsights.actionSteps.map((step, index) => (
-                      <div key={index} className="flex items-start gap-3">
+                    {aiInsights.actionSteps.map((step, index) => <div key={index} className="flex items-start gap-3">
                         <div className="p-1 bg-blue-100 rounded-full">
                           <ArrowRight className="h-3 w-3 text-blue-600" />
                         </div>
                         <p className="text-gray-700 text-sm">• {step.action}</p>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+              </Card>}
+          </div>}
 
         {/* Pricing Cards Section */}
         <div className="space-y-8">
@@ -466,57 +379,11 @@ const AssessmentSummary = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <PricingCard
-              title="Weekly Support"
-              price="99 AED"
-              sessions="4 sessions per month"
-              features={[
-                "Once a week AI sessions",
-                "30-minute conversations",
-                "Flexible scheduling",
-                "Personal growth tracking",
-                "Basic emotional support",
-                "Stress management techniques",
-                "Goal setting guidance"
-              ]}
-            />
+            <PricingCard title="Weekly Support" price="99 AED" sessions="4 sessions per month" features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]} />
             
-            <PricingCard
-              title="Regular Care"
-              price="219 AED"
-              sessions="3 times per week"
-              features={[
-                "12 AI sessions per month",
-                "30-minute sessions",
-                "Any time, any day",
-                "Faster progress tracking",
-                "Priority AI support",
-                "Advanced coping strategies",
-                "Relationship guidance",
-                "Trauma-informed approach",
-                "Mood pattern analysis"
-              ]}
-            />
+            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} />
             
-            <PricingCard
-              title="Unlimited Support"
-              price="499 AED"
-              sessions="Unlimited access"
-              features={[
-                "24/7 AI availability",
-                "Unlimited conversations",
-                "Always there when you need support",
-                "Immediate anxiety relief",
-                "AI companion during lonely moments",
-                "Timeless sessions",
-                "Crisis intervention support",
-                "Personalized AI coaching plans",
-                "Progress insights & reports",
-                "Advanced emotional coaching",
-                "Family relationship support"
-              ]}
-              isPopular={true}
-            />
+            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} isPopular={true} />
           </div>
         </div>
 
@@ -529,8 +396,6 @@ const AssessmentSummary = () => {
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AssessmentSummary;
