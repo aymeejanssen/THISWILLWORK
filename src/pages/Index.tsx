@@ -37,10 +37,10 @@ const Index = () => {
   ];
 
   const countryStats = [
-    { flag: "🇺🇸", users: "2,847", country: "USA" },
-    { flag: "🇬🇧", users: "1,923", country: "UK" },
-    { flag: "🇨🇦", users: "1,456", country: "Canada" },
-    { flag: "🇦🇺", users: "1,082", country: "Australia" }
+    { flag: "🇺🇸", users: "34k+", country: "USA" },
+    { flag: "🇦🇪", users: "28k+", country: "UAE" },
+    { flag: "🇳🇱", users: "25k+", country: "Netherlands" },
+    { flag: "🇪🇸", users: "31k+", country: "Spain" }
   ];
 
   return (
