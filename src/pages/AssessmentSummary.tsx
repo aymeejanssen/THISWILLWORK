@@ -264,10 +264,10 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Full Width Chat with AI Coach Section - New Layout */}
+        {/* Full Width Chat with AI Coach Section - Updated Layout */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
           <CardContent className="pt-4 pb-4">
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Side - Click Button and Text */}
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg text-center space-y-4">
                 <div>
@@ -287,9 +287,9 @@ const AssessmentSummary = () => {
                 <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
               </div>
               
-              {/* Right Side - Features */}
+              {/* Right Side - Benefits */}
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg flex flex-col">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 text-left">Benefits of MindEase support</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4 text-left">Benefits of MindEase support</h3>
                 <div className="flex-1 flex items-center">
                   <div className="space-y-4 text-sm text-gray-700 w-full">
                     <div className="flex items-start gap-3">
