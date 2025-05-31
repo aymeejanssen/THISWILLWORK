@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +20,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [selectedVoice, setSelectedVoice] = useState<string>('nova');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   // OpenAI TTS voices - 5 best options
   const openAIVoices = [
@@ -61,7 +62,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     "Those doubts can be so loud, can't they? Like a voice that just won't quiet down. But you know what? You showed up here today, and that tells me something important about your strength. What's that voice been telling you?"
   ];
 
-  // Initialize speech recognition
+  // Initialize speech recognition and audio context
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
@@ -91,6 +92,11 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       };
     }
 
+    // Initialize audio context
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext();
+    }
+
     // Speak the initial greeting if there's a greeting
     if (initialGreeting && chatMode === 'text') {
       setTimeout(() => {
@@ -102,9 +108,8 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current = null;
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
       }
     };
   }, [chatMode]);
@@ -116,12 +121,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       setIsSpeaking(true);
       console.log('Generating speech for:', text.substring(0, 50) + '...');
 
-      // Stop any current audio
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current = null;
-      }
-
+      // Use OpenAI TTS for much more natural voice
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text, 
@@ -136,29 +136,29 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       }
 
       if (data?.audioContent) {
-        // Create audio from base64
-        const audioBlob = new Blob([
-          Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))
-        ], { type: 'audio/mp3' });
+        // Initialize audio context if needed
+        if (!audioContextRef.current) {
+          audioContextRef.current = new AudioContext();
+        }
+
+        // Decode base64 audio
+        const binaryString = atob(data.audioContent);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // Decode and play audio
+        const audioBuffer = await audioContextRef.current.decodeAudioData(bytes.buffer);
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContextRef.current.destination);
         
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        currentAudioRef.current = audio;
-
-        audio.onended = () => {
+        source.onended = () => {
           setIsSpeaking(false);
-          URL.revokeObjectURL(audioUrl);
-          currentAudioRef.current = null;
         };
-
-        audio.onerror = () => {
-          console.error('Audio playback error');
-          setIsSpeaking(false);
-          URL.revokeObjectURL(audioUrl);
-          currentAudioRef.current = null;
-        };
-
-        await audio.play();
+        
+        source.start(0);
       } else {
         setIsSpeaking(false);
       }
@@ -210,7 +210,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       };
       setMessages(prev => [...prev, aiResponse]);
       
-      // Speak the AI response
+      // Speak the AI response using OpenAI TTS
       setTimeout(() => {
         speakText(randomResponse);
       }, 500);
@@ -272,7 +272,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     );
   }
 
-  // Text chat mode (existing functionality)
+  // Text chat mode with OpenAI TTS
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl h-[600px] flex flex-col">
@@ -280,7 +280,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-6 w-6" />
-              {userProfile?.name ? `MindEase & ${userProfile.name}` : 'MindEase AI Companion'}
+              {userProfile?.name ? `Mynd Ease & ${userProfile.name}` : 'Mynd Ease AI Companion'}
             </CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
               <X className="h-5 w-5" />
@@ -317,6 +317,16 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
                 </div>
               </div>
             ))}
+            {isSpeaking && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-gray-200 shadow-sm px-4 py-3 rounded-2xl max-w-xs">
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="h-4 w-4 text-wellness-purple animate-pulse" />
+                    <span className="text-sm text-gray-600">Speaking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Input Area */}
