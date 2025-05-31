@@ -7,6 +7,7 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
+
 interface AIInsight {
   title: string;
   description: string;
@@ -22,6 +23,7 @@ interface AIResponse {
   actionSteps: AIActionStep[];
   supportiveMessage: string;
 }
+
 const AssessmentSummary = () => {
   const navigate = useNavigate();
   const {
@@ -281,31 +283,34 @@ const AssessmentSummary = () => {
               </div>
               
               {/* Right Side - Features */}
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg flex items-center">
-                <div className="space-y-4 text-sm text-gray-700 w-full">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-green-100 p-1 rounded-full flex-shrink-0">
-                      <Shield className="h-4 w-4 text-green-600" />
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg flex flex-col">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 text-center">What You'll Get</h3>
+                <div className="flex-1 flex items-center">
+                  <div className="space-y-4 text-sm text-gray-700 w-full">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 p-1 rounded-full flex-shrink-0">
+                        <Shield className="h-4 w-4 text-green-600" />
+                      </div>
+                      <span>Available 24/7 for panic attacks or anxiety</span>
                     </div>
-                    <span>Available 24/7 for panic attacks or anxiety</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-100 p-1 rounded-full flex-shrink-0">
-                      <Heart className="h-4 w-4 text-blue-600" />
+                    <div className="flex items-start gap-3">
+                      <div className="bg-blue-100 p-1 rounded-full flex-shrink-0">
+                        <Heart className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <span>AI companion when you're feeling lonely</span>
                     </div>
-                    <span>AI companion when you're feeling lonely</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-purple-100 p-1 rounded-full flex-shrink-0">
-                      <Brain className="h-4 w-4 text-purple-600" />
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 p-1 rounded-full flex-shrink-0">
+                        <Brain className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <span>AI emotional education and awareness building</span>
                     </div>
-                    <span>AI emotional education and awareness building</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-pink-100 p-1 rounded-full flex-shrink-0">
-                      <Headphones className="h-4 w-4 text-pink-600" />
+                    <div className="flex items-start gap-3">
+                      <div className="bg-pink-100 p-1 rounded-full flex-shrink-0">
+                        <Headphones className="h-4 w-4 text-pink-600" />
+                      </div>
+                      <span>AI understanding of trauma responses</span>
                     </div>
-                    <span>AI understanding of trauma responses</span>
                   </div>
                 </div>
               </div>
@@ -404,4 +409,5 @@ const AssessmentSummary = () => {
       </div>
     </div>;
 };
+
 export default AssessmentSummary;
