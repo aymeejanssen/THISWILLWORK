@@ -36,6 +36,13 @@ const Index = () => {
     }
   ];
 
+  const countryStats = [
+    { flag: "🇺🇸", users: "2,847", country: "USA" },
+    { flag: "🇬🇧", users: "1,923", country: "UK" },
+    { flag: "🇨🇦", users: "1,456", country: "Canada" },
+    { flag: "🇦🇺", users: "1,082", country: "Australia" }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-wellness-purple via-wellness-pink to-wellness-yellow">
       {/* Hero Section */}
@@ -164,11 +171,14 @@ const Index = () => {
         {/* Trust Indicators */}
         <div className="mt-20 text-center">
           <p className="text-white/80 mb-8">Trusted by people from over 50 countries</p>
-          <div className="flex justify-center items-center gap-8 opacity-60">
-            <div className="w-12 h-12 bg-white/20 rounded-lg"></div>
-            <div className="w-12 h-12 bg-white/20 rounded-lg"></div>
-            <div className="w-12 h-12 bg-white/20 rounded-lg"></div>
-            <div className="w-12 h-12 bg-white/20 rounded-lg"></div>
+          <div className="flex justify-center items-center gap-8">
+            {countryStats.map((stat, index) => (
+              <div key={index} className="flex flex-col items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg p-4 min-w-[80px]">
+                <div className="text-2xl">{stat.flag}</div>
+                <div className="text-white font-semibold text-sm">{stat.users}</div>
+                <div className="text-white/60 text-xs">{stat.country}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
