@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
@@ -68,19 +69,19 @@ const Index = () => {
             in your language, available 24/7 for judgment-free guidance and emotional healing.
           </p>
 
-          {/* CTA Button */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-fade-in">
+          {/* CTA Button - Made Much Larger and More Prominent */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 animate-fade-in">
             <Button 
               onClick={handleBeginJourney}
               size="lg"
-              className="bg-white text-wellness-purple hover:bg-white/90 px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+              className="bg-white text-wellness-purple hover:bg-white/90 px-16 py-8 text-2xl font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group transform hover:scale-105 animate-pulse border-4 border-white/30"
             >
               Begin My Journey
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="ml-3 h-8 w-8 group-hover:translate-x-2 transition-transform" />
             </Button>
             <div className="flex items-center gap-2 text-white/80">
-              <Shield className="h-4 w-4" />
-              <span className="text-sm">Private & Secure</span>
+              <Shield className="h-5 w-5" />
+              <span className="text-base">Private & Secure</span>
             </div>
           </div>
 
@@ -192,3 +193,4 @@ const Index = () => {
 };
 
 export default Index;
+
