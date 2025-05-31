@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
@@ -58,7 +57,7 @@ const Index = () => {
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
             Welcome to{" "}
             <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">
-              MindEase
+              Mynd
             </span>
           </h1>
           
