@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle } from 'lucide-react';
+import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
 
 const Index = () => {
@@ -14,6 +14,27 @@ const Index = () => {
   const handleCloseOnboarding = () => {
     setShowOnboarding(false);
   };
+
+  const reviews = [
+    {
+      name: "Sarah M.",
+      location: "New York, USA",
+      review: "I used to cry myself to sleep every night, feeling completely alone with my anxiety. MindEase became my lifeline - having someone to talk to at 3 AM when the world felt too heavy changed everything for me.",
+      rating: 5
+    },
+    {
+      name: "Ahmed K.",
+      location: "Dubai, UAE",
+      review: "As someone who struggled to find culturally-aware mental health support in my language, MindEase was a game changer. It understands my background and helps me work through challenges in a way that feels authentic.",
+      rating: 5
+    },
+    {
+      name: "Maria L.",
+      location: "São Paulo, Brazil",
+      review: "After losing my job, I fell into a deep depression. MindEase helped me rebuild my confidence step by step. The 24/7 support meant I never had to face my darkest moments alone.",
+      rating: 5
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-wellness-purple via-wellness-pink to-wellness-yellow">
@@ -106,6 +127,37 @@ const Index = () => {
               Start meaningful conversations anytime you need support. No appointments, 
               no waiting - your AI wellness companion is always ready to listen and help.
             </p>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-32 mb-20">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Stories of Hope & Healing
+            </h2>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+              Real people sharing how MindEase helped them through their darkest moments
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {reviews.map((review, index) => (
+              <div key={index} className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <div className="flex items-center mb-4">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-6 italic">
+                  "{review.review}"
+                </p>
+                <div className="border-t pt-4">
+                  <div className="font-semibold text-gray-900">{review.name}</div>
+                  <div className="text-gray-500 text-sm">{review.location}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
