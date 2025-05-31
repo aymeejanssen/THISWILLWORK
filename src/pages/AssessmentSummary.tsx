@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
@@ -196,50 +196,57 @@ const AssessmentSummary = () => {
           <div className="grid md:grid-cols-3 gap-6">
             <PricingCard title="Weekly Support" price="99 AED" sessions="4 sessions per month" features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]} />
             
-            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} />
+            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} isPopular={true} />
             
-            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} isPopular={true} />
+            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} />
           </div>
 
-          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-            <CardContent className="pt-6 text-center">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">What You'll Experience with AI Coaching</h3>
-              <div className="grid md:grid-cols-2 gap-6 text-left">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Brain className="h-5 w-5 text-purple-600 mt-1" />
-                    <div>
-                      <h4 className="font-semibold">Deep AI Conversations</h4>
-                      <p className="text-sm text-gray-600">Get to the root of your challenges through meaningful AI dialogue</p>
-                    </div>
+          {/* Red Cross Points - What we don't provide */}
+          <Card className="bg-orange-50 border-orange-200">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="h-6 w-6 text-orange-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-lg font-bold text-orange-800 mb-2">Important Limitations</h3>
+                  <p className="text-orange-700 text-sm mb-4">
+                    MindEase AI coaching is designed for everyday wellness support. We do not provide:
+                  </p>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-orange-700">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>24/7 crisis intervention or emergency support</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-purple-600 mt-1" />
-                    <div>
-                      <h4 className="font-semibold">At Your Own Pace</h4>
-                      <p className="text-sm text-gray-600">No pressure - progress at a speed that feels right for you</p>
-                    </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Immediate relief during mental health emergencies</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Medical diagnosis or prescription services</span>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Heart className="h-5 w-5 text-purple-600 mt-1" />
-                    <div>
-                      <h4 className="font-semibold">AI-Guided Exercises</h4>
-                      <p className="text-sm text-gray-600">Intelligent activities to help you process and heal</p>
-                    </div>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Replacement for licensed therapy or counseling</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <UserCircle className="h-5 w-5 text-purple-600 mt-1" />
-                    <div>
-                      <h4 className="font-semibold">Clear AI Explanations</h4>
-                      <p className="text-sm text-gray-600">Understand why you feel certain ways with AI insights</p>
-                    </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Treatment for severe mental health conditions</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Legal or financial advice</span>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* ... keep existing code (benefits section) */}
         </div>
       </div>;
   }
@@ -392,10 +399,55 @@ const AssessmentSummary = () => {
           <div className="grid md:grid-cols-3 gap-6">
             <PricingCard title="Weekly Support" price="99 AED" sessions="4 sessions per month" features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]} />
             
-            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} />
+            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} isPopular={true} />
             
-            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} isPopular={true} />
+            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} />
           </div>
+
+          {/* Red Cross Points - What we don't provide */}
+          <Card className="bg-orange-50 border-orange-200">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="h-6 w-6 text-orange-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-lg font-bold text-orange-800 mb-2">Important Limitations</h3>
+                  <p className="text-orange-700 text-sm mb-4">
+                    MindEase AI coaching is designed for everyday wellness support. We do not provide:
+                  </p>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-orange-700">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>24/7 crisis intervention or emergency support</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Immediate relief during mental health emergencies</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Medical diagnosis or prescription services</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Replacement for licensed therapy or counseling</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Treatment for severe mental health conditions</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-orange-600 mt-1">✗</span>
+                    <span>Legal or financial advice</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="flex justify-center gap-4">
