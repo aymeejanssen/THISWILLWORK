@@ -77,7 +77,9 @@ Please respond in JSON format:
   "supportiveMessage": "Validating message that acknowledges their journey and normalizes their experience"
 }
 
-Be warm, psychologically informed, and avoid clinical jargon. Focus on helping them understand themselves with compassion.`;
+Be warm, psychologically informed, and avoid clinical jargon. Focus on helping them understand themselves with compassion.
+
+IMPORTANT: Respond with ONLY the JSON object, no additional text or markdown formatting.`;
 
     console.log('Making OpenAI API call...');
 
@@ -90,7 +92,7 @@ Be warm, psychologically informed, and avoid clinical jargon. Focus on helping t
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an expert psychologist who provides compassionate, educational insights about mental health patterns and coping mechanisms. You help people understand their behaviors with warmth and scientific accuracy.' },
+          { role: 'system', content: 'You are an expert psychologist who provides compassionate, educational insights about mental health patterns and coping mechanisms. You help people understand their behaviors with warmth and scientific accuracy. Always respond with valid JSON only, no markdown or extra formatting.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
@@ -107,17 +109,31 @@ Be warm, psychologically informed, and avoid clinical jargon. Focus on helping t
     const data = await response.json();
     console.log('OpenAI API response received successfully');
     
-    const aiResponse = data.choices[0].message.content;
+    let aiResponse = data.choices[0].message.content;
+    console.log('Raw AI Response:', aiResponse);
 
-    console.log('AI Response:', aiResponse);
+    // Clean up the AI response - remove markdown code blocks if present
+    if (aiResponse.includes('```json')) {
+      aiResponse = aiResponse.replace(/```json\s*/g, '').replace(/```\s*$/g, '');
+    }
+    if (aiResponse.includes('```')) {
+      aiResponse = aiResponse.replace(/```\s*/g, '');
+    }
+    
+    // Trim whitespace
+    aiResponse = aiResponse.trim();
+
+    console.log('Cleaned AI Response:', aiResponse);
 
     // Parse the JSON response from AI
     let parsedResponse;
     try {
       parsedResponse = JSON.parse(aiResponse);
+      console.log('Successfully parsed AI response:', parsedResponse);
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
-      console.error('Raw AI response:', aiResponse);
+      console.error('Cleaned AI response that failed to parse:', aiResponse);
+      
       // Fallback response if parsing fails
       parsedResponse = {
         insights: [{
