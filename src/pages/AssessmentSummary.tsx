@@ -7,7 +7,6 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
-
 interface AIInsight {
   title: string;
   description: string;
@@ -321,8 +320,8 @@ const AssessmentSummary = () => {
         {aiInsights && aiInsights.insights.length > 0 && <div className="space-y-6">
             <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardHeader>
-                <CardTitle className="text-3xl text-gray-900 mb-2">Summarizing your answers</CardTitle>
-                <p className="text-gray-600 text-lg">Our AI analysis has identified these key insights about your situation</p>
+                <CardTitle className="text-3xl text-gray-900 mb-2 text-center">Summarizing your answers</CardTitle>
+                <p className="text-gray-600 text-lg text-center">Our AI analysis has identified these key insights about your situation</p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
