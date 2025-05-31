@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle, X } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
@@ -102,12 +102,14 @@ const AssessmentSummary = () => {
     price,
     sessions,
     features,
+    missingFeatures = [],
     isPopular = false
   }: {
     title: string;
     price: string;
     sessions: string;
     features: string[];
+    missingFeatures?: string[];
     isPopular?: boolean;
   }) => <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
       {isPopular && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -123,6 +125,10 @@ const AssessmentSummary = () => {
           {features.map((feature, index) => <div key={index} className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-600 mt-1 flex-shrink-0" />
               <span className="text-sm text-gray-700">{feature}</span>
+            </div>)}
+          {missingFeatures.map((feature, index) => <div key={`missing-${index}`} className="flex items-start gap-2">
+              <X className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
+              <span className="text-sm text-gray-500 line-through">{feature}</span>
             </div>)}
         </div>
         <Button className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
@@ -194,11 +200,29 @@ const AssessmentSummary = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <PricingCard title="Weekly Support" price="99 AED" sessions="4 sessions per month" features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]} />
+            <PricingCard 
+              title="Weekly Support" 
+              price="99 AED" 
+              sessions="4 sessions per month" 
+              features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]}
+              missingFeatures={["24/7 AI availability", "Unlimited conversations", "Immediate anxiety relief", "AI companion during lonely moments", "Crisis intervention support", "Advanced emotional coaching"]}
+            />
             
-            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} isPopular={true} />
+            <PricingCard 
+              title="Regular Care" 
+              price="219 AED" 
+              sessions="3 times per week" 
+              features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} 
+              missingFeatures={["24/7 AI availability", "Unlimited conversations", "AI companion during lonely moments", "Crisis intervention support", "Timeless sessions"]}
+              isPopular={true} 
+            />
             
-            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} />
+            <PricingCard 
+              title="Unlimited Support" 
+              price="499 AED" 
+              sessions="Unlimited access" 
+              features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} 
+            />
           </div>
 
           {/* Red Cross Points - What we don't provide */}
@@ -404,11 +428,29 @@ const AssessmentSummary = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <PricingCard title="Weekly Support" price="99 AED" sessions="4 sessions per month" features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]} />
+            <PricingCard 
+              title="Weekly Support" 
+              price="99 AED" 
+              sessions="4 sessions per month" 
+              features={["Once a week AI sessions", "30-minute conversations", "Flexible scheduling", "Personal growth tracking", "Basic emotional support", "Stress management techniques", "Goal setting guidance"]}
+              missingFeatures={["24/7 AI availability", "Unlimited conversations", "Immediate anxiety relief", "AI companion during lonely moments", "Crisis intervention support", "Advanced emotional coaching"]}
+            />
             
-            <PricingCard title="Regular Care" price="219 AED" sessions="3 times per week" features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} isPopular={true} />
+            <PricingCard 
+              title="Regular Care" 
+              price="219 AED" 
+              sessions="3 times per week" 
+              features={["12 AI sessions per month", "30-minute sessions", "Any time, any day", "Faster progress tracking", "Priority AI support", "Advanced coping strategies", "Relationship guidance", "Trauma-informed approach", "Mood pattern analysis"]} 
+              missingFeatures={["24/7 AI availability", "Unlimited conversations", "AI companion during lonely moments", "Crisis intervention support", "Timeless sessions"]}
+              isPopular={true} 
+            />
             
-            <PricingCard title="Unlimited Support" price="499 AED" sessions="Unlimited access" features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} />
+            <PricingCard 
+              title="Unlimited Support" 
+              price="499 AED" 
+              sessions="Unlimited access" 
+              features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} 
+            />
           </div>
 
           {/* Red Cross Points - What we don't provide */}
