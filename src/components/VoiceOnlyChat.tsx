@@ -5,6 +5,23 @@ import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Home } from '
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+// TypeScript declarations for Speech Recognition API
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 interface VoiceOnlyChatProps {
   onClose: () => void;
   userProfile?: {
@@ -35,7 +52,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   ]);
 
   const navigate = useNavigate();
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
