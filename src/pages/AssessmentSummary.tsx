@@ -251,7 +251,7 @@ const AssessmentSummary = () => {
             <span className="text-sm font-medium">Assessment Complete</span>
           </div>
           <h1 className="text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-tight">
             You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
           </p>
         </div>
