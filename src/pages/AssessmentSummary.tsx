@@ -264,60 +264,67 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Full Width Chat with AI Coach Section - Updated Layout */}
+        {/* Chat with AI Coach Section - Simplified */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
-          <CardContent className="pt-4 pb-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Left Side - Click Button and Text */}
-              <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg text-center space-y-4">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Chat with Your AI Wellness Coach</h3>
-                  <p className="text-gray-700 leading-tight text-sm mb-4">
-                    Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges.
-                  </p>
-                </div>
-                
-                <div className="flex justify-center">
-                  <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-28 h-28 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-xl font-bold" size="lg">
-                    Click
-                    <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
-                  </Button>
-                </div>
-                
-                <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
+          <CardContent className="pt-6 pb-6">
+            <div className="text-center space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Chat with Your AI Wellness Coach</h3>
+                <p className="text-gray-700 leading-tight text-lg mb-6 max-w-2xl mx-auto">
+                  Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges.
+                </p>
               </div>
               
-              {/* Right Side - Benefits */}
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg flex flex-col">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 text-left">Benefits of MindEase support</h3>
-                <div className="flex-1 flex items-center">
-                  <div className="space-y-4 text-sm text-gray-700 w-full">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-green-100 p-1 rounded-full flex-shrink-0">
-                        <Shield className="h-4 w-4 text-green-600" />
-                      </div>
-                      <span>Available 24/7 for panic attacks or anxiety</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="bg-blue-100 p-1 rounded-full flex-shrink-0">
-                        <Heart className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <span>AI companion when you're feeling lonely</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="bg-purple-100 p-1 rounded-full flex-shrink-0">
-                        <Brain className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <span>AI emotional education and awareness building</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="bg-pink-100 p-1 rounded-full flex-shrink-0">
-                        <Headphones className="h-4 w-4 text-pink-600" />
-                      </div>
-                      <span>AI understanding of trauma responses</span>
-                    </div>
-                  </div>
+              <div className="flex justify-center">
+                <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-xl font-bold" size="lg">
+                  Click
+                  <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
+                </Button>
+              </div>
+              
+              <p className="text-lg text-gray-600 font-medium">Try free AI conversation - 5 min</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Centralized Benefits Section */}
+        <Card className="shadow-xl bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center wellness-text-gradient">Benefits of MindEase Support</CardTitle>
+            <p className="text-gray-600 text-center">Comprehensive AI wellness coaching designed for your well-being</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow-md border border-green-100 text-center space-y-3">
+                <div className="bg-green-100 p-3 rounded-full w-fit mx-auto">
+                  <Shield className="h-6 w-6 text-green-600" />
                 </div>
+                <h4 className="font-semibold text-gray-900">24/7 Availability</h4>
+                <p className="text-sm text-gray-700">Available for panic attacks or anxiety whenever you need support</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-md border border-blue-100 text-center space-y-3">
+                <div className="bg-blue-100 p-3 rounded-full w-fit mx-auto">
+                  <Heart className="h-6 w-6 text-blue-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900">AI Companion</h4>
+                <p className="text-sm text-gray-700">Your AI companion when you're feeling lonely or isolated</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-md border border-purple-100 text-center space-y-3">
+                <div className="bg-purple-100 p-3 rounded-full w-fit mx-auto">
+                  <Brain className="h-6 w-6 text-purple-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Emotional Education</h4>
+                <p className="text-sm text-gray-700">AI emotional education and awareness building for personal growth</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-md border border-pink-100 text-center space-y-3">
+                <div className="bg-pink-100 p-3 rounded-full w-fit mx-auto">
+                  <Headphones className="h-6 w-6 text-pink-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Trauma-Informed</h4>
+                <p className="text-sm text-gray-700">AI understanding of trauma responses and healing approaches</p>
               </div>
             </div>
           </CardContent>
