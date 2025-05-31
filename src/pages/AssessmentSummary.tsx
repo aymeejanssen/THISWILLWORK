@@ -7,6 +7,7 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
+
 interface AIInsight {
   title: string;
   description: string;
@@ -263,7 +264,7 @@ const AssessmentSummary = () => {
               {/* Left Side - Click Button and Text */}
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg text-center space-y-4">
                 <div className="flex justify-center">
-                  <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-20 h-20 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-lg font-bold" size="lg">
+                  <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-28 h-28 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-xl font-bold" size="lg">
                     Click
                     <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
                   </Button>
