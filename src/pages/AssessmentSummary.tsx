@@ -108,7 +108,8 @@ const AssessmentSummary = () => {
     sessions: string;
     features: string[];
     isPopular?: boolean;
-  }) => <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
+  }) => (
+    <Card className={`relative flex flex-col h-full ${isPopular ? 'border-purple-500 border-2' : ''}`}>
       {isPopular && <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
           <Badge className="bg-purple-600 text-white px-4 py-1">Most Popular</Badge>
         </div>}
@@ -128,7 +129,8 @@ const AssessmentSummary = () => {
           Choose Plan
         </Button>
       </CardContent>
-    </Card>;
+    </Card>
+  );
   if (isLoading) {
     return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[60vh]">
@@ -242,7 +244,8 @@ const AssessmentSummary = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-4">
@@ -256,11 +259,15 @@ const AssessmentSummary = () => {
           </p>
         </div>
 
-        {/* Full Width Chat with AI Coach Section - Moved to Top */}
+        {/* Full Width Chat with AI Coach Section - Compressed */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 overflow-hidden w-full">
-          <CardContent className="pt-8 pb-8 text-center space-y-6 py-0">
+          <CardContent className="pt-6 pb-6 text-center space-y-4">
             <div className="flex justify-center">
-              <Button onClick={handleStartFreeTrial} className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-2xl font-bold" size="lg">
+              <Button 
+                onClick={handleStartFreeTrial} 
+                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-400 hover:from-purple-600 hover:via-pink-500 hover:to-yellow-500 text-white w-28 h-28 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 cursor-pointer group text-xl font-bold" 
+                size="lg"
+              >
                 Click
                 <div className="absolute inset-0 rounded-full bg-white/20 animate-ping opacity-75"></div>
               </Button>
@@ -269,15 +276,15 @@ const AssessmentSummary = () => {
             <p className="text-sm text-gray-600 font-medium">Try free AI conversation - 5 min</p>
             
             <div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-3">Chat with Your AI Wellness Coach</h3>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Chat with Your AI Wellness Coach</h3>
+              <p className="text-gray-700 leading-relaxed text-base">
                 Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges. 
                 Click the button above to begin - no commitment needed!
               </p>
             </div>
             
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-700">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-purple-200 shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm text-gray-700">
                 <div className="flex items-center gap-3">
                   <div className="bg-green-100 p-1 rounded-full">
                     <Shield className="h-4 w-4 text-green-600" />
@@ -308,7 +315,8 @@ const AssessmentSummary = () => {
         </Card>
 
         {/* AI Insights Section */}
-        {aiInsights && aiInsights.insights.length > 0 && <div className="space-y-6">
+        {aiInsights && aiInsights.insights.length > 0 && (
+          <div className="space-y-6">
             <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardHeader>
                 <CardTitle className="text-3xl text-gray-900 mb-2">What We See In You</CardTitle>
@@ -367,7 +375,8 @@ const AssessmentSummary = () => {
                   </div>
                 </CardContent>
               </Card>}
-          </div>}
+          </div>
+        )}
 
         {/* Pricing Cards Section */}
         <div className="space-y-8">
@@ -396,6 +405,8 @@ const AssessmentSummary = () => {
           </Button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default AssessmentSummary;
