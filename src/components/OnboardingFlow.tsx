@@ -272,7 +272,7 @@ const QuestionInput = ({
           disabled={!response.trim()}
           className="bg-purple-600 hover:bg-purple-700"
         >
-          {isOtherCategory ? 'Complete Assessment' : 'Continue'}
+          {isOtherCategory ? 'Submit My Answers' : 'Continue'}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
