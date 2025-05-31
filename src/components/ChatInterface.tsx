@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, User, X, Heart, Mic, MicOff, Volume2, Headphones, Edit } from "lucide-react";
+import { MessageCircle, User, X, Heart, Mic, MicOff, Volume2, Headphones, Edit, Settings } from "lucide-react";
 import { supabase } from '../integrations/supabase/client';
 import VoiceOnlyChat from './VoiceOnlyChat';
 
@@ -19,6 +19,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [isListening, setIsListening] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<string>('nova');
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const recognitionRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -120,6 +121,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     try {
       setIsSpeaking(true);
       console.log('Generating speech for:', text.substring(0, 50) + '...');
+      console.log('Using voice:', selectedVoice);
 
       // Use OpenAI TTS for much more natural voice
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
@@ -282,9 +284,19 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
               <Heart className="h-6 w-6" />
               {userProfile?.name ? `Mynd Ease & ${userProfile.name}` : 'Mynd Ease AI Companion'}
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+                className="text-white hover:bg-white/20"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <Badge className="bg-white/20 text-white border-white/30 w-fit">
@@ -294,6 +306,42 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
               ✍️ Text Mode
             </Badge>
           </div>
+          
+          {/* Voice Settings Panel */}
+          {showVoiceSettings && (
+            <div className="mt-4 p-4 bg-white/10 rounded-lg">
+              <h4 className="text-sm font-semibold mb-3">Voice Settings</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium mb-1">Choose Voice</label>
+                  <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                    <SelectTrigger className="w-full bg-white/20 border-white/30 text-white">
+                      <SelectValue placeholder="Select a voice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {openAIVoices.map((voice) => (
+                        <SelectItem key={voice.id} value={voice.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{voice.name}</span>
+                            <span className="text-xs text-gray-500">{voice.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={testVoice}
+                  className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+                  disabled={isSpeaking}
+                >
+                  {isSpeaking ? 'Playing...' : 'Test Voice'}
+                </Button>
+              </div>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="flex-1 flex flex-col p-0">

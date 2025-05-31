@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -44,6 +45,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isCallOngoing, setIsCallOngoing] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<string>('nova');
   const [sampleResponses, setSampleResponses] = useState([
     "Tell me about a time you felt really happy.",
     "What's a challenge you're currently facing?",
@@ -55,6 +57,15 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  // OpenAI TTS voices - 5 best options
+  const openAIVoices = [
+    { id: 'nova', name: 'Nova (Warm & Empathetic)', description: 'Warm, caring female voice' },
+    { id: 'alloy', name: 'Alloy (Neutral)', description: 'Balanced, professional voice' },
+    { id: 'echo', name: 'Echo (Gentle)', description: 'Soft, gentle male voice' },
+    { id: 'onyx', name: 'Onyx (Deep)', description: 'Deep, calming male voice' },
+    { id: 'shimmer', name: 'Shimmer (Bright)', description: 'Bright, encouraging female voice' }
+  ];
 
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -114,6 +125,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setIsSpeakerEnabled(!isSpeakerEnabled);
   };
 
+  const testVoice = () => {
+    const testText = "Hi there! This is how I sound. I'm here to support you with warmth and understanding. Does this voice feel comfortable to you?";
+    speak(testText);
+  };
+
   const startConversation = async () => {
     setIsConnecting(true);
     // Simulate connection delay
@@ -163,23 +179,20 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setIsAssistantSpeaking(true);
     
     try {
+      console.log('Generating speech for:', text.substring(0, 50) + '...');
+      console.log('Using voice:', selectedVoice);
+
       // Use OpenAI TTS for much more natural voice
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: text,
-          voice: 'nova' // Nova voice is warm, caring, and reassuring
+          voice: selectedVoice
         }
       });
 
       if (error) {
         console.error('Error generating speech:', error);
-        // Fallback to browser speech synthesis
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = userProfile?.preferredLanguage || 'en-US';
-        speechSynthesis.speak(utterance);
-        utterance.onend = () => {
-          setIsAssistantSpeaking(false);
-        };
+        setIsAssistantSpeaking(false);
         return;
       }
 
@@ -207,18 +220,12 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         };
         
         source.start(0);
+      } else {
+        setIsAssistantSpeaking(false);
       }
     } catch (error) {
       console.error('Error with OpenAI TTS:', error);
       setIsAssistantSpeaking(false);
-      
-      // Fallback to browser speech synthesis
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = userProfile?.preferredLanguage || 'en-US';
-      speechSynthesis.speak(utterance);
-      utterance.onend = () => {
-        setIsAssistantSpeaking(false);
-      };
     }
   };
 
@@ -266,6 +273,37 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         <CardContent className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-purple-50/30 to-teal-50/30">
           {!conversationStarted ? (
             <div className="flex flex-col items-center justify-center h-full space-y-6">
+              {/* Voice Selection */}
+              <div className="mb-6 w-full max-w-sm">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Choose Your Voice
+                </label>
+                <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a voice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {openAIVoices.map((voice) => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{voice.name}</span>
+                          <span className="text-xs text-gray-500">{voice.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={testVoice}
+                  className="mt-2 w-full"
+                  disabled={isAssistantSpeaking}
+                >
+                  {isAssistantSpeaking ? 'Playing...' : 'Test Voice'}
+                </Button>
+              </div>
+
               <Button 
                 onClick={startConversation}
                 className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 text-xl font-bold"
@@ -340,8 +378,40 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
         {showSettings && (
           <div className="p-6 border-t border-gray-200">
-            <h4 className="text-lg font-semibold mb-2">Settings</h4>
-            <div className="flex items-center justify-between">
+            <h4 className="text-lg font-semibold mb-4">Settings</h4>
+            
+            {/* Voice Selection in Settings */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Voice Selection
+              </label>
+              <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {openAIVoices.map((voice) => (
+                    <SelectItem key={voice.id} value={voice.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{voice.name}</span>
+                        <span className="text-xs text-gray-500">{voice.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={testVoice}
+                className="mt-2"
+                disabled={isAssistantSpeaking}
+              >
+                {isAssistantSpeaking ? 'Playing...' : 'Test Voice'}
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
               <Button
                 variant="outline"
@@ -351,7 +421,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 {isMicrophoneEnabled ? "Disable" : "Enable"}
               </Button>
             </div>
-            <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center justify-between">
               <label className="text-gray-700">Speaker:</label>
               <Button
                 variant="outline"
