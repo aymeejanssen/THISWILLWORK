@@ -7,7 +7,6 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
-
 interface AIInsight {
   title: string;
   description: string;
@@ -277,9 +276,7 @@ const AssessmentSummary = () => {
                   <p className="text-gray-700 leading-tight text-sm">
                     Start a real conversation with your personal AI wellness coach about your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges.
                   </p>
-                  <p className="text-gray-700 leading-tight text-sm mt-1">
-                    Click the button above to begin - no commitment needed!
-                  </p>
+                  
                 </div>
               </div>
               
