@@ -128,7 +128,7 @@ const AssessmentSummary = () => {
             </div>)}
           {missingFeatures.map((feature, index) => <div key={`missing-${index}`} className="flex items-start gap-2">
               <X className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
-              <span className="text-sm text-gray-500 line-through">{feature}</span>
+              <span className="text-sm text-gray-500">{feature}</span>
             </div>)}
         </div>
         <Button className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
@@ -224,53 +224,6 @@ const AssessmentSummary = () => {
               features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} 
             />
           </div>
-
-          {/* Red Cross Points - What we don't provide */}
-          <Card className="bg-orange-50 border-orange-200">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3 mb-4">
-                <AlertTriangle className="h-6 w-6 text-orange-600 flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-lg font-bold text-orange-800 mb-2">Important Limitations</h3>
-                  <p className="text-orange-700 text-sm mb-4">
-                    MindEase AI coaching is designed for everyday wellness support. We do not provide:
-                  </p>
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-orange-700">
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>24/7 crisis intervention or emergency support</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Immediate relief during mental health emergencies</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Medical diagnosis or prescription services</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Replacement for licensed therapy or counseling</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Treatment for severe mental health conditions</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Legal or financial advice</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ... keep existing code (benefits section) */}
         </div>
       </div>;
   }
@@ -452,51 +405,6 @@ const AssessmentSummary = () => {
               features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} 
             />
           </div>
-
-          {/* Red Cross Points - What we don't provide */}
-          <Card className="bg-orange-50 border-orange-200">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3 mb-4">
-                <AlertTriangle className="h-6 w-6 text-orange-600 flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-lg font-bold text-orange-800 mb-2">Important Limitations</h3>
-                  <p className="text-orange-700 text-sm mb-4">
-                    MindEase AI coaching is designed for everyday wellness support. We do not provide:
-                  </p>
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-orange-700">
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>24/7 crisis intervention or emergency support</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Immediate relief during mental health emergencies</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Medical diagnosis or prescription services</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Replacement for licensed therapy or counseling</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Treatment for severe mental health conditions</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-600 mt-1">✗</span>
-                    <span>Legal or financial advice</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="flex justify-center gap-4">
