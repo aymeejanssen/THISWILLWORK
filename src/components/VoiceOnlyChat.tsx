@@ -55,9 +55,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const finalTranscriptRef = useRef<string>('');
-  const isRestartingRecognitionRef = useRef<boolean>(false);
   const currentAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recognitionRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // OpenAI TTS voices - 5 best options
   const openAIVoices = [
@@ -95,46 +95,63 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   };
 
-  const forceStopAssistantSpeaking = useCallback(() => {
-    console.log('Force stopping assistant speaking...');
+  const stopCurrentAudio = useCallback(() => {
+    console.log('Stopping current audio...');
     if (currentAudioSourceRef.current) {
       try {
         currentAudioSourceRef.current.stop();
-        currentAudioSourceRef.current = null;
       } catch (error) {
         console.log('Error stopping audio source:', error);
       }
+      currentAudioSourceRef.current = null;
     }
     setIsAssistantSpeaking(false);
   }, []);
 
-  const restartSpeechRecognition = useCallback(() => {
-    if (!conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || isProcessingResponse || microphonePermission !== 'granted') {
-      console.log('Not restarting recognition - conditions not met:', {
+  const startSpeechRecognition = useCallback(() => {
+    if (!recognitionRef.current || !conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || microphonePermission !== 'granted') {
+      console.log('Not starting recognition - conditions not met:', {
         conversationStarted,
         isMicrophoneEnabled,
         isAssistantSpeaking,
-        isProcessingResponse,
         microphonePermission
       });
       return;
     }
 
-    console.log('Restarting speech recognition...');
-    isRestartingRecognitionRef.current = true;
-    
-    setTimeout(() => {
+    try {
+      console.log('Starting speech recognition...');
+      recognitionRef.current.start();
+    } catch (error) {
+      console.log('Recognition start error (probably already running):', error);
+    }
+  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, microphonePermission]);
+
+  const stopSpeechRecognition = useCallback(() => {
+    if (recognitionRef.current) {
+      console.log('Stopping speech recognition...');
       try {
-        if (recognitionRef.current && conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && microphonePermission === 'granted') {
-          recognitionRef.current.start();
-          console.log('Speech recognition restarted successfully');
-        }
+        recognitionRef.current.stop();
       } catch (error) {
-        console.log('Error restarting recognition:', error);
+        console.log('Error stopping recognition:', error);
       }
-      isRestartingRecognitionRef.current = false;
-    }, 500);
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
+    }
+  }, []);
+
+  const restartSpeechRecognitionDelayed = useCallback(() => {
+    // Clear any existing restart timeout
+    if (recognitionRestartTimeoutRef.current) {
+      clearTimeout(recognitionRestartTimeoutRef.current);
+    }
+
+    // Set a new restart timeout
+    recognitionRestartTimeoutRef.current = setTimeout(() => {
+      console.log('Attempting delayed recognition restart...');
+      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
+        startSpeechRecognition();
+      }
+    }, 1000);
+  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission, startSpeechRecognition]);
 
   const generateAIResponse = async (userMessage: string) => {
     if (!userMessage.trim() || isProcessingResponse) return;
@@ -143,13 +160,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     console.log('Generating AI response for:', userMessage);
 
     // Stop any ongoing speech recognition
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (error) {
-        console.log('Error stopping recognition:', error);
-      }
-    }
+    stopSpeechRecognition();
 
     try {
       // Create conversation context
@@ -192,26 +203,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   };
 
-  const startSpeechRecognition = useCallback(() => {
-    if (!recognitionRef.current || !conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || isRestartingRecognitionRef.current || microphonePermission !== 'granted') {
-      return;
-    }
-
-    try {
-      console.log('Starting speech recognition...');
-      recognitionRef.current.start();
-    } catch (error) {
-      console.log('Recognition already running or error:', error);
-    }
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, microphonePermission]);
-
-  const stopSpeechRecognition = useCallback(() => {
-    if (recognitionRef.current) {
-      console.log('Stopping speech recognition...');
-      recognitionRef.current.stop();
-    }
-  }, []);
-
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
       toast.error("Speech Recognition not supported in this browser. Please try Chrome.");
@@ -227,7 +218,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     recognitionRef.current.onstart = () => {
       console.log("Speech recognition started");
       setIsUserSpeaking(true);
-      isRestartingRecognitionRef.current = false;
     };
 
     recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
@@ -261,13 +251,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             setTranscript('');
             setMessage('');
             
-            // Stop recognition before processing
-            stopSpeechRecognition();
-            
             // Generate AI response
             generateAIResponse(messageToProcess);
           }
-        }, 1500);
+        }, 2000); // Increased to 2 seconds for better user experience
       }
       
       setMessage(interimTranscript);
@@ -277,10 +264,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       console.log("Speech recognition ended");
       setIsUserSpeaking(false);
       
-      // Only restart if conversation is ongoing, mic is enabled, and AI is not speaking
+      // Only restart if conditions are met
       if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
-        console.log('Attempting to restart recognition after natural end...');
-        restartSpeechRecognition();
+        console.log('Restarting recognition after natural end...');
+        restartSpeechRecognitionDelayed();
       }
     };
 
@@ -293,6 +280,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         toast.error("Microphone access denied. Please allow microphone access in your browser settings.");
       } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
         toast.error(`Speech recognition error: ${event.error}`);
+        // Try to restart on error (except for abort or no-speech)
+        restartSpeechRecognitionDelayed();
       }
     };
 
@@ -306,19 +295,22 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       if (silenceTimeoutRef.current) {
         clearTimeout(silenceTimeoutRef.current);
       }
+      if (recognitionRestartTimeoutRef.current) {
+        clearTimeout(recognitionRestartTimeoutRef.current);
+      }
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach(track => track.stop());
       }
-      forceStopAssistantSpeaking();
+      stopCurrentAudio();
     };
-  }, [userProfile?.preferredLanguage, startSpeechRecognition, stopSpeechRecognition, restartSpeechRecognition, forceStopAssistantSpeaking, microphonePermission]);
+  }, [userProfile?.preferredLanguage, restartSpeechRecognitionDelayed, microphonePermission]);
 
   const toggleMicrophone = () => {
     setIsMicrophoneEnabled(!isMicrophoneEnabled);
     if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
-      }, 200);
+      }, 500);
     } else if (isMicrophoneEnabled) {
       stopSpeechRecognition();
     }
@@ -326,8 +318,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   const toggleSpeaker = () => {
     if (isSpeakerEnabled) {
-      // Stop any current speech
-      forceStopAssistantSpeaking();
+      stopCurrentAudio();
     }
     setIsSpeakerEnabled(!isSpeakerEnabled);
   };
@@ -367,22 +358,28 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       setTimeout(() => {
         startSpeechRecognition();
         toast.success("Voice recognition started. Start speaking!");
-      }, 500);
+      }, 1000);
     }
 
     // Simulate initial AI message
     const greeting = getPersonalizedGreeting();
-    await speak(greeting);
+    setTimeout(() => {
+      speak(greeting);
+    }, 1500);
   };
 
   const endConversation = () => {
     setConversationStarted(false);
     setIsCallOngoing(false);
     stopSpeechRecognition();
-    forceStopAssistantSpeaking();
+    stopCurrentAudio();
     
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
+    }
+    
+    if (recognitionRestartTimeoutRef.current) {
+      clearTimeout(recognitionRestartTimeoutRef.current);
     }
     
     if (mediaStreamRef.current) {
@@ -399,7 +396,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   };
 
   const speak = async (text: string) => {
-    if (!isSpeakerEnabled) return;
+    if (!isSpeakerEnabled || !text.trim()) {
+      console.log('Skipping speech - speaker disabled or empty text');
+      return;
+    }
     
     console.log('Starting to speak:', text.substring(0, 50) + '...');
     setIsAssistantSpeaking(true);
@@ -410,7 +410,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     try {
       console.log('Generating speech with voice:', selectedVoice);
 
-      // Use OpenAI TTS for much more natural voice
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: text,
@@ -420,12 +419,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
       if (error) {
         console.error('Error generating speech:', error);
-        setIsAssistantSpeaking(false);
-        // Restart recognition even if speech fails
-        if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
-          setTimeout(() => restartSpeechRecognition(), 500);
-        }
-        return;
+        throw error;
       }
 
       if (data?.audioContent) {
@@ -456,17 +450,17 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         currentAudioSourceRef.current = source;
         
         source.onended = () => {
-          console.log('AI finished speaking, clearing state and restarting recognition');
+          console.log('AI finished speaking, restarting recognition');
           currentAudioSourceRef.current = null;
           setIsAssistantSpeaking(false);
           
-          // Force a small delay then restart recognition
+          // Restart recognition after AI finishes speaking
           setTimeout(() => {
             if (conversationStarted && isMicrophoneEnabled && !isProcessingResponse && microphonePermission === 'granted') {
-              console.log('Restarting recognition after AI speech ended');
-              restartSpeechRecognition();
+              console.log('Restarting recognition after AI speech');
+              startSpeechRecognition();
             }
-          }, 800);
+          }, 500);
         };
         
         source.start(0);
@@ -474,18 +468,15 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       } else {
         console.error('No audio content received');
         setIsAssistantSpeaking(false);
-        // Restart recognition even if no audio
-        if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
-          setTimeout(() => restartSpeechRecognition(), 500);
-        }
+        restartSpeechRecognitionDelayed();
       }
     } catch (error) {
       console.error('Error with speech synthesis:', error);
       setIsAssistantSpeaking(false);
-      // Restart recognition on error
-      if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
-        setTimeout(() => restartSpeechRecognition(), 500);
-      }
+      restartSpeechRecognitionDelayed();
+      
+      // Show a fallback message
+      toast.error("Sorry, I couldn't speak that response. Please try again.");
     }
   };
 
@@ -497,7 +488,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     const name = userProfile.name || 'dear';
     const struggles = userProfile.currentStruggles?.join(', ') || 'what you\'re going through';
     
-    return `Hi ${name}... I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
+    return `Hi ${name}! I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
   };
 
   return (
@@ -611,7 +602,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={forceStopAssistantSpeaking}
+                          onClick={stopCurrentAudio}
                           className="ml-2 text-xs"
                         >
                           Skip
