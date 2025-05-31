@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '../integrations/supabase/client';
 
 // TypeScript declarations for Speech Recognition API
 declare global {
@@ -53,6 +54,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -98,6 +100,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
     };
   }, [userProfile?.preferredLanguage]);
 
@@ -117,6 +122,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setConversationStarted(true);
     setIsCallOngoing(true);
 
+    // Initialize audio context
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext();
+    }
+
     // Start speech recognition
     if (recognitionRef.current && isMicrophoneEnabled) {
       try {
@@ -130,7 +140,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
     // Simulate initial AI message
     const greeting = getPersonalizedGreeting();
-    speak(greeting);
+    await speak(greeting);
   };
 
   const endConversation = () => {
@@ -142,19 +152,74 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     toast.message("Conversation ended.");
   };
 
-  const handleSampleResponse = (response: string) => {
+  const handleSampleResponse = async (response: string) => {
     setMessage(response);
-    speak("Okay, processing your request: " + response);
+    await speak("Okay, processing your request: " + response);
   };
 
-  const speak = (text: string) => {
+  const speak = async (text: string) => {
+    if (!isSpeakerEnabled) return;
+    
     setIsAssistantSpeaking(true);
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = userProfile?.preferredLanguage || 'en-US';
-    speechSynthesis.speak(utterance);
-    utterance.onend = () => {
+    
+    try {
+      // Use OpenAI TTS for much more natural voice
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: { 
+          text: text,
+          voice: 'nova' // Nova voice is warm, caring, and reassuring
+        }
+      });
+
+      if (error) {
+        console.error('Error generating speech:', error);
+        // Fallback to browser speech synthesis
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = userProfile?.preferredLanguage || 'en-US';
+        speechSynthesis.speak(utterance);
+        utterance.onend = () => {
+          setIsAssistantSpeaking(false);
+        };
+        return;
+      }
+
+      if (data?.audioContent) {
+        // Initialize audio context if needed
+        if (!audioContextRef.current) {
+          audioContextRef.current = new AudioContext();
+        }
+
+        // Decode base64 audio
+        const binaryString = atob(data.audioContent);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // Decode and play audio
+        const audioBuffer = await audioContextRef.current.decodeAudioData(bytes.buffer);
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContextRef.current.destination);
+        
+        source.onended = () => {
+          setIsAssistantSpeaking(false);
+        };
+        
+        source.start(0);
+      }
+    } catch (error) {
+      console.error('Error with OpenAI TTS:', error);
       setIsAssistantSpeaking(false);
-    };
+      
+      // Fallback to browser speech synthesis
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = userProfile?.preferredLanguage || 'en-US';
+      speechSynthesis.speak(utterance);
+      utterance.onend = () => {
+        setIsAssistantSpeaking(false);
+      };
+    }
   };
 
   const getPersonalizedGreeting = () => {
