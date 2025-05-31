@@ -187,7 +187,7 @@ const AssessmentSummary = () => {
             <Button variant="ghost" onClick={() => setShowPricing(false)} className="mb-4">
               ← Back to Summary
             </Button>
-            <h1 className="text-4xl font-bold text-gray-900">Choose Your AI Coaching Plan</h1>
+            <h1 className="text-4xl font-bold text-white">Choose Your AI Coaching Plan</h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Start your personalized {primaryConcern} sessions with your AI wellness coach
             </p>
@@ -251,7 +251,7 @@ const AssessmentSummary = () => {
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm font-medium">Assessment Complete</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
+          <h1 className="text-4xl font-bold text-white">Your Journey Starts Here</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-tight">
             You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
           </p>
@@ -321,7 +321,7 @@ const AssessmentSummary = () => {
           <div className="space-y-6">
             <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardHeader>
-                <CardTitle className="text-3xl text-gray-900 mb-2 text-center">Summarizing your answers</CardTitle>
+                <CardTitle className="text-3xl text-white mb-2 text-center">Summarizing your answers</CardTitle>
                 <p className="text-gray-600 text-lg text-center">Our AI analysis has identified these key insights about your situation</p>
               </CardHeader>
               <CardContent>
@@ -383,7 +383,7 @@ const AssessmentSummary = () => {
         {/* Pricing Cards Section */}
         <div className="space-y-6">
           <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold text-gray-900">Choose Your AI Coaching Plan</h2>
+            <h2 className="text-3xl font-bold text-white">Choose Your AI Coaching Plan</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Start your personalized {primaryConcern} sessions with your AI wellness coach
             </p>
