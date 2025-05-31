@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +54,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const finalTranscriptRef = useRef<string>('');
+  const isRestartingRecognitionRef = useRef<boolean>(false);
 
   // OpenAI TTS voices - 5 best options
   const openAIVoices = [
@@ -112,6 +112,26 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   };
 
+  const startSpeechRecognition = useCallback(() => {
+    if (!recognitionRef.current || !conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || isRestartingRecognitionRef.current) {
+      return;
+    }
+
+    try {
+      console.log('Starting speech recognition...');
+      recognitionRef.current.start();
+    } catch (error) {
+      console.log('Recognition already running or error:', error);
+    }
+  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking]);
+
+  const stopSpeechRecognition = useCallback(() => {
+    if (recognitionRef.current) {
+      console.log('Stopping speech recognition...');
+      recognitionRef.current.stop();
+    }
+  }, []);
+
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) {
       toast.error("Speech Recognition not supported in this browser. Please try Chrome.");
@@ -125,8 +145,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     recognitionRef.current.lang = userProfile?.preferredLanguage || 'en-US';
 
     recognitionRef.current.onstart = () => {
+      console.log("Speech recognition started");
       setIsUserSpeaking(true);
-      console.log("Speech recognition service has started");
+      isRestartingRecognitionRef.current = false;
     };
 
     recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
@@ -155,35 +176,40 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         silenceTimeoutRef.current = setTimeout(() => {
           if (finalTranscriptRef.current.trim()) {
             console.log('Processing speech after silence:', finalTranscriptRef.current);
-            generateAIResponse(finalTranscriptRef.current.trim());
+            const messageToProcess = finalTranscriptRef.current.trim();
             finalTranscriptRef.current = '';
             setTranscript('');
+            setMessage('');
+            
+            // Stop recognition before processing
+            stopSpeechRecognition();
+            
+            // Generate AI response
+            generateAIResponse(messageToProcess);
           }
-        }, 2000); // Wait 2 seconds of silence before processing
+        }, 1500); // Reduced to 1.5 seconds for better responsiveness
       }
       
       setMessage(interimTranscript);
     };
 
     recognitionRef.current.onend = () => {
+      console.log("Speech recognition ended");
       setIsUserSpeaking(false);
-      console.log("Speech recognition service disconnected");
       
-      // Restart recognition if the conversation is ongoing and mic is enabled
-      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking) {
+      // Only restart if conversation is ongoing, mic is enabled, and AI is not speaking
+      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse) {
+        console.log('Attempting to restart recognition...');
+        isRestartingRecognitionRef.current = true;
         setTimeout(() => {
-          try {
-            recognitionRef.current?.start();
-          } catch (error) {
-            console.log('Recognition restart skipped - already running');
-          }
-        }, 100);
+          startSpeechRecognition();
+        }, 200);
       }
     };
 
     recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
-      setIsUserSpeaking(false);
       console.error("Speech recognition error:", event.error);
+      setIsUserSpeaking(false);
       
       if (event.error !== 'aborted' && event.error !== 'no-speech') {
         toast.error(`Speech recognition error: ${event.error}`);
@@ -201,18 +227,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         clearTimeout(silenceTimeoutRef.current);
       }
     };
-  }, [userProfile?.preferredLanguage, conversationStarted, isMicrophoneEnabled, isAssistantSpeaking]);
+  }, [userProfile?.preferredLanguage, startSpeechRecognition, stopSpeechRecognition]);
 
   const toggleMicrophone = () => {
     setIsMicrophoneEnabled(!isMicrophoneEnabled);
-    if (!isMicrophoneEnabled && recognitionRef.current && conversationStarted) {
-      try {
-        recognitionRef.current.start();
-      } catch (error) {
-        console.log('Recognition already running');
-      }
-    } else if (isMicrophoneEnabled && recognitionRef.current) {
-      recognitionRef.current.stop();
+    if (!isMicrophoneEnabled && conversationStarted) {
+      startSpeechRecognition();
+    } else if (isMicrophoneEnabled) {
+      stopSpeechRecognition();
     }
   };
 
@@ -235,18 +257,19 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
     // Initialize audio context
     if (!audioContextRef.current) {
-      audioContextRef.current = new AudioContext();
+      try {
+        audioContextRef.current = new AudioContext();
+      } catch (error) {
+        console.error('Failed to create audio context:', error);
+      }
     }
 
     // Start speech recognition
-    if (recognitionRef.current && isMicrophoneEnabled) {
-      try {
-        recognitionRef.current.start();
+    if (isMicrophoneEnabled) {
+      setTimeout(() => {
+        startSpeechRecognition();
         toast.success("Voice recognition started. Start speaking!");
-      } catch (error) {
-        console.error("Error starting speech recognition:", error);
-        toast.error("Failed to start voice recognition. Please check microphone permissions.");
-      }
+      }, 500);
     }
 
     // Simulate initial AI message
@@ -257,31 +280,32 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const endConversation = () => {
     setConversationStarted(false);
     setIsCallOngoing(false);
-    if (recognitionRef.current) {
-      recognitionRef.current.abort();
-    }
+    stopSpeechRecognition();
+    
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
     }
+    
     finalTranscriptRef.current = '';
     setTranscript('');
+    setMessage('');
     setConversationHistory([]);
+    setIsProcessingResponse(false);
+    setIsAssistantSpeaking(false);
     toast.message("Conversation ended.");
   };
 
   const speak = async (text: string) => {
     if (!isSpeakerEnabled) return;
     
+    console.log('Starting to speak:', text.substring(0, 50) + '...');
     setIsAssistantSpeaking(true);
     
     // Stop recognition while AI is speaking
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
+    stopSpeechRecognition();
     
     try {
-      console.log('Generating speech for:', text.substring(0, 50) + '...');
-      console.log('Using voice:', selectedVoice);
+      console.log('Generating speech with voice:', selectedVoice);
 
       // Use OpenAI TTS for much more natural voice
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
@@ -294,6 +318,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       if (error) {
         console.error('Error generating speech:', error);
         setIsAssistantSpeaking(false);
+        // Restart recognition even if speech fails
+        if (conversationStarted && isMicrophoneEnabled) {
+          setTimeout(() => startSpeechRecognition(), 500);
+        }
         return;
       }
 
@@ -301,6 +329,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         // Initialize audio context if needed
         if (!audioContextRef.current) {
           audioContextRef.current = new AudioContext();
+        }
+
+        // Resume audio context if suspended
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
         }
 
         // Decode base64 audio
@@ -317,26 +350,34 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         source.connect(audioContextRef.current.destination);
         
         source.onended = () => {
+          console.log('AI finished speaking, restarting recognition');
           setIsAssistantSpeaking(false);
+          
           // Restart recognition after AI finishes speaking
-          if (conversationStarted && isMicrophoneEnabled && recognitionRef.current) {
+          if (conversationStarted && isMicrophoneEnabled) {
             setTimeout(() => {
-              try {
-                recognitionRef.current.start();
-              } catch (error) {
-                console.log('Recognition restart skipped - already running');
-              }
-            }, 500);
+              startSpeechRecognition();
+            }, 1000); // Wait 1 second before restarting
           }
         };
         
         source.start(0);
+        console.log('Audio playback started');
       } else {
+        console.error('No audio content received');
         setIsAssistantSpeaking(false);
+        // Restart recognition even if no audio
+        if (conversationStarted && isMicrophoneEnabled) {
+          setTimeout(() => startSpeechRecognition(), 500);
+        }
       }
     } catch (error) {
-      console.error('Error with OpenAI TTS:', error);
+      console.error('Error with speech synthesis:', error);
       setIsAssistantSpeaking(false);
+      // Restart recognition on error
+      if (conversationStarted && isMicrophoneEnabled) {
+        setTimeout(() => startSpeechRecognition(), 500);
+      }
     }
   };
 
@@ -435,30 +476,44 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             <div className="flex flex-col items-center justify-between h-full w-full">
               <div className="flex-1 overflow-y-auto p-4 w-full">
                 <div className="mb-4 text-center">
-                  <p className="text-gray-700 italic">
+                  <p className="text-gray-700 italic min-h-[1.5em]">
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
-                  {isAssistantSpeaking && (
-                    <div className="flex items-center justify-center mt-4">
-                      <div className="animate-pulse h-3 w-3 bg-purple-500 rounded-full mr-2"></div>
-                      <span className="text-sm text-purple-600">Assistant is speaking...</span>
-                    </div>
-                  )}
-                  {isProcessingResponse && (
-                    <div className="flex items-center justify-center mt-4">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500 mr-2"></div>
-                      <span className="text-sm text-purple-600">Thinking...</span>
-                    </div>
-                  )}
-                  {isUserSpeaking && (
-                    <div className="flex items-center justify-center mt-4">
-                      <div className="animate-pulse h-3 w-3 bg-green-500 rounded-full mr-2"></div>
-                      <span className="text-sm text-green-600">You're speaking...</span>
-                    </div>
-                  )}
+                  
+                  {/* Status indicators */}
+                  <div className="mt-4 space-y-2">
+                    {isAssistantSpeaking && (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-pulse h-3 w-3 bg-purple-500 rounded-full mr-2"></div>
+                        <span className="text-sm text-purple-600">Assistant is speaking...</span>
+                      </div>
+                    )}
+                    
+                    {isProcessingResponse && !isAssistantSpeaking && (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500 mr-2"></div>
+                        <span className="text-sm text-purple-600">Thinking...</span>
+                      </div>
+                    )}
+                    
+                    {isUserSpeaking && !isAssistantSpeaking && !isProcessingResponse && (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-pulse h-3 w-3 bg-green-500 rounded-full mr-2"></div>
+                        <span className="text-sm text-green-600">You're speaking...</span>
+                      </div>
+                    )}
+
+                    {!isUserSpeaking && !isAssistantSpeaking && !isProcessingResponse && isMicrophoneEnabled && (
+                      <div className="flex items-center justify-center">
+                        <div className="h-3 w-3 bg-gray-400 rounded-full mr-2"></div>
+                        <span className="text-sm text-gray-600">Ready to listen...</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
+              {/* Control buttons */}
               <div className="flex items-center justify-around w-full p-4 border-t border-gray-200">
                 <Button
                   variant="ghost"
