@@ -7,6 +7,7 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ChatInterface from '../components/ChatInterface';
+
 interface AIInsight {
   title: string;
   description: string;
@@ -282,7 +283,7 @@ const AssessmentSummary = () => {
               
               {/* Right Side - Features */}
               <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-200 shadow-lg flex flex-col">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 text-left">Benefits of MindEase support</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 text-left">Benefits of MindEase support</h3>
                 <div className="flex-1 flex items-center">
                   <div className="space-y-4 text-sm text-gray-700 w-full">
                     <div className="flex items-start gap-3">
