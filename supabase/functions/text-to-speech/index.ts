@@ -22,52 +22,50 @@ serve(async (req) => {
     console.log('Generating speech for text:', text.substring(0, 100), '...')
     console.log('Using voice:', voice)
 
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured')
+    const googleApiKey = Deno.env.get('GOOGLE_API_KEY')
+    if (!googleApiKey) {
+      throw new Error('Google API key not configured')
     }
 
-    // Generate speech from text using OpenAI
-    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+    // Generate speech from text using Google Text-to-Speech
+    const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'tts-1',
-        input: text,
-        voice: voice || 'nova',
-        response_format: 'mp3',
+        input: {
+          text: text
+        },
+        voice: {
+          languageCode: 'en-US',
+          name: voice || 'en-US-Neural2-F',
+          ssmlGender: voice?.includes('F') || voice?.includes('H') ? 'FEMALE' : 'MALE'
+        },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate: 0.9,
+          pitch: 0.0
+        }
       }),
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('OpenAI API error:', errorText)
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
+      console.error('Google TTS API error:', errorText)
+      throw new Error(`Google TTS API error: ${response.status} - ${errorText}`)
     }
 
-    // Get the audio as array buffer
-    const arrayBuffer = await response.arrayBuffer()
+    const data = await response.json()
     
-    // Convert to base64 using btoa with proper string conversion
-    const bytes = new Uint8Array(arrayBuffer)
-    let binaryString = ''
-    
-    // Build binary string in chunks to avoid call stack issues
-    const chunkSize = 8192
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      const chunk = bytes.subarray(i, i + chunkSize)
-      binaryString += String.fromCharCode(...chunk)
+    if (!data.audioContent) {
+      throw new Error('No audio content received from Google TTS')
     }
-    
-    const base64Audio = btoa(binaryString)
 
-    console.log('Speech generated successfully, audio length:', base64Audio.length)
+    console.log('Speech generated successfully, audio length:', data.audioContent.length)
 
     return new Response(
-      JSON.stringify({ audioContent: base64Audio }),
+      JSON.stringify({ audioContent: data.audioContent }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },

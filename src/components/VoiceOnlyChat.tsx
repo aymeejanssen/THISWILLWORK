@@ -45,7 +45,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isCallOngoing, setIsCallOngoing] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState<string>('nova');
+  const [selectedVoice, setSelectedVoice] = useState<string>('en-US-Neural2-F');
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
@@ -59,13 +59,12 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recognitionRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // OpenAI TTS voices - 5 best options
-  const openAIVoices = [
-    { id: 'nova', name: 'Nova (Warm & Empathetic)', description: 'Warm, caring female voice' },
-    { id: 'alloy', name: 'Alloy (Neutral)', description: 'Balanced, professional voice' },
-    { id: 'echo', name: 'Echo (Gentle)', description: 'Soft, gentle male voice' },
-    { id: 'onyx', name: 'Onyx (Deep)', description: 'Deep, calming male voice' },
-    { id: 'shimmer', name: 'Shimmer (Bright)', description: 'Bright, encouraging female voice' }
+  // Google Cloud Text-to-Speech voices - calm and kind options
+  const googleVoices = [
+    { id: 'en-US-Neural2-F', name: 'Emily (Soft & Understanding)', description: 'Warm, empathetic female voice', gender: 'FEMALE' },
+    { id: 'en-US-Neural2-H', name: 'Grace (Gentle & Caring)', description: 'Soft, nurturing female voice', gender: 'FEMALE' },
+    { id: 'en-US-Neural2-A', name: 'David (Calm & Supportive)', description: 'Gentle, reassuring male voice', gender: 'MALE' },
+    { id: 'en-US-Neural2-J', name: 'Michael (Kind & Patient)', description: 'Warm, understanding male voice', gender: 'MALE' }
   ];
 
   // Request microphone permission
@@ -408,7 +407,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     stopSpeechRecognition();
     
     try {
-      console.log('Generating speech with voice:', selectedVoice);
+      console.log('Generating speech with Google voice:', selectedVoice);
 
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { 
@@ -433,7 +432,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           await audioContextRef.current.resume();
         }
 
-        // Decode base64 audio
+        // Google TTS returns base64 encoded audio directly
         const binaryString = atob(data.audioContent);
         const bytes = new Uint8Array(binaryString.length);
         for (let i = 0; i < binaryString.length; i++) {
@@ -464,14 +463,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         };
         
         source.start(0);
-        console.log('Audio playback started');
+        console.log('Google TTS audio playback started');
       } else {
-        console.error('No audio content received');
+        console.error('No audio content received from Google TTS');
         setIsAssistantSpeaking(false);
         restartSpeechRecognitionDelayed();
       }
     } catch (error) {
-      console.error('Error with speech synthesis:', error);
+      console.error('Error with Google TTS:', error);
       setIsAssistantSpeaking(false);
       restartSpeechRecognitionDelayed();
       
@@ -536,14 +535,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               {/* Voice Selection */}
               <div className="mb-6 w-full max-w-sm">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Choose Your Voice
+                  Choose Your AI Voice
                 </label>
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a voice" />
                   </SelectTrigger>
                   <SelectContent>
-                    {openAIVoices.map((voice) => (
+                    {googleVoices.map((voice) => (
                       <SelectItem key={voice.id} value={voice.id}>
                         <div className="flex flex-col">
                           <span className="font-medium">{voice.name}</span>
@@ -581,7 +580,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               <p className="text-gray-600 text-lg text-center">
                 {microphonePermission === 'denied' 
                   ? "Please allow microphone access to start" 
-                  : "Tap to begin your voice conversation"
+                  : "Tap to begin your voice conversation with Google TTS"
                 }
               </p>
             </div>
@@ -680,14 +679,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             {/* Voice Selection in Settings */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Voice Selection
+                Google AI Voice Selection
               </label>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a voice" />
                 </SelectTrigger>
                 <SelectContent>
-                  {openAIVoices.map((voice) => (
+                  {googleVoices.map((voice) => (
                     <SelectItem key={voice.id} value={voice.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{voice.name}</span>
