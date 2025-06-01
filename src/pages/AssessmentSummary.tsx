@@ -402,7 +402,7 @@ const AssessmentSummary = () => {
               title="Unlimited Support" 
               price="499 AED" 
               sessions="Unlimited access" 
-              features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support"]} 
+              features={["24/7 AI availability", "Unlimited conversations", "Always there when you need support", "Immediate anxiety relief", "AI companion during lonely moments", "Timeless sessions", "Crisis intervention support", "Personalized AI coaching plans", "Progress insights & reports", "Advanced emotional coaching", "Family relationship support", "Weekly wellness check-ins", "Mindfulness & meditation guidance"]} 
             />
           </div>
         </div>
