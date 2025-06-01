@@ -68,6 +68,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   // Audio level monitoring function
   const startAudioLevelMonitoring = useCallback(() => {
+    console.log('Starting audio level monitoring...');
+    console.log('Media stream available:', !!mediaStreamRef.current);
+    
     if (!mediaStreamRef.current) {
       console.log('No media stream available for audio monitoring');
       return;
@@ -79,23 +82,27 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
       audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
       
-      audioAnalyzerRef.current.fftSize = 512;
-      audioAnalyzerRef.current.smoothingTimeConstant = 0.8;
+      audioAnalyzerRef.current.fftSize = 256; // Smaller FFT for better performance
+      audioAnalyzerRef.current.smoothingTimeConstant = 0.3; // Less smoothing for more responsive
       source.connect(audioAnalyzerRef.current);
 
       const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
 
       const updateAudioLevel = () => {
-        if (!audioAnalyzerRef.current) return;
+        if (!audioAnalyzerRef.current || !conversationStarted) return;
 
         audioAnalyzerRef.current.getByteFrequencyData(dataArray);
         
-        // Calculate average volume with better sensitivity
-        const average = dataArray.reduce((acc, value) => acc + value, 0) / dataArray.length;
-        const normalizedLevel = Math.min(100, Math.max(0, (average / 64) * 100)); // Increased sensitivity
+        // Calculate RMS (Root Mean Square) for better audio level detection
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i] * dataArray[i];
+        }
+        const rms = Math.sqrt(sum / dataArray.length);
+        const normalizedLevel = Math.min(100, Math.max(0, (rms / 128) * 100));
         
         setAudioLevel(normalizedLevel);
-        console.log('Audio level:', normalizedLevel); // Debug log
+        console.log('Raw audio level:', rms, 'Normalized:', normalizedLevel);
         
         if (conversationStarted && isMicrophoneEnabled) {
           animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
@@ -107,7 +114,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     } catch (error) {
       console.error('Error setting up audio level monitoring:', error);
     }
-  }, [conversationStarted, isMicrophoneEnabled]);
+  }, []); // Remove dependencies to prevent recreation
 
   const stopAudioLevelMonitoring = useCallback(() => {
     if (animationFrameRef.current) {
@@ -132,16 +139,22 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         audio: {
           sampleRate: 44100,
           channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: false, // Disable to get raw audio levels
-          autoGainControl: false // Disable to get raw audio levels
+          echoCancellation: false, // Turn off to get raw audio
+          noiseSuppression: false,
+          autoGainControl: false
         }
       });
       
       mediaStreamRef.current = stream;
       setMicrophonePermission('granted');
       console.log('Microphone permission granted');
+      console.log('Media stream tracks:', stream.getTracks());
       toast.success("Microphone access granted!");
+      
+      // Start audio monitoring immediately after getting permission
+      setTimeout(() => {
+        startAudioLevelMonitoring();
+      }, 100);
       
       return true;
     } catch (error) {
@@ -370,7 +383,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
-        startAudioLevelMonitoring(); // Ensure this is called
+        // Restart audio monitoring when enabling microphone
+        if (mediaStreamRef.current && !audioAnalyzerRef.current) {
+          startAudioLevelMonitoring();
+        }
       }, 500);
     } else if (isMicrophoneEnabled) {
       stopSpeechRecognition();
@@ -410,7 +426,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     if (isMicrophoneEnabled && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
-        startAudioLevelMonitoring(); // Start monitoring immediately
+        // Ensure audio monitoring is running
+        if (mediaStreamRef.current && !audioAnalyzerRef.current) {
+          startAudioLevelMonitoring();
+        }
         toast.success("Voice recognition started. Start speaking!");
       }, 1000);
     }
@@ -661,9 +680,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                       audioLevel={audioLevel} 
                       isActive={isMicrophoneEnabled && microphonePermission === 'granted'} 
                     />
-                    {/* Debug info */}
+                    {/* Enhanced debug info */}
                     <div className="text-xs text-gray-500 mt-2">
-                      Audio Level: {Math.round(audioLevel)}% | Stream: {mediaStreamRef.current ? 'Connected' : 'Not Connected'} | Mic: {isMicrophoneEnabled ? 'On' : 'Off'}
+                      Audio Level: {Math.round(audioLevel)}% | Stream: {mediaStreamRef.current ? 'Connected' : 'Not Connected'} | Mic: {isMicrophoneEnabled ? 'On' : 'Off'} | Analyzer: {audioAnalyzerRef.current ? 'Active' : 'Inactive'}
                     </div>
                   </div>
                   
