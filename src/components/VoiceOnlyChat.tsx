@@ -14,6 +14,7 @@ declare global {
   interface Window {
     SpeechRecognition: any;
     webkitSpeechRecognition: any;
+    webkitAudioContext: typeof AudioContext;
   }
 }
 
@@ -73,7 +74,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
 
     try {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
       const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
       audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
       
@@ -408,7 +410,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     if (isMicrophoneEnabled && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
-        startAudioLevelMonitoring(); // Ensure this is called
+        startAudioLevelMonitoring(); // Start monitoring immediately
         toast.success("Voice recognition started. Start speaking!");
       }, 1000);
     }
@@ -661,7 +663,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     />
                     {/* Debug info */}
                     <div className="text-xs text-gray-500 mt-2">
-                      Audio Level: {Math.round(audioLevel)}%
+                      Audio Level: {Math.round(audioLevel)}% | Stream: {mediaStreamRef.current ? 'Connected' : 'Not Connected'} | Mic: {isMicrophoneEnabled ? 'On' : 'Off'}
                     </div>
                   </div>
                   
