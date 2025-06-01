@@ -139,6 +139,23 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   };
 
+  // Add the missing stopListening function
+  const stopListening = useCallback(() => {
+    console.log("🎙️ stopListening called");
+    
+    if (recognitionRef.current && isListeningRef.current) {
+      console.log("🎙️ Actually stopping speech recognition...");
+      try {
+        recognitionRef.current.abort();
+        console.log("🎙️ Speech recognition aborted");
+      } catch (error) {
+        console.error("🎙️ Error stopping recognition:", error);
+      }
+      isListeningRef.current = false;
+      setIsUserSpeaking(false);
+    }
+  }, []);
+
   // EXACTLY like assessment - simple speech recognition
   const setupSpeechRecognition = useCallback(() => {
     console.log('🎙️ Setting up speech recognition...');
@@ -279,7 +296,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         startListening();
       }, 1000);
     }
-  }, [isAssistantSpeaking, isProcessingResponse, microphonePermission, conversationStarted, isMicrophoneEnabled]);
+  }, [isAssistantSpeaking, isProcessingResponse, microphonePermission, conversationStarted, isMicrophoneEnabled, setupSpeechRecognition]);
 
   // Generate AI response
   const generateAIResponse = async (userMessage: string) => {
