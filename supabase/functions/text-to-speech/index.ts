@@ -88,15 +88,10 @@ serve(async (req) => {
           },
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: 0.95, // Slightly slower for more natural pace
-            pitch: -1.0, // Slightly lower pitch for warmth
+            speakingRate: 0.95,
+            pitch: -1.0,
             volumeGainDb: 0.0,
-            effectsProfileId: ['headphone-class-device'], // Optimize for headphones
-            // Add prosody for more natural speech patterns
-            synthesizeSpeechConfig: {
-              speakingRate: 0.95,
-              pitch: '-1st'
-            }
+            effectsProfileId: ['headphone-class-device']
           }
         }),
       })
