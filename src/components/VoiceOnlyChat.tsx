@@ -47,140 +47,72 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isCallOngoing, setIsCallOngoing] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState<string>('9BWtsMINqrJLrRacOk9x'); // Default to Aria from ElevenLabs
+  const [selectedVoice, setSelectedVoice] = useState<string>('9BWtsMINqrJLrRacOk9x');
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
-  const [isUsingAgent, setIsUsingAgent] = useState(false);
-  const [currentAgentId, setCurrentAgentId] = useState<string>('');
   const [audioLevel, setAudioLevel] = useState(0);
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const finalTranscriptRef = useRef<string>('');
   const mediaStreamRef = useRef<MediaStream | null>(null);
-  const recognitionRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const isListeningRef = useRef(false);
+  const finalTranscriptRef = useRef<string>('');
 
-  // Improved audio level monitoring function
+  // Simplified audio level monitoring
   const startAudioLevelMonitoring = useCallback(async () => {
-    console.log('🎤 Starting audio level monitoring...');
-    console.log('Media stream available:', !!mediaStreamRef.current);
+    console.log('🎤 Starting simplified audio monitoring...');
     
     if (!mediaStreamRef.current) {
-      console.error('❌ No media stream available for audio monitoring');
+      console.error('❌ No media stream for monitoring');
       return;
     }
 
     try {
-      // Create audio context if it doesn't exist
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AudioContext();
-        console.log('🔊 Created new AudioContext');
-      }
-
-      // Resume audio context if suspended
+      audioContextRef.current = new AudioContext({ sampleRate: 44100 });
+      
       if (audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
-        console.log('▶️ Resumed AudioContext');
       }
 
-      // Create media stream source
       const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
-      
-      // Create analyzer
       audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
-      audioAnalyzerRef.current.fftSize = 512;
-      audioAnalyzerRef.current.smoothingTimeConstant = 0.1;
+      audioAnalyzerRef.current.fftSize = 256;
+      audioAnalyzerRef.current.smoothingTimeConstant = 0.3;
       
-      // Connect source to analyzer
       source.connect(audioAnalyzerRef.current);
       
-      console.log('✅ Audio analyzer connected successfully');
-      console.log('Analyzer settings:', {
-        fftSize: audioAnalyzerRef.current.fftSize,
-        frequencyBinCount: audioAnalyzerRef.current.frequencyBinCount,
-        smoothingTimeConstant: audioAnalyzerRef.current.smoothingTimeConstant
-      });
-
       const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
 
-      const updateAudioLevel = () => {
-        if (!audioAnalyzerRef.current || !conversationStarted) {
-          console.log('🛑 Stopping audio level monitoring - analyzer removed or conversation ended');
-          return;
-        }
-
-        try {
-          audioAnalyzerRef.current.getByteFrequencyData(dataArray);
-          
-          // Calculate RMS for better audio level detection
-          let sum = 0;
-          for (let i = 0; i < dataArray.length; i++) {
-            sum += dataArray[i] * dataArray[i];
-          }
-          const rms = Math.sqrt(sum / dataArray.length);
-          
-          // More sensitive normalization
-          const normalizedLevel = Math.min(100, Math.max(0, (rms / 50) * 100));
-          
-          setAudioLevel(normalizedLevel);
-          
-          // Log every 30 frames to avoid spam
-          if (Math.random() < 0.03) {
-            console.log('🎵 Audio data:', {
-              rms: rms.toFixed(2),
-              normalizedLevel: normalizedLevel.toFixed(1),
-              rawMax: Math.max(...dataArray),
-              rawAvg: (dataArray.reduce((a, b) => a + b, 0) / dataArray.length).toFixed(1)
-            });
-          }
-          
-          if (conversationStarted && isMicrophoneEnabled) {
-            animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
-          }
-        } catch (error) {
-          console.error('❌ Error in audio level update:', error);
+      const updateLevel = () => {
+        if (!audioAnalyzerRef.current || !conversationStarted) return;
+        
+        audioAnalyzerRef.current.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+        const level = Math.min(100, (average / 128) * 100);
+        
+        setAudioLevel(level);
+        
+        if (conversationStarted) {
+          animationFrameRef.current = requestAnimationFrame(updateLevel);
         }
       };
 
-      // Start the monitoring loop
-      updateAudioLevel();
-      console.log('🎯 Audio level monitoring loop started');
+      updateLevel();
+      console.log('✅ Audio monitoring started');
       
     } catch (error) {
-      console.error('❌ Error setting up audio level monitoring:', error);
-      toast.error('Failed to set up audio monitoring');
+      console.error('❌ Audio monitoring error:', error);
     }
-  }, [conversationStarted, isMicrophoneEnabled]);
+  }, [conversationStarted]);
 
-  const stopAudioLevelMonitoring = useCallback(() => {
-    console.log('🛑 Stopping audio level monitoring...');
-    
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-      console.log('⏹️ Cancelled animation frame');
-    }
-    
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-      console.log('🔇 Closed AudioContext');
-    }
-    
-    audioAnalyzerRef.current = null;
-    setAudioLevel(0);
-    console.log('✅ Audio monitoring stopped');
-  }, []);
-
-  // Request microphone permission with better error handling
+  // Request microphone permission
   const requestMicrophonePermission = async () => {
     try {
-      console.log('🎤 Requesting microphone permission...');
+      console.log('🎤 Requesting microphone...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           sampleRate: 44100,
@@ -193,89 +125,155 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       
       mediaStreamRef.current = stream;
       setMicrophonePermission('granted');
-      console.log('✅ Microphone permission granted');
-      console.log('Stream details:', {
-        active: stream.active,
-        trackCount: stream.getTracks().length,
-        audioTracks: stream.getAudioTracks().length
-      });
+      console.log('✅ Microphone granted');
       
-      toast.success("Microphone access granted!");
-      
-      // Start audio monitoring immediately after getting permission
       await startAudioLevelMonitoring();
-      
+      toast.success("Microphone access granted!");
       return true;
     } catch (error) {
-      console.error('❌ Microphone permission denied:', error);
+      console.error('❌ Microphone denied:', error);
       setMicrophonePermission('denied');
-      toast.error("Microphone access is required for voice conversation. Please allow microphone access and try again.");
+      toast.error("Microphone access required for voice conversation.");
       return false;
     }
   };
 
-  const stopCurrentAudio = useCallback(() => {
-    console.log('Stopping current audio...');
-    voiceService.stopCurrentAudio();
-    setIsAssistantSpeaking(false);
-  }, []);
+  // Simplified speech recognition setup
+  const setupSpeechRecognition = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window)) {
+      toast.error("Speech Recognition not supported. Please use Chrome.");
+      return;
+    }
 
-  const startSpeechRecognition = useCallback(() => {
-    if (!recognitionRef.current || !conversationStarted || !isMicrophoneEnabled || isAssistantSpeaking || microphonePermission !== 'granted') {
-      console.log('Not starting recognition - conditions not met:', {
-        conversationStarted,
-        isMicrophoneEnabled,
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+    
+    // Simple, reliable configuration
+    recognitionRef.current.continuous = true;
+    recognitionRef.current.interimResults = true;
+    recognitionRef.current.lang = 'en-US';
+    recognitionRef.current.maxAlternatives = 1;
+
+    recognitionRef.current.onstart = () => {
+      console.log("🎙️ Speech recognition started");
+      setIsUserSpeaking(true);
+      isListeningRef.current = true;
+    };
+
+    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+      console.log("🎙️ Speech result received");
+      let interimTranscript = '';
+      let finalTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+          console.log("📝 Final transcript:", transcript);
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      
+      setMessage(interimTranscript);
+      
+      if (finalTranscript.trim()) {
+        finalTranscriptRef.current += finalTranscript;
+        setTranscript(finalTranscriptRef.current);
+        
+        // Process after a short delay to allow for more speech
+        setTimeout(() => {
+          if (finalTranscriptRef.current.trim() && !isProcessingResponse) {
+            const messageToProcess = finalTranscriptRef.current.trim();
+            console.log("🔄 Processing message:", messageToProcess);
+            
+            finalTranscriptRef.current = '';
+            setTranscript('');
+            setMessage('');
+            
+            generateAIResponse(messageToProcess);
+          }
+        }, 1500);
+      }
+    };
+
+    recognitionRef.current.onend = () => {
+      console.log("🎙️ Speech recognition ended");
+      setIsUserSpeaking(false);
+      isListeningRef.current = false;
+      
+      // Restart if we should be listening
+      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
+        console.log("🔄 Restarting speech recognition...");
+        setTimeout(() => {
+          if (!isListeningRef.current) {
+            startListening();
+          }
+        }, 1000);
+      }
+    };
+
+    recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error("🎙️ Speech error:", event.error);
+      setIsUserSpeaking(false);
+      isListeningRef.current = false;
+      
+      if (event.error === 'not-allowed') {
+        setMicrophonePermission('denied');
+        toast.error("Microphone access denied.");
+      } else if (event.error !== 'aborted') {
+        toast.error(`Speech error: ${event.error}`);
+      }
+    };
+  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
+
+  // Simple start listening function
+  const startListening = useCallback(() => {
+    if (!recognitionRef.current || isListeningRef.current || isAssistantSpeaking || isProcessingResponse || microphonePermission !== 'granted') {
+      console.log("❌ Cannot start listening:", {
+        hasRecognition: !!recognitionRef.current,
+        isListening: isListeningRef.current,
         isAssistantSpeaking,
-        microphonePermission
+        isProcessingResponse,
+        micPermission: microphonePermission
       });
       return;
     }
 
     try {
-      console.log('Starting speech recognition...');
+      console.log("🎙️ Starting to listen...");
       recognitionRef.current.start();
     } catch (error) {
-      console.log('Recognition start error (probably already running):', error);
+      console.log("🎙️ Start listening error:", error);
     }
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, microphonePermission]);
+  }, [isAssistantSpeaking, isProcessingResponse, microphonePermission]);
 
-  const stopSpeechRecognition = useCallback(() => {
-    if (recognitionRef.current) {
-      console.log('Stopping speech recognition...');
+  // Simple stop listening function
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current && isListeningRef.current) {
+      console.log("🛑 Stopping listening...");
       try {
         recognitionRef.current.stop();
       } catch (error) {
-        console.log('Error stopping recognition:', error);
+        console.log("🛑 Stop error:", error);
       }
     }
   }, []);
 
-  const restartSpeechRecognitionDelayed = useCallback(() => {
-    if (recognitionRestartTimeoutRef.current) {
-      clearTimeout(recognitionRestartTimeoutRef.current);
-    }
-
-    recognitionRestartTimeoutRef.current = setTimeout(() => {
-      console.log('Attempting delayed recognition restart...');
-      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
-        startSpeechRecognition();
-      }
-    }, 1000);
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission, startSpeechRecognition]);
-
+  // Generate AI response
   const generateAIResponse = async (userMessage: string) => {
     if (!userMessage.trim() || isProcessingResponse) return;
     
     setIsProcessingResponse(true);
-    console.log('Generating AI response for:', userMessage);
+    console.log('🤖 Generating response for:', userMessage);
 
-    stopSpeechRecognition();
+    stopListening();
 
     try {
       const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
       
       if (selectedVoiceOption?.type === 'agent') {
-        console.log('Using ElevenLabs conversational agent:', selectedVoice);
+        console.log('🤖 Using ElevenLabs agent:', selectedVoice);
         const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, userMessage);
         setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
       } else {
@@ -296,19 +294,19 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         });
 
         if (error) {
-          console.error('Error generating AI response:', error);
+          console.error('🤖 AI response error:', error);
           throw error;
         }
 
         const aiResponse = data?.response || "I understand. Could you tell me more about that?";
-        console.log('AI response generated:', aiResponse);
+        console.log('🤖 AI response:', aiResponse);
 
         setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
         await speak(aiResponse);
       }
       
     } catch (error) {
-      console.error('Error in AI response generation:', error);
+      console.error('🤖 AI error:', error);
       const fallbackResponse = "I'm here to listen. Please continue sharing what's on your mind.";
       await speak(fallbackResponse);
     } finally {
@@ -316,136 +314,58 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   };
 
-  useEffect(() => {
-    if (!('webkitSpeechRecognition' in window)) {
-      toast.error("Speech Recognition not supported in this browser. Please try Chrome.");
-      return;
+  // Speak function
+  const speak = async (text: string) => {
+    if (!isSpeakerEnabled || !text.trim()) return;
+    
+    console.log('🔊 Speaking:', text.substring(0, 50) + '...');
+    setIsAssistantSpeaking(true);
+    
+    stopListening();
+    
+    try {
+      await voiceService.speak(text, selectedVoice);
+      console.log('🔊 Finished speaking');
+    } catch (error) {
+      console.error('🔊 Speech error:', error);
+      toast.error("Could not play response audio.");
+    } finally {
+      setIsAssistantSpeaking(false);
+      
+      // Restart listening after speaking
+      if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
+        setTimeout(() => {
+          startListening();
+        }, 500);
+      }
     }
+  };
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true;
-    recognitionRef.current.lang = userProfile?.preferredLanguage || 'en-US';
-
-    recognitionRef.current.onstart = () => {
-      console.log("Speech recognition started");
-      setIsUserSpeaking(true);
-    };
-
-    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-      let interimTranscript = '';
-      let finalTranscript = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-      
-      if (finalTranscript) {
-        finalTranscriptRef.current += finalTranscript;
-        setTranscript(finalTranscriptRef.current);
-        console.log('Final transcript:', finalTranscriptRef.current);
-        
-        if (silenceTimeoutRef.current) {
-          clearTimeout(silenceTimeoutRef.current);
-        }
-        
-        silenceTimeoutRef.current = setTimeout(() => {
-          if (finalTranscriptRef.current.trim()) {
-            console.log('Processing speech after silence:', finalTranscriptRef.current);
-            const messageToProcess = finalTranscriptRef.current.trim();
-            finalTranscriptRef.current = '';
-            setTranscript('');
-            setMessage('');
-            
-            generateAIResponse(messageToProcess);
-          }
-        }, 2000);
-      }
-      
-      setMessage(interimTranscript);
-    };
-
-    recognitionRef.current.onend = () => {
-      console.log("Speech recognition ended");
-      setIsUserSpeaking(false);
-      
-      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
-        console.log('Restarting recognition after natural end...');
-        restartSpeechRecognitionDelayed();
-      }
-    };
-
-    recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error("Speech recognition error:", event.error);
-      setIsUserSpeaking(false);
-      
-      if (event.error === 'not-allowed') {
-        setMicrophonePermission('denied');
-        toast.error("Microphone access denied. Please allow microphone access in your browser settings.");
-      } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
-        toast.error(`Speech recognition error: ${event.error}`);
-        restartSpeechRecognitionDelayed();
-      }
-    };
-
+  // Initialize speech recognition
+  useEffect(() => {
+    setupSpeechRecognition();
+    
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
-      if (silenceTimeoutRef.current) {
-        clearTimeout(silenceTimeoutRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
-      if (recognitionRestartTimeoutRef.current) {
-        clearTimeout(recognitionRestartTimeoutRef.current);
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
       }
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach(track => track.stop());
       }
-      stopCurrentAudio();
-      stopAudioLevelMonitoring();
     };
-  }, [userProfile?.preferredLanguage, restartSpeechRecognitionDelayed, microphonePermission, stopAudioLevelMonitoring]);
+  }, [setupSpeechRecognition]);
 
-  // Improved microphone toggle
-  const toggleMicrophone = async () => {
-    setIsMicrophoneEnabled(!isMicrophoneEnabled);
-    if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
-      setTimeout(async () => {
-        startSpeechRecognition();
-        if (mediaStreamRef.current) {
-          await startAudioLevelMonitoring();
-        }
-      }, 500);
-    } else if (isMicrophoneEnabled) {
-      stopSpeechRecognition();
-      stopAudioLevelMonitoring();
-    }
-  };
-
-  const toggleSpeaker = () => {
-    if (isSpeakerEnabled) {
-      stopCurrentAudio();
-    }
-    setIsSpeakerEnabled(!isSpeakerEnabled);
-  };
-
-  const testVoice = () => {
-    const testText = "Hi there! This is how I sound. I'm here to support you with warmth and understanding. Does this voice feel comfortable to you?";
-    speak(testText);
-  };
-
-  // Improved conversation start
+  // Start conversation
   const startConversation = async () => {
     if (microphonePermission !== 'granted') {
       const hasPermission = await requestMicrophonePermission();
-      if (!hasPermission) {
-        return;
-      }
+      if (!hasPermission) return;
     }
 
     setIsConnecting(true);
@@ -454,50 +374,42 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setConversationStarted(true);
     setIsCallOngoing(true);
 
-    // Start everything with proper timing
-    if (isMicrophoneEnabled && microphonePermission === 'granted') {
-      setTimeout(async () => {
-        startSpeechRecognition();
-        
-        // Ensure audio monitoring starts
-        if (mediaStreamRef.current) {
-          await startAudioLevelMonitoring();
-        }
-        
-        toast.success("Voice recognition started. Start speaking!");
-      }, 1000);
-    }
+    // Start listening after a short delay
+    setTimeout(() => {
+      if (isMicrophoneEnabled && microphonePermission === 'granted') {
+        startListening();
+        toast.success("Voice recognition started! Start speaking.");
+      }
+    }, 1000);
 
     // Initial greeting
-    const greeting = getPersonalizedGreeting();
     setTimeout(() => {
       const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
-      if (selectedVoiceOption?.type === 'agent') {
-        console.log('Using agent - no manual greeting needed');
-      } else {
+      if (selectedVoiceOption?.type !== 'agent') {
+        const greeting = getPersonalizedGreeting();
         speak(greeting);
       }
     }, 1500);
   };
 
+  // End conversation
   const endConversation = () => {
     setConversationStarted(false);
     setIsCallOngoing(false);
-    stopSpeechRecognition();
-    stopCurrentAudio();
-    stopAudioLevelMonitoring();
-    
-    if (silenceTimeoutRef.current) {
-      clearTimeout(silenceTimeoutRef.current);
-    }
-    
-    if (recognitionRestartTimeoutRef.current) {
-      clearTimeout(recognitionRestartTimeoutRef.current);
-    }
+    stopListening();
     
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach(track => track.stop());
       mediaStreamRef.current = null;
+    }
+    
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
     }
     
     finalTranscriptRef.current = '';
@@ -505,54 +417,52 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setMessage('');
     setConversationHistory([]);
     setIsProcessingResponse(false);
+    setAudioLevel(0);
     toast.message("Conversation ended.");
   };
 
-  const speak = async (text: string) => {
-    if (!isSpeakerEnabled || !text.trim()) {
-      console.log('Skipping speech - speaker disabled or empty text');
-      return;
-    }
-    
-    console.log('Starting to speak:', text.substring(0, 50) + '...');
-    setIsAssistantSpeaking(true);
-    
-    stopSpeechRecognition();
-    
-    try {
-      await voiceService.speak(text, selectedVoice);
-      console.log('AI finished speaking, restarting recognition');
-      setIsAssistantSpeaking(false);
-      
-      setTimeout(() => {
-        if (conversationStarted && isMicrophoneEnabled && !isProcessingResponse && microphonePermission === 'granted') {
-          console.log('Restarting recognition after AI speech');
-          startSpeechRecognition();
-        }
-      }, 500);
-    } catch (error) {
-      console.error('Error with speech:', error);
-      setIsAssistantSpeaking(false);
-      restartSpeechRecognitionDelayed();
-      toast.error("Sorry, I couldn't speak that response. Please try again.");
+  // Toggle microphone
+  const toggleMicrophone = () => {
+    setIsMicrophoneEnabled(!isMicrophoneEnabled);
+    if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
+      setTimeout(() => startListening(), 500);
+    } else if (isMicrophoneEnabled) {
+      stopListening();
     }
   };
 
+  // Toggle speaker
+  const toggleSpeaker = () => {
+    if (isSpeakerEnabled) {
+      voiceService.stopCurrentAudio();
+    }
+    setIsSpeakerEnabled(!isSpeakerEnabled);
+  };
+
+  // Test voice
+  const testVoice = () => {
+    const testText = "Hi there! This is how I sound. I'm here to support you with warmth and understanding.";
+    speak(testText);
+  };
+
+  // Get personalized greeting
   const getPersonalizedGreeting = () => {
     if (!userProfile) {
-      return "Hi there! I'm your AI wellness companion. I'm here to listen and support you through whatever you're experiencing. What's on your mind today?";
+      return "Hi there! I'm your AI wellness companion. I'm here to listen and support you. What's on your mind today?";
     }
 
     const name = userProfile.name || 'dear';
     const struggles = userProfile.currentStruggles?.join(', ') || 'what you\'re going through';
     
-    return `Hi ${name}! I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
+    return `Hi ${name}! I'm really glad you're here. I know it takes courage to reach out, especially when dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
   };
 
+  // Set voice service enabled state
   useEffect(() => {
     voiceService.setEnabled(isSpeakerEnabled);
   }, [isSpeakerEnabled]);
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       voiceService.cleanup();
@@ -592,16 +502,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         <CardContent className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-purple-50/30 to-teal-50/30">
           {!conversationStarted ? (
             <div className="flex flex-col items-center justify-center h-full space-y-6">
-              {/* Microphone permission status */}
               {microphonePermission === 'denied' && (
                 <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
                   <p className="text-red-700 text-sm text-center">
-                    Microphone access is required for voice conversation. Please enable microphone access in your browser settings and refresh the page.
+                    Microphone access is required. Please enable microphone access and refresh the page.
                   </p>
                 </div>
               )}
 
-              {/* Voice Selection with grouped options */}
               <div className="mb-6 w-full max-w-sm">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Choose Your AI Experience
@@ -647,7 +555,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   </SelectContent>
                 </Select>
                 
-                {/* Show test button only for TTS voices, not agents */}
                 {allVoices.find(v => v.id === selectedVoice)?.type === 'tts' && (
                   <Button 
                     variant="outline" 
@@ -660,7 +567,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   </Button>
                 )}
                 
-                {/* Voice provider info */}
                 <div className="mt-2 text-xs text-gray-600 text-center">
                   {allVoices.find(v => v.id === selectedVoice)?.type === 'agent' ? (
                     <span className="text-green-600">🤖 Using your ElevenLabs conversational AI agent</span>
@@ -703,27 +609,17 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
                   
-                  {/* Audio Level Indicator - Always show when conversation is active */}
                   <div className="mt-6 mb-4">
                     <AudioLevelIndicator 
                       audioLevel={audioLevel} 
                       isActive={isMicrophoneEnabled && microphonePermission === 'granted'} 
                     />
-                    {/* Enhanced debug info */}
                     <div className="text-xs text-gray-500 mt-2">
-                      Audio Level: {Math.round(audioLevel)}% | Stream: {mediaStreamRef.current ? 'Connected' : 'Not Connected'} | Mic: {isMicrophoneEnabled ? 'On' : 'Off'} | Analyzer: {audioAnalyzerRef.current ? 'Active' : 'Inactive'}
+                      Audio Level: {Math.round(audioLevel)}% | Listening: {isListeningRef.current ? 'Yes' : 'No'} | Mic: {isMicrophoneEnabled ? 'On' : 'Off'}
                     </div>
                   </div>
                   
-                  {/* Status indicators */}
                   <div className="mt-4 space-y-2">
-                    {isUsingAgent && (
-                      <div className="flex items-center justify-center mb-2">
-                        <div className="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
-                        <span className="text-sm text-green-600">Using AI Agent: {allVoices.find(v => v.id === currentAgentId)?.name}</span>
-                      </div>
-                    )}
-                    
                     {isAssistantSpeaking && (
                       <div className="flex items-center justify-center">
                         <div className="animate-pulse h-3 w-3 bg-purple-500 rounded-full mr-2"></div>
@@ -731,7 +627,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={stopCurrentAudio}
+                          onClick={() => voiceService.stopCurrentAudio()}
                           className="ml-2 text-xs"
                         >
                           Skip
@@ -759,18 +655,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                         <span className="text-sm text-gray-600">Ready to listen...</span>
                       </div>
                     )}
-
-                    {microphonePermission === 'denied' && (
-                      <div className="flex items-center justify-center">
-                        <div className="h-3 w-3 bg-red-500 rounded-full mr-2"></div>
-                        <span className="text-sm text-red-600">Microphone access denied</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Control buttons */}
               <div className="flex items-center justify-around w-full p-4 border-t border-gray-200">
                 <Button
                   variant="ghost"
@@ -806,7 +694,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           <div className="p-6 border-t border-gray-200">
             <h4 className="text-lg font-semibold mb-4">Settings</h4>
             
-            {/* Voice Selection in Settings */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 AI Voice Selection
@@ -852,7 +739,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 </SelectContent>
               </Select>
               
-              {/* Show test button only for TTS voices */}
               {allVoices.find(v => v.id === selectedVoice)?.type === 'tts' && (
                 <Button 
                   variant="outline" 
@@ -866,7 +752,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               )}
             </div>
 
-            {/* Microphone and speaker controls */}
             <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
               <Button
