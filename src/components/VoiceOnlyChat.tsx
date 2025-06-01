@@ -280,9 +280,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
       if (silenceTimeoutRef.current) {
         clearTimeout(silenceTimeoutRef.current);
       }
@@ -334,15 +331,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setIsConnecting(false);
     setConversationStarted(true);
     setIsCallOngoing(true);
-
-    // Initialize audio context
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new AudioContext();
-      } catch (error) {
-        console.error('Failed to create audio context:', error);
-      }
-    }
 
     // Start speech recognition
     if (isMicrophoneEnabled && microphonePermission === 'granted') {

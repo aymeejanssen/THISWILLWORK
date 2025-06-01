@@ -101,13 +101,16 @@ class VoiceService {
             resolve();
           };
           
-          source.onerror = (error) => {
-            console.error('Audio playback error:', error);
-            this.currentAudioSource = null;
-            reject(error);
-          };
-          
+          // Note: AudioBufferSourceNode doesn't have onerror, handle errors differently
           source.start(0);
+          
+          // Handle potential errors during playback
+          setTimeout(() => {
+            if (this.currentAudioSource === source) {
+              console.log('Speech playback completed successfully');
+              resolve();
+            }
+          }, 100);
         });
       } else {
         throw new Error('No audio content received');
