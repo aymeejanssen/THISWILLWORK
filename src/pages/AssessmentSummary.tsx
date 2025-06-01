@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle, X } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
-import ChatInterface from '../components/ChatInterface';
+import VoiceOnlyChat from '../components/VoiceOnlyChat';
 
 interface AIInsight {
   title: string;
@@ -176,7 +176,7 @@ const AssessmentSummary = () => {
               </CardContent>
             </Card>
           </div>}
-        <ChatInterface onClose={() => {
+        <VoiceOnlyChat onClose={() => {
         setShowFreeTrialChat(false);
         setShowPricing(true);
       }} userProfile={{
