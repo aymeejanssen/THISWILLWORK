@@ -67,14 +67,18 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   // Audio level monitoring function
   const startAudioLevelMonitoring = useCallback(() => {
-    if (!mediaStreamRef.current) return;
+    if (!mediaStreamRef.current) {
+      console.log('No media stream available for audio monitoring');
+      return;
+    }
 
     try {
-      audioContextRef.current = new AudioContext();
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
       audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
       
-      audioAnalyzerRef.current.fftSize = 256;
+      audioAnalyzerRef.current.fftSize = 512;
+      audioAnalyzerRef.current.smoothingTimeConstant = 0.8;
       source.connect(audioAnalyzerRef.current);
 
       const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
@@ -84,11 +88,12 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
         audioAnalyzerRef.current.getByteFrequencyData(dataArray);
         
-        // Calculate average volume
+        // Calculate average volume with better sensitivity
         const average = dataArray.reduce((acc, value) => acc + value, 0) / dataArray.length;
-        const normalizedLevel = Math.min(100, (average / 128) * 100);
+        const normalizedLevel = Math.min(100, Math.max(0, (average / 64) * 100)); // Increased sensitivity
         
         setAudioLevel(normalizedLevel);
+        console.log('Audio level:', normalizedLevel); // Debug log
         
         if (conversationStarted && isMicrophoneEnabled) {
           animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
@@ -96,6 +101,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       };
 
       updateAudioLevel();
+      console.log('Audio level monitoring started successfully');
     } catch (error) {
       console.error('Error setting up audio level monitoring:', error);
     }
@@ -125,8 +131,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           sampleRate: 44100,
           channelCount: 1,
           echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
+          noiseSuppression: false, // Disable to get raw audio levels
+          autoGainControl: false // Disable to get raw audio levels
         }
       });
       
@@ -134,11 +140,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       setMicrophonePermission('granted');
       console.log('Microphone permission granted');
       toast.success("Microphone access granted!");
-      
-      // Start audio level monitoring when we get the stream
-      if (conversationStarted) {
-        startAudioLevelMonitoring();
-      }
       
       return true;
     } catch (error) {
@@ -367,7 +368,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
-        startAudioLevelMonitoring();
+        startAudioLevelMonitoring(); // Ensure this is called
       }, 500);
     } else if (isMicrophoneEnabled) {
       stopSpeechRecognition();
@@ -407,7 +408,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     if (isMicrophoneEnabled && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
-        startAudioLevelMonitoring();
+        startAudioLevelMonitoring(); // Ensure this is called
         toast.success("Voice recognition started. Start speaking!");
       }, 1000);
     }
@@ -652,12 +653,16 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
                   
-                  {/* Audio Level Indicator */}
+                  {/* Audio Level Indicator - Always show when conversation is active */}
                   <div className="mt-6 mb-4">
                     <AudioLevelIndicator 
                       audioLevel={audioLevel} 
-                      isActive={isUserSpeaking && isMicrophoneEnabled && microphonePermission === 'granted'} 
+                      isActive={isMicrophoneEnabled && microphonePermission === 'granted'} 
                     />
+                    {/* Debug info */}
+                    <div className="text-xs text-gray-500 mt-2">
+                      Audio Level: {Math.round(audioLevel)}%
+                    </div>
                   </div>
                   
                   {/* Status indicators */}
