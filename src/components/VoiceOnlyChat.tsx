@@ -50,6 +50,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
+  const [isUsingAgent, setIsUsingAgent] = useState(false);
+  const [currentAgentId, setCurrentAgentId] = useState<string>('');
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
@@ -146,36 +148,49 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     stopSpeechRecognition();
 
     try {
-      // Create conversation context
-      const conversationContext = [
-        ...conversationHistory,
-        `User: ${userMessage}`
-      ].join('\n');
-
-      const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
-
-      const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-        body: {
-          prompt: userMessage,
-          context: conversationContext,
-          systemPrompt: systemPrompt,
-          maxTokens: 150
-        }
-      });
-
-      if (error) {
-        console.error('Error generating AI response:', error);
-        throw error;
-      }
-
-      const aiResponse = data?.response || "I understand. Could you tell me more about that?";
-      console.log('AI response generated:', aiResponse);
-
-      // Update conversation history
-      setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
+      // Check if we're using an ElevenLabs conversational agent
+      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
       
-      // Speak the response
-      await speak(aiResponse);
+      if (selectedVoiceOption?.type === 'agent') {
+        console.log('Using ElevenLabs conversational agent:', selectedVoice);
+        // Use the conversational agent
+        const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, userMessage);
+        
+        // Update conversation history
+        setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
+      } else {
+        // Use traditional text-to-speech with GPT
+        // Create conversation context
+        const conversationContext = [
+          ...conversationHistory,
+          `User: ${userMessage}`
+        ].join('\n');
+
+        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
+
+        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
+          body: {
+            prompt: userMessage,
+            context: conversationContext,
+            systemPrompt: systemPrompt,
+            maxTokens: 150
+          }
+        });
+
+        if (error) {
+          console.error('Error generating AI response:', error);
+          throw error;
+        }
+
+        const aiResponse = data?.response || "I understand. Could you tell me more about that?";
+        console.log('AI response generated:', aiResponse);
+
+        // Update conversation history
+        setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
+        
+        // Speak the response using TTS
+        await speak(aiResponse);
+      }
       
     } catch (error) {
       console.error('Error in AI response generation:', error);
@@ -335,7 +350,12 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     // Simulate initial AI message
     const greeting = getPersonalizedGreeting();
     setTimeout(() => {
-      speak(greeting);
+      if (selectedVoiceOption?.type === 'agent') {
+        // Let the agent handle the greeting naturally
+        console.log('Using agent - no manual greeting needed');
+      } else {
+        speak(greeting);
+      }
     }, 1500);
   };
 
@@ -466,17 +486,28 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               {/* Voice Selection with grouped options */}
               <div className="mb-6 w-full max-w-sm">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Choose Your AI Voice
+                  Choose Your AI Experience
                 </label>
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a voice" />
+                    <SelectValue placeholder="Select a voice or agent" />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50">
+                    <div className="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50">
+                      🤖 Your ElevenLabs Conversational Agents
+                    </div>
+                    {allVoices.filter(voice => voice.type === 'agent').map((voice) => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{voice.name}</span>
+                          <span className="text-xs text-gray-500">{voice.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                    <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50 mt-2">
                       🎭 Premium Human-like Voices (ElevenLabs)
                     </div>
-                    {allVoices.filter(voice => voice.provider === 'elevenlabs').map((voice) => (
+                    {allVoices.filter(voice => voice.provider === 'elevenlabs' && voice.type === 'tts').map((voice) => (
                       <SelectItem key={voice.id} value={voice.id}>
                         <div className="flex flex-col">
                           <span className="font-medium">{voice.name}</span>
@@ -497,19 +528,25 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={testVoice}
-                  className="mt-2 w-full"
-                  disabled={isAssistantSpeaking}
-                >
-                  {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
-                </Button>
+                
+                {/* Show test button only for TTS voices, not agents */}
+                {allVoices.find(v => v.id === selectedVoice)?.type === 'tts' && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={testVoice}
+                    className="mt-2 w-full"
+                    disabled={isAssistantSpeaking}
+                  >
+                    {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
+                  </Button>
+                )}
                 
                 {/* Voice provider info */}
                 <div className="mt-2 text-xs text-gray-600 text-center">
-                  {allVoices.find(v => v.id === selectedVoice)?.provider === 'elevenlabs' ? (
+                  {allVoices.find(v => v.id === selectedVoice)?.type === 'agent' ? (
+                    <span className="text-green-600">🤖 Using your ElevenLabs conversational AI agent</span>
+                  ) : allVoices.find(v => v.id === selectedVoice)?.provider === 'elevenlabs' ? (
                     <span className="text-purple-600">✨ Using premium ElevenLabs voice for natural speech</span>
                   ) : (
                     <span className="text-blue-600">🤖 Using Google Text-to-Speech</span>
@@ -534,7 +571,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               <p className="text-gray-600 text-lg text-center">
                 {microphonePermission === 'denied' 
                   ? "Please allow microphone access to start" 
-                  : "Tap to begin your voice conversation with ElevenLabs"
+                  : allVoices.find(v => v.id === selectedVoice)?.type === 'agent'
+                    ? "Tap to begin conversation with your AI agent"
+                    : "Tap to begin your voice conversation"
                 }
               </p>
             </div>
@@ -548,6 +587,13 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   
                   {/* Status indicators */}
                   <div className="mt-4 space-y-2">
+                    {isUsingAgent && (
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
+                        <span className="text-sm text-green-600">Using AI Agent: {allVoices.find(v => v.id === currentAgentId)?.name}</span>
+                      </div>
+                    )}
+                    
                     {isAssistantSpeaking && (
                       <div className="flex items-center justify-center">
                         <div className="animate-pulse h-3 w-3 bg-purple-500 rounded-full mr-2"></div>
@@ -637,13 +683,24 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               </label>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a voice" />
+                  <SelectValue placeholder="Select a voice or agent" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50">
+                  <div className="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50">
+                    🤖 Your ElevenLabs Conversational Agents
+                  </div>
+                  {allVoices.filter(voice => voice.type === 'agent').map((voice) => (
+                    <SelectItem key={voice.id} value={voice.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{voice.name}</span>
+                        <span className="text-xs text-gray-500">{voice.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                  <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50 mt-2">
                     🎭 Premium Human-like Voices (ElevenLabs)
                   </div>
-                  {allVoices.filter(voice => voice.provider === 'elevenlabs').map((voice) => (
+                  {allVoices.filter(voice => voice.provider === 'elevenlabs' && voice.type === 'tts').map((voice) => (
                     <SelectItem key={voice.id} value={voice.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{voice.name}</span>
@@ -664,17 +721,22 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={testVoice}
-                className="mt-2"
-                disabled={isAssistantSpeaking}
-              >
-                {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
-              </Button>
+              
+              {/* Show test button only for TTS voices */}
+              {allVoices.find(v => v.id === selectedVoice)?.type === 'tts' && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={testVoice}
+                  className="mt-2"
+                  disabled={isAssistantSpeaking}
+                >
+                  {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
+                </Button>
+              )}
             </div>
 
+            {/* Microphone and speaker controls */}
             <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
               <Button
