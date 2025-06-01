@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
 import { voiceService, allVoices } from '../services/voiceService';
+import AudioLevelIndicator from './AudioLevelIndicator';
 
 // TypeScript declarations for Speech Recognition API
 declare global {
@@ -53,6 +53,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [isUsingAgent, setIsUsingAgent] = useState(false);
   const [currentAgentId, setCurrentAgentId] = useState<string>('');
+  const [audioLevel, setAudioLevel] = useState(0);
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
@@ -60,6 +61,60 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const finalTranscriptRef = useRef<string>('');
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recognitionRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  // Audio level monitoring function
+  const startAudioLevelMonitoring = useCallback(() => {
+    if (!mediaStreamRef.current) return;
+
+    try {
+      audioContextRef.current = new AudioContext();
+      const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
+      audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
+      
+      audioAnalyzerRef.current.fftSize = 256;
+      source.connect(audioAnalyzerRef.current);
+
+      const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
+
+      const updateAudioLevel = () => {
+        if (!audioAnalyzerRef.current) return;
+
+        audioAnalyzerRef.current.getByteFrequencyData(dataArray);
+        
+        // Calculate average volume
+        const average = dataArray.reduce((acc, value) => acc + value, 0) / dataArray.length;
+        const normalizedLevel = Math.min(100, (average / 128) * 100);
+        
+        setAudioLevel(normalizedLevel);
+        
+        if (conversationStarted && isMicrophoneEnabled) {
+          animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
+        }
+      };
+
+      updateAudioLevel();
+    } catch (error) {
+      console.error('Error setting up audio level monitoring:', error);
+    }
+  }, [conversationStarted, isMicrophoneEnabled]);
+
+  const stopAudioLevelMonitoring = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    
+    audioAnalyzerRef.current = null;
+    setAudioLevel(0);
+  }, []);
 
   // Request microphone permission
   const requestMicrophonePermission = async () => {
@@ -79,6 +134,12 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       setMicrophonePermission('granted');
       console.log('Microphone permission granted');
       toast.success("Microphone access granted!");
+      
+      // Start audio level monitoring when we get the stream
+      if (conversationStarted) {
+        startAudioLevelMonitoring();
+      }
+      
       return true;
     } catch (error) {
       console.error('Microphone permission denied:', error);
@@ -306,9 +367,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
+        startAudioLevelMonitoring();
       }, 500);
     } else if (isMicrophoneEnabled) {
       stopSpeechRecognition();
+      stopAudioLevelMonitoring();
     }
   };
 
@@ -340,10 +403,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setConversationStarted(true);
     setIsCallOngoing(true);
 
-    // Start speech recognition
+    // Start speech recognition and audio monitoring
     if (isMicrophoneEnabled && microphonePermission === 'granted') {
       setTimeout(() => {
         startSpeechRecognition();
+        startAudioLevelMonitoring();
         toast.success("Voice recognition started. Start speaking!");
       }, 1000);
     }
@@ -366,6 +430,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setIsCallOngoing(false);
     stopSpeechRecognition();
     stopCurrentAudio();
+    stopAudioLevelMonitoring();
     
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
@@ -586,6 +651,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   <p className="text-gray-700 italic min-h-[1.5em]">
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
+                  
+                  {/* Audio Level Indicator */}
+                  <div className="mt-6 mb-4">
+                    <AudioLevelIndicator 
+                      audioLevel={audioLevel} 
+                      isActive={isUserSpeaking && isMicrophoneEnabled && microphonePermission === 'granted'} 
+                    />
+                  </div>
                   
                   {/* Status indicators */}
                   <div className="mt-4 space-y-2">
