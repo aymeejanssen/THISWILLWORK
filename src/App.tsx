@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AssessmentSummary from "./pages/AssessmentSummary";
 import AnswerSummary from "./pages/AnswerSummary";
+import PrivacyPolicy from "./components/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/answer-summary/:questionNumber" element={<AnswerSummary />} />
             <Route path="/assessment-summary" element={<AssessmentSummary />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

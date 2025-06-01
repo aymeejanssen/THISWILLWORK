@@ -7,6 +7,9 @@ import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, Arrow
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import VoiceOnlyChat from '../components/VoiceOnlyChat';
+import ConsentModal from '../components/ConsentModal';
+import DataManagement from '../components/DataManagement';
+import { usePrivacyConsent } from '../hooks/usePrivacyConsent';
 
 interface AIInsight {
   title: string;
@@ -28,6 +31,8 @@ const AssessmentSummary = () => {
   const {
     responses
   } = useAssessment();
+  const { hasConsent, showConsentModal, grantConsent, closeConsentModal } = usePrivacyConsent();
+  
   const [aiInsights, setAiInsights] = useState<AIResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +40,7 @@ const AssessmentSummary = () => {
   const [showFreeTrialChat, setShowFreeTrialChat] = useState(false);
   const [trialTimeRemaining, setTrialTimeRemaining] = useState(300); // 5 minutes in seconds
   const [timerStarted, setTimerStarted] = useState(false);
+  const [showDataManagement, setShowDataManagement] = useState(false);
 
   // Get the primary concern from responses
   const primaryConcern = responses.primaryConcern || 'general wellness';
@@ -91,6 +97,10 @@ const AssessmentSummary = () => {
     }
     setShowFreeTrialChat(true);
     setTrialTimeRemaining(300); // Reset to 5 minutes
+  };
+  const handleConsentDecline = () => {
+    alert('Consent is required to use this mental wellness service. You will be redirected to the homepage.');
+    navigate('/');
   };
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -227,8 +237,55 @@ const AssessmentSummary = () => {
         </div>
       </div>;
   }
+  if (showConsentModal) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+        <ConsentModal
+          isOpen={showConsentModal}
+          onConsent={grantConsent}
+          onDecline={handleConsentDecline}
+        />
+      </div>
+    );
+  }
+  if (showDataManagement) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowDataManagement(false)} 
+            className="mb-4"
+          >
+            ← Back to Summary
+          </Button>
+          <DataManagement />
+        </div>
+      </div>
+    );
+  }
   return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* Privacy Notice */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-medium text-blue-800">
+                Your privacy is protected. Data processed with your consent.
+              </span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowDataManagement(true)}
+              className="text-blue-600 border-blue-300"
+            >
+              Manage Data
+            </Button>
+          </div>
+        </div>
+
         {/* Header Section */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-2">
