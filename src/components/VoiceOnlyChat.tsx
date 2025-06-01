@@ -14,7 +14,6 @@ declare global {
   interface Window {
     SpeechRecognition: any;
     webkitSpeechRecognition: any;
-    webkitAudioContext: typeof AudioContext;
   }
 }
 
@@ -66,99 +65,149 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Audio level monitoring function
-  const startAudioLevelMonitoring = useCallback(() => {
-    console.log('Starting audio level monitoring...');
+  // Improved audio level monitoring function
+  const startAudioLevelMonitoring = useCallback(async () => {
+    console.log('🎤 Starting audio level monitoring...');
     console.log('Media stream available:', !!mediaStreamRef.current);
     
     if (!mediaStreamRef.current) {
-      console.log('No media stream available for audio monitoring');
+      console.error('❌ No media stream available for audio monitoring');
       return;
     }
 
     try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      audioContextRef.current = new AudioContextClass();
+      // Create audio context if it doesn't exist
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+        console.log('🔊 Created new AudioContext');
+      }
+
+      // Resume audio context if suspended
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+        console.log('▶️ Resumed AudioContext');
+      }
+
+      // Create media stream source
       const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
-      audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
       
-      audioAnalyzerRef.current.fftSize = 256; // Smaller FFT for better performance
-      audioAnalyzerRef.current.smoothingTimeConstant = 0.3; // Less smoothing for more responsive
+      // Create analyzer
+      audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
+      audioAnalyzerRef.current.fftSize = 512;
+      audioAnalyzerRef.current.smoothingTimeConstant = 0.1;
+      
+      // Connect source to analyzer
       source.connect(audioAnalyzerRef.current);
+      
+      console.log('✅ Audio analyzer connected successfully');
+      console.log('Analyzer settings:', {
+        fftSize: audioAnalyzerRef.current.fftSize,
+        frequencyBinCount: audioAnalyzerRef.current.frequencyBinCount,
+        smoothingTimeConstant: audioAnalyzerRef.current.smoothingTimeConstant
+      });
 
       const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
 
       const updateAudioLevel = () => {
-        if (!audioAnalyzerRef.current || !conversationStarted) return;
-
-        audioAnalyzerRef.current.getByteFrequencyData(dataArray);
-        
-        // Calculate RMS (Root Mean Square) for better audio level detection
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i] * dataArray[i];
+        if (!audioAnalyzerRef.current || !conversationStarted) {
+          console.log('🛑 Stopping audio level monitoring - analyzer removed or conversation ended');
+          return;
         }
-        const rms = Math.sqrt(sum / dataArray.length);
-        const normalizedLevel = Math.min(100, Math.max(0, (rms / 128) * 100));
-        
-        setAudioLevel(normalizedLevel);
-        console.log('Raw audio level:', rms, 'Normalized:', normalizedLevel);
-        
-        if (conversationStarted && isMicrophoneEnabled) {
-          animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
+
+        try {
+          audioAnalyzerRef.current.getByteFrequencyData(dataArray);
+          
+          // Calculate RMS for better audio level detection
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i] * dataArray[i];
+          }
+          const rms = Math.sqrt(sum / dataArray.length);
+          
+          // More sensitive normalization
+          const normalizedLevel = Math.min(100, Math.max(0, (rms / 50) * 100));
+          
+          setAudioLevel(normalizedLevel);
+          
+          // Log every 30 frames to avoid spam
+          if (Math.random() < 0.03) {
+            console.log('🎵 Audio data:', {
+              rms: rms.toFixed(2),
+              normalizedLevel: normalizedLevel.toFixed(1),
+              rawMax: Math.max(...dataArray),
+              rawAvg: (dataArray.reduce((a, b) => a + b, 0) / dataArray.length).toFixed(1)
+            });
+          }
+          
+          if (conversationStarted && isMicrophoneEnabled) {
+            animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
+          }
+        } catch (error) {
+          console.error('❌ Error in audio level update:', error);
         }
       };
 
+      // Start the monitoring loop
       updateAudioLevel();
-      console.log('Audio level monitoring started successfully');
+      console.log('🎯 Audio level monitoring loop started');
+      
     } catch (error) {
-      console.error('Error setting up audio level monitoring:', error);
+      console.error('❌ Error setting up audio level monitoring:', error);
+      toast.error('Failed to set up audio monitoring');
     }
-  }, []); // Remove dependencies to prevent recreation
+  }, [conversationStarted, isMicrophoneEnabled]);
 
   const stopAudioLevelMonitoring = useCallback(() => {
+    console.log('🛑 Stopping audio level monitoring...');
+    
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
+      console.log('⏹️ Cancelled animation frame');
     }
     
-    if (audioContextRef.current) {
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close();
       audioContextRef.current = null;
+      console.log('🔇 Closed AudioContext');
     }
     
     audioAnalyzerRef.current = null;
     setAudioLevel(0);
+    console.log('✅ Audio monitoring stopped');
   }, []);
 
-  // Request microphone permission
+  // Request microphone permission with better error handling
   const requestMicrophonePermission = async () => {
     try {
-      console.log('Requesting microphone permission...');
+      console.log('🎤 Requesting microphone permission...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           sampleRate: 44100,
           channelCount: 1,
-          echoCancellation: false, // Turn off to get raw audio
-          noiseSuppression: false,
-          autoGainControl: false
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
         }
       });
       
       mediaStreamRef.current = stream;
       setMicrophonePermission('granted');
-      console.log('Microphone permission granted');
-      console.log('Media stream tracks:', stream.getTracks());
+      console.log('✅ Microphone permission granted');
+      console.log('Stream details:', {
+        active: stream.active,
+        trackCount: stream.getTracks().length,
+        audioTracks: stream.getAudioTracks().length
+      });
+      
       toast.success("Microphone access granted!");
       
       // Start audio monitoring immediately after getting permission
-      setTimeout(() => {
-        startAudioLevelMonitoring();
-      }, 100);
+      await startAudioLevelMonitoring();
       
       return true;
     } catch (error) {
-      console.error('Microphone permission denied:', error);
+      console.error('❌ Microphone permission denied:', error);
       setMicrophonePermission('denied');
       toast.error("Microphone access is required for voice conversation. Please allow microphone access and try again.");
       return false;
@@ -202,12 +251,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   }, []);
 
   const restartSpeechRecognitionDelayed = useCallback(() => {
-    // Clear any existing restart timeout
     if (recognitionRestartTimeoutRef.current) {
       clearTimeout(recognitionRestartTimeoutRef.current);
     }
 
-    // Set a new restart timeout
     recognitionRestartTimeoutRef.current = setTimeout(() => {
       console.log('Attempting delayed recognition restart...');
       if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
@@ -222,23 +269,16 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setIsProcessingResponse(true);
     console.log('Generating AI response for:', userMessage);
 
-    // Stop any ongoing speech recognition
     stopSpeechRecognition();
 
     try {
-      // Check if we're using an ElevenLabs conversational agent
       const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
       
       if (selectedVoiceOption?.type === 'agent') {
         console.log('Using ElevenLabs conversational agent:', selectedVoice);
-        // Use the conversational agent
         const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, userMessage);
-        
-        // Update conversation history
         setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
       } else {
-        // Use traditional text-to-speech with GPT
-        // Create conversation context
         const conversationContext = [
           ...conversationHistory,
           `User: ${userMessage}`
@@ -263,10 +303,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         const aiResponse = data?.response || "I understand. Could you tell me more about that?";
         console.log('AI response generated:', aiResponse);
 
-        // Update conversation history
         setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
-        
-        // Speak the response using TTS
         await speak(aiResponse);
       }
       
@@ -313,12 +350,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         setTranscript(finalTranscriptRef.current);
         console.log('Final transcript:', finalTranscriptRef.current);
         
-        // Clear any existing silence timeout
         if (silenceTimeoutRef.current) {
           clearTimeout(silenceTimeoutRef.current);
         }
         
-        // Set a timeout to process the response after silence
         silenceTimeoutRef.current = setTimeout(() => {
           if (finalTranscriptRef.current.trim()) {
             console.log('Processing speech after silence:', finalTranscriptRef.current);
@@ -327,10 +362,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             setTranscript('');
             setMessage('');
             
-            // Generate AI response
             generateAIResponse(messageToProcess);
           }
-        }, 2000); // Increased to 2 seconds for better user experience
+        }, 2000);
       }
       
       setMessage(interimTranscript);
@@ -340,7 +374,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       console.log("Speech recognition ended");
       setIsUserSpeaking(false);
       
-      // Only restart if conditions are met
       if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
         console.log('Restarting recognition after natural end...');
         restartSpeechRecognitionDelayed();
@@ -356,7 +389,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         toast.error("Microphone access denied. Please allow microphone access in your browser settings.");
       } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
         toast.error(`Speech recognition error: ${event.error}`);
-        // Try to restart on error (except for abort or no-speech)
         restartSpeechRecognitionDelayed();
       }
     };
@@ -375,17 +407,18 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         mediaStreamRef.current.getTracks().forEach(track => track.stop());
       }
       stopCurrentAudio();
+      stopAudioLevelMonitoring();
     };
-  }, [userProfile?.preferredLanguage, restartSpeechRecognitionDelayed, microphonePermission]);
+  }, [userProfile?.preferredLanguage, restartSpeechRecognitionDelayed, microphonePermission, stopAudioLevelMonitoring]);
 
-  const toggleMicrophone = () => {
+  // Improved microphone toggle
+  const toggleMicrophone = async () => {
     setIsMicrophoneEnabled(!isMicrophoneEnabled);
     if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
-      setTimeout(() => {
+      setTimeout(async () => {
         startSpeechRecognition();
-        // Restart audio monitoring when enabling microphone
-        if (mediaStreamRef.current && !audioAnalyzerRef.current) {
-          startAudioLevelMonitoring();
+        if (mediaStreamRef.current) {
+          await startAudioLevelMonitoring();
         }
       }, 500);
     } else if (isMicrophoneEnabled) {
@@ -406,8 +439,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     speak(testText);
   };
 
+  // Improved conversation start
   const startConversation = async () => {
-    // First request microphone permission
     if (microphonePermission !== 'granted') {
       const hasPermission = await requestMicrophonePermission();
       if (!hasPermission) {
@@ -416,30 +449,30 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
 
     setIsConnecting(true);
-    // Simulate connection delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsConnecting(false);
     setConversationStarted(true);
     setIsCallOngoing(true);
 
-    // Start speech recognition and audio monitoring
+    // Start everything with proper timing
     if (isMicrophoneEnabled && microphonePermission === 'granted') {
-      setTimeout(() => {
+      setTimeout(async () => {
         startSpeechRecognition();
-        // Ensure audio monitoring is running
-        if (mediaStreamRef.current && !audioAnalyzerRef.current) {
-          startAudioLevelMonitoring();
+        
+        // Ensure audio monitoring starts
+        if (mediaStreamRef.current) {
+          await startAudioLevelMonitoring();
         }
+        
         toast.success("Voice recognition started. Start speaking!");
       }, 1000);
     }
 
-    // Simulate initial AI message
+    // Initial greeting
     const greeting = getPersonalizedGreeting();
     setTimeout(() => {
       const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
       if (selectedVoiceOption?.type === 'agent') {
-        // Let the agent handle the greeting naturally
         console.log('Using agent - no manual greeting needed');
       } else {
         speak(greeting);
@@ -484,7 +517,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     console.log('Starting to speak:', text.substring(0, 50) + '...');
     setIsAssistantSpeaking(true);
     
-    // Stop recognition while AI is speaking
     stopSpeechRecognition();
     
     try {
@@ -492,7 +524,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       console.log('AI finished speaking, restarting recognition');
       setIsAssistantSpeaking(false);
       
-      // Restart recognition after AI finishes speaking
       setTimeout(() => {
         if (conversationStarted && isMicrophoneEnabled && !isProcessingResponse && microphonePermission === 'granted') {
           console.log('Restarting recognition after AI speech');
@@ -518,12 +549,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     return `Hi ${name}! I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
   };
 
-  // Update voice service when speaker is toggled
   useEffect(() => {
     voiceService.setEnabled(isSpeakerEnabled);
   }, [isSpeakerEnabled]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       voiceService.cleanup();
