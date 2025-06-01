@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -350,6 +351,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     // Simulate initial AI message
     const greeting = getPersonalizedGreeting();
     setTimeout(() => {
+      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
       if (selectedVoiceOption?.type === 'agent') {
         // Let the agent handle the greeting naturally
         console.log('Using agent - no manual greeting needed');
