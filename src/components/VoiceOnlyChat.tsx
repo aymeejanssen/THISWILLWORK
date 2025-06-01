@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,9 +64,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const animationFrameRef = useRef<number | null>(null);
   const isListeningRef = useRef(false);
 
-  // Simplified audio level monitoring
+  // Audio level monitoring
   const startAudioLevelMonitoring = useCallback(async () => {
-    console.log('🎤 Starting simplified audio monitoring...');
+    console.log('🎤 Starting audio monitoring...');
     
     if (!mediaStreamRef.current) {
       console.error('❌ No media stream for monitoring');
@@ -139,8 +140,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   };
 
-  // Simple speech recognition setup - matching what works in assessment
+  // EXACTLY like assessment - simple speech recognition
   const setupSpeechRecognition = useCallback(() => {
+    console.log('🎙️ Setting up speech recognition...');
+    
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast.error("Speech Recognition not supported. Please use Chrome.");
       return;
@@ -149,8 +152,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
     
-    // Use same config as assessment (simple and reliable)
-    recognitionRef.current.continuous = false; // Changed to false like assessment
+    // EXACT same settings as assessment
+    recognitionRef.current.continuous = false;
     recognitionRef.current.interimResults = true;
     recognitionRef.current.lang = 'en-US';
     recognitionRef.current.maxAlternatives = 1;
@@ -178,14 +181,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         }
       }
       
-      // Update live transcript
+      // Update live transcript (just like assessment)
       setLiveTranscript(interimTranscript + finalTranscript);
       
       if (finalTranscript.trim()) {
         console.log("🔄 Processing final transcript:", finalTranscript);
         setTranscript(finalTranscript);
         
-        // Process the message
+        // Process the message after a short delay
         setTimeout(() => {
           if (finalTranscript.trim() && !isProcessingResponse) {
             generateAIResponse(finalTranscript.trim());
@@ -199,7 +202,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       setIsUserSpeaking(false);
       isListeningRef.current = false;
       
-      // Auto restart if we should be listening (like assessment does)
+      // Auto restart if conversation is ongoing (like assessment)
       if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
         console.log("🔄 Auto restarting speech recognition...");
         setTimeout(() => {
@@ -226,9 +229,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         }
       }
     };
+
+    console.log('✅ Speech recognition setup complete');
   }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
 
-  // Simple start listening function
+  // Simple start listening
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListeningRef.current || isAssistantSpeaking || isProcessingResponse || microphonePermission !== 'granted') {
       console.log("❌ Cannot start listening:", {
@@ -249,7 +254,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   }, [isAssistantSpeaking, isProcessingResponse, microphonePermission]);
 
-  // Simple stop listening function
+  // Simple stop listening
   const stopListening = useCallback(() => {
     if (recognitionRef.current && isListeningRef.current) {
       console.log("🛑 Stopping listening...");
@@ -347,6 +352,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   // Initialize speech recognition
   useEffect(() => {
+    console.log('🔧 Initializing speech recognition...');
     setupSpeechRecognition();
     
     return () => {
@@ -367,6 +373,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   // Start conversation
   const startConversation = async () => {
+    console.log('🚀 Starting conversation...');
+    
     if (microphonePermission !== 'granted') {
       const hasPermission = await requestMicrophonePermission();
       if (!hasPermission) return;
@@ -378,11 +386,15 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setConversationStarted(true);
     setIsCallOngoing(true);
 
-    // Start listening after a short delay
+    // IMPORTANT: Start speech recognition immediately after conversation starts
     setTimeout(() => {
+      console.log('🎙️ Starting speech recognition after conversation start...');
       if (isMicrophoneEnabled && microphonePermission === 'granted') {
-        startListening();
-        toast.success("Voice recognition started! Start speaking.");
+        setupSpeechRecognition(); // Re-setup to ensure it's fresh
+        setTimeout(() => {
+          startListening();
+          toast.success("Voice recognition started! Start speaking.");
+        }, 500);
       }
     }, 1000);
 
@@ -613,10 +625,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
                   
-                  {/* Live transcript display */}
+                  {/* Live transcript display - EXACTLY like assessment */}
                   <div className="mt-4 w-full">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Live Speech Recognition (Just like in assessment):
+                      🎙️ Live Speech Recognition (Matching Assessment):
                     </label>
                     <Textarea
                       value={liveTranscript}
@@ -625,10 +637,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                       className="min-h-[100px] bg-gray-50 border-2 border-gray-200 text-sm"
                     />
                     <div className="text-xs text-gray-500 mt-1">
-                      Recognition Status: {isListeningRef.current ? '🟢 Active' : '🔴 Inactive'} | 
+                      Recognition Status: {isListeningRef.current ? '🟢 LISTENING' : '🔴 NOT LISTENING'} | 
                       Permission: {microphonePermission} | 
-                      Mic: {isMicrophoneEnabled ? 'On' : 'Off'} |
-                      Continuous: false (matching assessment)
+                      Mic: {isMicrophoneEnabled ? 'ON' : 'OFF'} |
+                      Continuous: false (same as assessment) |
+                      HasRecognition: {recognitionRef.current ? 'YES' : 'NO'}
                     </div>
                   </div>
                   
