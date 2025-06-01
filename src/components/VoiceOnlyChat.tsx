@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -159,7 +158,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     recognitionRef.current.maxAlternatives = 1;
 
     recognitionRef.current.onstart = () => {
-      console.log("🎙️ Speech recognition started");
+      console.log("🎙️ ✅ Speech recognition ACTUALLY started");
       setIsUserSpeaking(true);
       isListeningRef.current = true;
       setLiveTranscript('');
@@ -224,6 +223,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         // Auto restart on other errors
         if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
           setTimeout(() => {
+            console.log("🔄 Restarting after error:", event.error);
             startListening();
           }, 2000);
         }
@@ -233,38 +233,53 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     console.log('✅ Speech recognition setup complete');
   }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
 
-  // Simple start listening
+  // Simple start listening with FORCE
   const startListening = useCallback(() => {
-    if (!recognitionRef.current || isListeningRef.current || isAssistantSpeaking || isProcessingResponse || microphonePermission !== 'granted') {
-      console.log("❌ Cannot start listening:", {
-        hasRecognition: !!recognitionRef.current,
-        isListening: isListeningRef.current,
-        isAssistantSpeaking,
-        isProcessingResponse,
-        micPermission: microphonePermission
-      });
+    console.log("🎙️ startListening called - checking conditions...", {
+      hasRecognition: !!recognitionRef.current,
+      isListening: isListeningRef.current,
+      isAssistantSpeaking,
+      isProcessingResponse,
+      micPermission: microphonePermission,
+      conversationStarted,
+      isMicrophoneEnabled
+    });
+
+    if (!recognitionRef.current) {
+      console.log("❌ No recognition object - setting up again...");
+      setupSpeechRecognition();
+      setTimeout(() => startListening(), 500);
+      return;
+    }
+
+    if (isListeningRef.current) {
+      console.log("❌ Already listening, skipping");
+      return;
+    }
+
+    if (isAssistantSpeaking || isProcessingResponse) {
+      console.log("❌ Assistant speaking or processing, skipping");
+      return;
+    }
+
+    if (microphonePermission !== 'granted') {
+      console.log("❌ No microphone permission");
       return;
     }
 
     try {
-      console.log("🎙️ Starting to listen...");
+      console.log("🎙️ ACTUALLY starting speech recognition...");
       recognitionRef.current.start();
+      console.log("🎙️ Speech recognition start() called successfully");
     } catch (error) {
-      console.log("🎙️ Start listening error:", error);
+      console.error("🎙️ Start listening error:", error);
+      // If start fails, try again after a short delay
+      setTimeout(() => {
+        console.log("🎙️ Retrying start listening after error...");
+        startListening();
+      }, 1000);
     }
-  }, [isAssistantSpeaking, isProcessingResponse, microphonePermission]);
-
-  // Simple stop listening
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current && isListeningRef.current) {
-      console.log("🛑 Stopping listening...");
-      try {
-        recognitionRef.current.stop();
-      } catch (error) {
-        console.log("🛑 Stop error:", error);
-      }
-    }
-  }, []);
+  }, [isAssistantSpeaking, isProcessingResponse, microphonePermission, conversationStarted, isMicrophoneEnabled]);
 
   // Generate AI response
   const generateAIResponse = async (userMessage: string) => {
@@ -386,13 +401,26 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setConversationStarted(true);
     setIsCallOngoing(true);
 
-    // IMPORTANT: Start speech recognition immediately after conversation starts
+    // CRITICAL FIX: Force speech recognition to start immediately
     setTimeout(() => {
-      console.log('🎙️ Starting speech recognition after conversation start...');
+      console.log('🎙️ FORCING speech recognition to start...');
       if (isMicrophoneEnabled && microphonePermission === 'granted') {
-        setupSpeechRecognition(); // Re-setup to ensure it's fresh
+        // Re-setup speech recognition to ensure it's fresh
+        setupSpeechRecognition();
+        
+        // Force start listening with multiple attempts
         setTimeout(() => {
+          console.log('🎙️ First attempt to start listening...');
           startListening();
+          
+          // Backup attempt if first fails
+          setTimeout(() => {
+            if (!isListeningRef.current) {
+              console.log('🎙️ BACKUP attempt to start listening...');
+              startListening();
+            }
+          }, 1000);
+          
           toast.success("Voice recognition started! Start speaking.");
         }, 500);
       }
