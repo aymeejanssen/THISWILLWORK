@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,10 +62,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   // Google Cloud Text-to-Speech voices - calm and kind options
   const googleVoices = [
-    { id: 'en-US-Neural2-F', name: 'Emily (Soft & Understanding)', description: 'Warm, empathetic female voice', gender: 'FEMALE' },
-    { id: 'en-US-Neural2-H', name: 'Grace (Gentle & Caring)', description: 'Soft, nurturing female voice', gender: 'FEMALE' },
-    { id: 'en-US-Neural2-A', name: 'David (Calm & Supportive)', description: 'Gentle, reassuring male voice', gender: 'MALE' },
-    { id: 'en-US-Neural2-J', name: 'Michael (Kind & Patient)', description: 'Warm, understanding male voice', gender: 'MALE' }
+    { id: 'en-US-Neural2-F', name: 'Voice 1', description: 'Warm, empathetic female voice', gender: 'FEMALE' },
+    { id: 'en-US-Neural2-H', name: 'Voice 2', description: 'Soft, nurturing female voice', gender: 'FEMALE' },
+    { id: 'en-US-Neural2-A', name: 'Voice 3', description: 'Gentle, reassuring male voice', gender: 'MALE' },
+    { id: 'en-US-Neural2-J', name: 'Voice 4', description: 'Warm, understanding male voice', gender: 'MALE' }
   ];
 
   // Request microphone permission
