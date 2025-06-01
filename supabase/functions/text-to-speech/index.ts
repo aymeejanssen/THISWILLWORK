@@ -55,7 +55,18 @@ serve(async (req) => {
       }
 
       const audioBuffer = await response.arrayBuffer()
-      const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
+      
+      // Convert ArrayBuffer to base64 safely
+      const uint8Array = new Uint8Array(audioBuffer)
+      let binaryString = ''
+      const chunkSize = 8192
+      
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.slice(i, i + chunkSize)
+        binaryString += String.fromCharCode.apply(null, Array.from(chunk))
+      }
+      
+      const base64Audio = btoa(binaryString)
 
       console.log('ElevenLabs speech generated successfully, audio length:', base64Audio.length)
 
