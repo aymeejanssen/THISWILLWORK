@@ -267,7 +267,7 @@ const AssessmentSummary = () => {
         {/* Centralized Benefits Section */}
         <Card className="shadow-xl bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
           <CardHeader>
-            <CardTitle className="text-2xl text-center wellness-text-gradient">Benefits of MindEase Support</CardTitle>
+            <CardTitle className="text-2xl text-center wellness-text-gradient">Benefits of Mynd Ease Support</CardTitle>
             <p className="text-gray-600 text-center">Comprehensive AI wellness coaching designed for your well-being</p>
           </CardHeader>
           <CardContent>
