@@ -6,7 +6,7 @@ import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Home } from '
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
-import { voiceService, googleVoices } from '../services/voiceService';
+import { voiceService, allVoices } from '../services/voiceService';
 
 // TypeScript declarations for Speech Recognition API
 declare global {
@@ -57,17 +57,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const finalTranscriptRef = useRef<string>('');
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recognitionRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Google Cloud Text-to-Speech voices - calm and kind options
-  const googleVoices = [
-    { id: 'en-US-Neural2-F', name: 'Voice 1', description: 'Warm, empathetic female voice', gender: 'FEMALE' },
-    { id: 'en-US-Neural2-H', name: 'Voice 2', description: 'Soft, nurturing female voice', gender: 'FEMALE' },
-    { id: 'en-US-Neural2-A', name: 'Voice 3', description: 'Gentle, reassuring male voice', gender: 'MALE' },
-    { id: 'en-US-Neural2-J', name: 'Voice 4', description: 'Warm, understanding male voice', gender: 'MALE' }
-  ];
-
-  // Import the new voice options
-  const { allVoices } = require('../services/voiceService');
 
   // Request microphone permission
   const requestMicrophonePermission = async () => {
@@ -545,7 +534,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               <p className="text-gray-600 text-lg text-center">
                 {microphonePermission === 'denied' 
                   ? "Please allow microphone access to start" 
-                  : "Tap to begin your voice conversation with Google TTS"
+                  : "Tap to begin your voice conversation with ElevenLabs"
                 }
               </p>
             </div>
