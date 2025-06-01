@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Home } from '
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
+import { voiceService, googleVoices } from '../services/voiceService';
 
 // TypeScript declarations for Speech Recognition API
 declare global {
@@ -53,10 +53,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const finalTranscriptRef = useRef<string>('');
-  const currentAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recognitionRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -97,14 +95,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   const stopCurrentAudio = useCallback(() => {
     console.log('Stopping current audio...');
-    if (currentAudioSourceRef.current) {
-      try {
-        currentAudioSourceRef.current.stop();
-      } catch (error) {
-        console.log('Error stopping audio source:', error);
-      }
-      currentAudioSourceRef.current = null;
-    }
+    voiceService.stopCurrentAudio();
     setIsAssistantSpeaking(false);
   }, []);
 
@@ -408,74 +399,21 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     stopSpeechRecognition();
     
     try {
-      console.log('Generating speech with Google voice:', selectedVoice);
-
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { 
-          text: text,
-          voice: selectedVoice
+      await voiceService.speak(text, selectedVoice);
+      console.log('AI finished speaking, restarting recognition');
+      setIsAssistantSpeaking(false);
+      
+      // Restart recognition after AI finishes speaking
+      setTimeout(() => {
+        if (conversationStarted && isMicrophoneEnabled && !isProcessingResponse && microphonePermission === 'granted') {
+          console.log('Restarting recognition after AI speech');
+          startSpeechRecognition();
         }
-      });
-
-      if (error) {
-        console.error('Error generating speech:', error);
-        throw error;
-      }
-
-      if (data?.audioContent) {
-        // Initialize audio context if needed
-        if (!audioContextRef.current) {
-          audioContextRef.current = new AudioContext();
-        }
-
-        // Resume audio context if suspended
-        if (audioContextRef.current.state === 'suspended') {
-          await audioContextRef.current.resume();
-        }
-
-        // Google TTS returns base64 encoded audio directly
-        const binaryString = atob(data.audioContent);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-
-        // Decode and play audio
-        const audioBuffer = await audioContextRef.current.decodeAudioData(bytes.buffer);
-        const source = audioContextRef.current.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioContextRef.current.destination);
-        
-        // Store reference to current audio source
-        currentAudioSourceRef.current = source;
-        
-        source.onended = () => {
-          console.log('AI finished speaking, restarting recognition');
-          currentAudioSourceRef.current = null;
-          setIsAssistantSpeaking(false);
-          
-          // Restart recognition after AI finishes speaking
-          setTimeout(() => {
-            if (conversationStarted && isMicrophoneEnabled && !isProcessingResponse && microphonePermission === 'granted') {
-              console.log('Restarting recognition after AI speech');
-              startSpeechRecognition();
-            }
-          }, 500);
-        };
-        
-        source.start(0);
-        console.log('Google TTS audio playback started');
-      } else {
-        console.error('No audio content received from Google TTS');
-        setIsAssistantSpeaking(false);
-        restartSpeechRecognitionDelayed();
-      }
+      }, 500);
     } catch (error) {
-      console.error('Error with Google TTS:', error);
+      console.error('Error with speech:', error);
       setIsAssistantSpeaking(false);
       restartSpeechRecognitionDelayed();
-      
-      // Show a fallback message
       toast.error("Sorry, I couldn't speak that response. Please try again.");
     }
   };
@@ -490,6 +428,18 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     
     return `Hi ${name}! I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
   };
+
+  // Update voice service when speaker is toggled
+  useEffect(() => {
+    voiceService.setEnabled(isSpeakerEnabled);
+  }, [isSpeakerEnabled]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      voiceService.cleanup();
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
