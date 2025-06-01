@@ -13,63 +13,115 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice } = await req.json()
+    const { text, voice, provider = 'google' } = await req.json()
 
     if (!text) {
       throw new Error('Text is required')
     }
 
     console.log('Generating speech for text:', text.substring(0, 100), '...')
-    console.log('Using voice:', voice)
+    console.log('Using voice:', voice, 'Provider:', provider)
 
-    const googleApiKey = Deno.env.get('GOOGLE_API_KEY')
-    if (!googleApiKey) {
-      throw new Error('Google API key not configured')
-    }
+    if (provider === 'elevenlabs') {
+      const elevenLabsApiKey = Deno.env.get('ELEVENLABS_API_KEY')
+      if (!elevenLabsApiKey) {
+        throw new Error('ElevenLabs API key not configured')
+      }
 
-    // Generate speech from text using Google Text-to-Speech
-    const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        input: {
-          text: text
+      // Use ElevenLabs for more human-like voices
+      const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + (voice || '9BWtsMINqrJLrRacOk9x'), {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': elevenLabsApiKey,
         },
-        voice: {
-          languageCode: 'en-US',
-          name: voice || 'en-US-Neural2-F',
-          ssmlGender: voice?.includes('F') || voice?.includes('H') ? 'FEMALE' : 'MALE'
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.8,
+            style: 0.2,
+            use_speaker_boost: true
+          }
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('ElevenLabs API error:', errorText)
+        throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`)
+      }
+
+      const audioBuffer = await response.arrayBuffer()
+      const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
+
+      console.log('ElevenLabs speech generated successfully, audio length:', base64Audio.length)
+
+      return new Response(
+        JSON.stringify({ audioContent: base64Audio }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         },
-        audioConfig: {
-          audioEncoding: 'MP3',
-          speakingRate: 0.9,
-          pitch: 0.0
-        }
-      }),
-    })
+      )
+    } else {
+      // Use Google TTS with improved settings for more natural speech
+      const googleApiKey = Deno.env.get('GOOGLE_API_KEY')
+      if (!googleApiKey) {
+        throw new Error('Google API key not configured')
+      }
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Google TTS API error:', errorText)
-      throw new Error(`Google TTS API error: ${response.status} - ${errorText}`)
+      const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          input: {
+            text: text
+          },
+          voice: {
+            languageCode: 'en-US',
+            name: voice || 'en-US-Neural2-F',
+            ssmlGender: voice?.includes('F') || voice?.includes('H') ? 'FEMALE' : 'MALE'
+          },
+          audioConfig: {
+            audioEncoding: 'MP3',
+            speakingRate: 0.95, // Slightly slower for more natural pace
+            pitch: -1.0, // Slightly lower pitch for warmth
+            volumeGainDb: 0.0,
+            effectsProfileId: ['headphone-class-device'], // Optimize for headphones
+            // Add prosody for more natural speech patterns
+            synthesizeSpeechConfig: {
+              speakingRate: 0.95,
+              pitch: '-1st'
+            }
+          }
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Google TTS API error:', errorText)
+        throw new Error(`Google TTS API error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      
+      if (!data.audioContent) {
+        throw new Error('No audio content received from Google TTS')
+      }
+
+      console.log('Google speech generated successfully, audio length:', data.audioContent.length)
+
+      return new Response(
+        JSON.stringify({ audioContent: data.audioContent }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
     }
-
-    const data = await response.json()
-    
-    if (!data.audioContent) {
-      throw new Error('No audio content received from Google TTS')
-    }
-
-    console.log('Speech generated successfully, audio length:', data.audioContent.length)
-
-    return new Response(
-      JSON.stringify({ audioContent: data.audioContent }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    )
   } catch (error) {
     console.error('Error in text-to-speech function:', error)
     return new Response(

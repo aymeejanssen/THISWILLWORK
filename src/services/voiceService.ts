@@ -6,14 +6,29 @@ export interface VoiceOption {
   name: string;
   description: string;
   gender: 'FEMALE' | 'MALE';
+  provider: 'google' | 'elevenlabs';
 }
 
+// Google Cloud Text-to-Speech voices with improved settings
 export const googleVoices: VoiceOption[] = [
-  { id: 'en-US-Neural2-F', name: 'Voice 1', description: 'Warm, empathetic female voice', gender: 'FEMALE' },
-  { id: 'en-US-Neural2-H', name: 'Voice 2', description: 'Soft, nurturing female voice', gender: 'FEMALE' },
-  { id: 'en-US-Neural2-A', name: 'Voice 3', description: 'Gentle, reassuring male voice', gender: 'MALE' },
-  { id: 'en-US-Neural2-J', name: 'Voice 4', description: 'Warm, understanding male voice', gender: 'MALE' }
+  { id: 'en-US-Neural2-F', name: 'Google Voice 1', description: 'Warm, empathetic female voice', gender: 'FEMALE', provider: 'google' },
+  { id: 'en-US-Neural2-H', name: 'Google Voice 2', description: 'Soft, nurturing female voice', gender: 'FEMALE', provider: 'google' },
+  { id: 'en-US-Neural2-A', name: 'Google Voice 3', description: 'Gentle, reassuring male voice', gender: 'MALE', provider: 'google' },
+  { id: 'en-US-Neural2-J', name: 'Google Voice 4', description: 'Warm, understanding male voice', gender: 'MALE', provider: 'google' }
 ];
+
+// ElevenLabs voices - much more human-like
+export const elevenLabsVoices: VoiceOption[] = [
+  { id: '9BWtsMINqrJLrRacOk9x', name: 'Aria', description: 'Natural, conversational female voice', gender: 'FEMALE', provider: 'elevenlabs' },
+  { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', description: 'Warm, empathetic female voice', gender: 'FEMALE', provider: 'elevenlabs' },
+  { id: 'XB0fDUnXU5powFXDhCwa', name: 'Charlotte', description: 'Gentle, caring female voice', gender: 'FEMALE', provider: 'elevenlabs' },
+  { id: 'TX3LPaxmHKxFdv7VOQHJ', name: 'Liam', description: 'Calm, reassuring male voice', gender: 'MALE', provider: 'elevenlabs' },
+  { id: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', description: 'Friendly, understanding male voice', gender: 'MALE', provider: 'elevenlabs' },
+  { id: 'CwhRBWXzGAHq8TQ4Fs17', name: 'Roger', description: 'Deep, comforting male voice', gender: 'MALE', provider: 'elevenlabs' }
+];
+
+// Combined voices list
+export const allVoices: VoiceOption[] = [...elevenLabsVoices, ...googleVoices];
 
 class VoiceService {
   private audioContext: AudioContext | null = null;
@@ -50,7 +65,7 @@ class VoiceService {
     }
   }
 
-  async speak(text: string, voiceId: string = 'en-US-Neural2-F'): Promise<void> {
+  async speak(text: string, voiceId: string = '9BWtsMINqrJLrRacOk9x'): Promise<void> {
     if (!this.isEnabled || !text.trim()) {
       console.log('Voice disabled or empty text');
       return;
@@ -65,11 +80,18 @@ class VoiceService {
       // Initialize audio context if needed
       await this.initializeAudioContext();
 
+      // Determine provider based on voice ID
+      const voice = allVoices.find(v => v.id === voiceId);
+      const provider = voice?.provider || 'elevenlabs'; // Default to ElevenLabs for better quality
+
+      console.log('Using provider:', provider);
+
       // Call the text-to-speech edge function
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: text,
-          voice: voiceId
+          voice: voiceId,
+          provider: provider
         }
       });
 
@@ -101,7 +123,6 @@ class VoiceService {
             resolve();
           };
           
-          // Note: AudioBufferSourceNode doesn't have onerror, handle errors differently
           source.start(0);
           
           // Handle potential errors during playback

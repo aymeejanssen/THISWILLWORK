@@ -46,7 +46,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isCallOngoing, setIsCallOngoing] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState<string>('en-US-Neural2-F');
+  const [selectedVoice, setSelectedVoice] = useState<string>('9BWtsMINqrJLrRacOk9x'); // Default to Aria from ElevenLabs
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
@@ -65,6 +65,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     { id: 'en-US-Neural2-A', name: 'Voice 3', description: 'Gentle, reassuring male voice', gender: 'MALE' },
     { id: 'en-US-Neural2-J', name: 'Voice 4', description: 'Warm, understanding male voice', gender: 'MALE' }
   ];
+
+  // Import the new voice options
+  const { allVoices } = require('../services/voiceService');
 
   // Request microphone permission
   const requestMicrophonePermission = async () => {
@@ -471,7 +474,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 </div>
               )}
 
-              {/* Voice Selection */}
+              {/* Voice Selection with grouped options */}
               <div className="mb-6 w-full max-w-sm">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Choose Your AI Voice
@@ -481,7 +484,21 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     <SelectValue placeholder="Select a voice" />
                   </SelectTrigger>
                   <SelectContent>
-                    {googleVoices.map((voice) => (
+                    <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50">
+                      🎭 Premium Human-like Voices (ElevenLabs)
+                    </div>
+                    {allVoices.filter(voice => voice.provider === 'elevenlabs').map((voice) => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{voice.name}</span>
+                          <span className="text-xs text-gray-500">{voice.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                    <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 mt-2">
+                      🤖 Google Text-to-Speech
+                    </div>
+                    {allVoices.filter(voice => voice.provider === 'google').map((voice) => (
                       <SelectItem key={voice.id} value={voice.id}>
                         <div className="flex flex-col">
                           <span className="font-medium">{voice.name}</span>
@@ -498,8 +515,17 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   className="mt-2 w-full"
                   disabled={isAssistantSpeaking}
                 >
-                  {isAssistantSpeaking ? 'Playing...' : 'Test Voice'}
+                  {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
                 </Button>
+                
+                {/* Voice provider info */}
+                <div className="mt-2 text-xs text-gray-600 text-center">
+                  {allVoices.find(v => v.id === selectedVoice)?.provider === 'elevenlabs' ? (
+                    <span className="text-purple-600">✨ Using premium ElevenLabs voice for natural speech</span>
+                  ) : (
+                    <span className="text-blue-600">🤖 Using Google Text-to-Speech</span>
+                  )}
+                </div>
               </div>
 
               <Button 
@@ -618,14 +644,28 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             {/* Voice Selection in Settings */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Google AI Voice Selection
+                AI Voice Selection
               </label>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a voice" />
                 </SelectTrigger>
                 <SelectContent>
-                  {googleVoices.map((voice) => (
+                  <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50">
+                    🎭 Premium Human-like Voices (ElevenLabs)
+                  </div>
+                  {allVoices.filter(voice => voice.provider === 'elevenlabs').map((voice) => (
+                    <SelectItem key={voice.id} value={voice.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{voice.name}</span>
+                        <span className="text-xs text-gray-500">{voice.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                  <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 mt-2">
+                    🤖 Google Text-to-Speech
+                  </div>
+                  {allVoices.filter(voice => voice.provider === 'google').map((voice) => (
                     <SelectItem key={voice.id} value={voice.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{voice.name}</span>
@@ -642,7 +682,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 className="mt-2"
                 disabled={isAssistantSpeaking}
               >
-                {isAssistantSpeaking ? 'Playing...' : 'Test Voice'}
+                {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
               </Button>
             </div>
 
