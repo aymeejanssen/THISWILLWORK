@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -52,6 +53,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [audioLevel, setAudioLevel] = useState(0);
+  const [liveTranscript, setLiveTranscript] = useState('');
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
@@ -158,6 +160,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       console.log("🎙️ Speech recognition started");
       setIsUserSpeaking(true);
       isListeningRef.current = true;
+      setLiveTranscript(''); // Clear transcript when starting
     };
 
     recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
@@ -175,6 +178,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         }
       }
       
+      // Update live transcript display
+      setLiveTranscript(interimTranscript + finalTranscript);
       setMessage(interimTranscript);
       
       if (finalTranscript.trim()) {
@@ -190,6 +195,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             finalTranscriptRef.current = '';
             setTranscript('');
             setMessage('');
+            setLiveTranscript('');
             
             generateAIResponse(messageToProcess);
           }
@@ -608,6 +614,24 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   <p className="text-gray-700 italic min-h-[1.5em]">
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
+                  
+                  {/* Live transcript display */}
+                  <div className="mt-4 w-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Live Speech Recognition:
+                    </label>
+                    <Textarea
+                      value={liveTranscript}
+                      placeholder="Your speech will appear here in real-time..."
+                      readOnly
+                      className="min-h-[100px] bg-gray-50 border-2 border-gray-200 text-sm"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      Recognition Status: {isListeningRef.current ? '🟢 Active' : '🔴 Inactive'} | 
+                      Permission: {microphonePermission} | 
+                      Mic: {isMicrophoneEnabled ? 'On' : 'Off'}
+                    </div>
+                  </div>
                   
                   <div className="mt-6 mb-4">
                     <AudioLevelIndicator 
