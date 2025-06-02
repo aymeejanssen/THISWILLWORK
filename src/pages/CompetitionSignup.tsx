@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
+import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Star, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
 
 const CompetitionSignup = () => {
   const navigate = useNavigate();
@@ -220,6 +220,150 @@ const CompetitionSignup = () => {
           <p className="text-white/80 text-sm mt-2">
             Help us understand your wellness journey • 5 minutes
           </p>
+        </div>
+
+        {/* Social Proof Section */}
+        <div className="max-w-4xl mx-auto py-12">
+          <h2 className="text-3xl font-bold text-white text-center mb-8">
+            Join Thousands on Their Healing Journey
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex">
+                  {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-yellow-300 text-yellow-300" />)}
+                </div>
+              </div>
+              <p className="text-white/90 text-sm mb-4">
+                "This AI coach helped me understand my anxiety patterns in ways traditional therapy never did. Life-changing!"
+              </p>
+              <p className="text-white/70 text-xs">- Sarah M., Teacher</p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex">
+                  {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-yellow-300 text-yellow-300" />)}
+                </div>
+              </div>
+              <p className="text-white/90 text-sm mb-4">
+                "Finally, a wellness app that actually understands trauma. The personalized insights are incredible."
+              </p>
+              <p className="text-white/70 text-xs">- Michael R., Engineer</p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex">
+                  {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-yellow-300 text-yellow-300" />)}
+                </div>
+              </div>
+              <p className="text-white/90 text-sm mb-4">
+                "The 24/7 support and evidence-based approaches make this so much better than other wellness apps."
+              </p>
+              <p className="text-white/70 text-xs">- Lisa K., Nurse</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Features Preview */}
+        <div className="max-w-4xl mx-auto py-12">
+          <h2 className="text-3xl font-bold text-white text-center mb-8">
+            What Makes Mynd Ease Different
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <Brain className="h-8 w-8 text-purple-300 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-3">AI-Powered Trauma Recovery</h3>
+              <p className="text-white/90">
+                Our advanced AI understands trauma patterns and provides personalized healing strategies based on the latest research in psychology and neuroscience.
+              </p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <Heart className="h-8 w-8 text-pink-300 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-3">24/7 Emotional Support</h3>
+              <p className="text-white/90">
+                Never feel alone again. Your AI wellness coach is available anytime you need support, guidance, or just someone to listen.
+              </p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <Shield className="h-8 w-8 text-green-300 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-3">Privacy & Security First</h3>
+              <p className="text-white/90">
+                Your mental health journey is completely private. We use end-to-end encryption and never share your personal data.
+              </p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <Clock className="h-8 w-8 text-yellow-300 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-3">Evidence-Based Methods</h3>
+              <p className="text-white/90">
+                All our techniques are grounded in proven therapeutic approaches like CBT, DBT, and trauma-informed care practices.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="max-w-3xl mx-auto py-12">
+          <h2 className="text-3xl font-bold text-white text-center mb-8">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-4">
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <h3 className="text-lg font-semibold text-white mb-2">When exactly does Mynd Ease launch?</h3>
+              <p className="text-white/90">We're launching July 1st, 2025. Pre-launch subscribers get early access and a free trial period.</p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <h3 className="text-lg font-semibold text-white mb-2">How does the Sri Lanka trip contest work?</h3>
+              <p className="text-white/90">Every pre-launch signup is automatically entered. We'll randomly select one winner in June 2025 for a 6-day wellness retreat in beautiful Ella, Sri Lanka.</p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <h3 className="text-lg font-semibold text-white mb-2">Is my personal information safe?</h3>
+              <p className="text-white/90">Absolutely. We use enterprise-grade security and never share your data. Your wellness journey remains completely private.</p>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+              <h3 className="text-lg font-semibold text-white mb-2">Can Mynd Ease replace professional therapy?</h3>
+              <p className="text-white/90">Mynd Ease is designed to complement, not replace, professional mental health care. Always consult with licensed professionals for serious mental health concerns.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="max-w-4xl mx-auto py-12 border-t border-white/20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-4">Contact Us</h3>
+              <p className="text-white/80 mb-2">questions@myndeaseapp.com</p>
+              <p className="text-white/80">Available 9 AM - 6 PM PST</p>
+            </div>
+            
+            <div>
+              <h3 className="text-xl font-bold text-white mb-4">Contest Details</h3>
+              <div className="flex items-center justify-center md:justify-start gap-2 text-white/80 mb-2">
+                <MapPin className="h-4 w-4" />
+                <span>Ella, Sri Lanka</span>
+              </div>
+              <p className="text-white/80">Winner announced June 15, 2025</p>
+            </div>
+            
+            <div>
+              <h3 className="text-xl font-bold text-white mb-4">Follow Journey</h3>
+              <p className="text-white/80 mb-2">Stay updated on our progress</p>
+              <p className="text-white/80">Launch countdown starts soon!</p>
+            </div>
+          </div>
+          
+          <div className="text-center mt-8 pt-8 border-t border-white/20">
+            <p className="text-white/60 text-sm">
+              © 2025 Mynd Ease. Healing journeys start here. 
+            </p>
+          </div>
         </div>
       </div>
     </div>;
