@@ -131,20 +131,32 @@ const CompetitionSignup = () => {
             
             <h2 className="text-2xl font-bold text-white">Enter Our Launch Contest</h2>
             
-            {/* Contest Details Box */}
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
-              <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
-              <div className="space-y-2 text-white/90 text-sm">
-                <p>✈️ Round-trip flights covered</p>
-                <p>🏔️ 5 nights in scenic Ella mountains</p>
-                <p>🧘‍♀️ Daily yoga & meditation sessions</p>
-                <p>❤️‍🩹 Guided therapy & wellness coaching</p>
-                <p>💆‍♀️ Daily massages included</p>
-                <p>📱 Complete digital detox program</p>
-                <p>🌿 Mindfulness & nature immersion</p>
-                <p>🥗 Healthy organic meals included</p>
-                <p>👨‍🍳 Daily activities like cooking classes</p>
-                <p>🧘 Personal wellness assessments</p>
+            {/* Contest Details Box with Image - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+              {/* Contest Details - Left Side */}
+              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
+                <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
+                <div className="space-y-2 text-white/90 text-sm">
+                  <p>✈️ Round-trip flights covered</p>
+                  <p>🏔️ 5 nights in scenic Ella mountains</p>
+                  <p>🧘‍♀️ Daily yoga & meditation sessions</p>
+                  <p>❤️‍🩹 Guided therapy & wellness coaching</p>
+                  <p>💆‍♀️ Daily massages included</p>
+                  <p>📱 Complete digital detox program</p>
+                  <p>🌿 Mindfulness & nature immersion</p>
+                  <p>🥗 Healthy organic meals included</p>
+                  <p>👨‍🍳 Daily activities like cooking classes</p>
+                  <p>🧘 Personal wellness assessments</p>
+                </div>
+              </div>
+              
+              {/* Image - Right Side */}
+              <div className="rounded-lg overflow-hidden shadow-2xl">
+                <img 
+                  src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" 
+                  alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
+                  className="w-full h-64 lg:h-80 object-cover"
+                />
               </div>
             </div>
           </div>
