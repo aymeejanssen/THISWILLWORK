@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Loader2, Mail, Sparkles } from 'lucide-react';
+import { CheckCircle, Loader2, Mail } from 'lucide-react';
 
 const CompetitionSignup = () => {
   const navigate = useNavigate();
@@ -47,11 +46,6 @@ const CompetitionSignup = () => {
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
               Personalized AI wellness coach to help you heal from trauma, build resilience, and improve your mental wellness.
             </p>
-            
-            <div className="flex items-center justify-center gap-2 text-white/80">
-              <Sparkles className="h-5 w-5" />
-              <span className="text-lg">Available 24/7 • Completely Private • Evidence-Based</span>
-            </div>
           </div>
         </div>
 
