@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
+
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
+  
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) return;
@@ -27,6 +28,7 @@ const CompetitionSignup = () => {
       setIsSubmittingEmail(false);
     }
   };
+
   return <div className="min-h-screen wellness-gradient p-6">
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
@@ -82,7 +84,9 @@ const CompetitionSignup = () => {
           <div>
             {!emailSubmitted ? <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
                 <CardHeader className="text-center pb-1 px-[5px] pt-3">
-                  <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
+                  <CardTitle className="text-2xl">
+                    Join <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">Mynd Ease</span> Pre-Launch
+                  </CardTitle>
                   <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
