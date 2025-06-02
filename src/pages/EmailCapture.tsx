@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -210,6 +211,7 @@ const EmailCapture = () => {
                       <p>📱 Complete digital detox program</p>
                       <p>🌿 Mindfulness & nature immersion</p>
                       <p>🥗 Healthy organic meals included</p>
+                      <p>🍳 Daily activities like cooking classes</p>
                       <p>🧘 Personal wellness assessments</p>
                     </div>
                   </div>
