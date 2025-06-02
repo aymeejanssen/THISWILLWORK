@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle, X, Mail, Sparkles, Plane, MapPin, Lotus } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle, X, Mail, Sparkles, Plane, MapPin, Flower2 } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ConsentModal from '../components/ConsentModal';
@@ -204,7 +205,7 @@ const EmailCapture = () => {
           <CardContent className="pt-6 pb-6">
             <div className="text-center space-y-4">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Lotus className="h-8 w-8 text-emerald-600" />
+                <Flower2 className="h-8 w-8 text-emerald-600" />
                 <Badge className="bg-emerald-600 text-white px-6 py-3 text-xl font-bold">
                   🏆 EXCLUSIVE CONTEST
                 </Badge>
@@ -217,7 +218,7 @@ const EmailCapture = () => {
               
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-6">
                 <div className="bg-white/80 rounded-lg p-4 text-center">
-                  <Lotus className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
+                  <Flower2 className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
                   <h4 className="font-semibold text-gray-800">Daily Yoga</h4>
                   <p className="text-sm text-gray-600">Sunrise sessions</p>
                 </div>
