@@ -225,7 +225,7 @@ const EmailCapture = () => {
           <div className="order-first lg:order-last">
             <div className="rounded-lg overflow-hidden shadow-2xl">
               <img 
-                src="/lovable-uploads/60238d89-a492-481c-b83f-c3df812a3ac0.png" 
+                src="/lovable-uploads/ad4e15c0-31db-40c7-8a31-6fea1b7fcd5c.png" 
                 alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
                 className="w-full h-64 lg:h-80 object-cover"
               />
