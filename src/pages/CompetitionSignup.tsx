@@ -160,17 +160,6 @@ const CompetitionSignup = () => {
               </div>
             </div>
           </div>
-
-          {/* Image */}
-          <div className="flex justify-center">
-            <div className="rounded-lg overflow-hidden shadow-2xl max-w-2xl">
-              <img 
-                src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" 
-                alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
-                className="w-full h-64 lg:h-80 object-cover"
-              />
-            </div>
-          </div>
         </div>
 
         {/* Assessment Button */}
