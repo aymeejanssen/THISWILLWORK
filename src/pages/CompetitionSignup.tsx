@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +34,7 @@ const CompetitionSignup = () => {
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
         <div className="text-center space-y-3">
-          <Badge className="bg-purple-500/80 text-white border-purple-300/50 px-6 py-3 text-xl font-bold backdrop-blur-sm">
+          <Badge className="bg-orange-500/80 text-white border-orange-300/50 px-6 py-3 text-xl font-bold backdrop-blur-sm">
             Launching July 1st, 2025
           </Badge>
           
