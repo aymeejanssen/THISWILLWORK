@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
-
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -172,7 +171,7 @@ const CompetitionSignup = () => {
             <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden shadow-2xl">
               {/* Contest Details Header */}
               <div className="p-6 pb-4">
-                <h3 className="text-3xl font-bold text-white bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent shadow-lg relative mb-4">
+                <h3 className="font-bold text-white bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent shadow-lg relative mb-4 mx-0 py-[10px] text-3xl text-center">
                   <span className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text drop-shadow-lg text-neutral-50">
                     6-Day All-Expenses-Paid Wellness Journey Includes:
                   </span>
