@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +95,7 @@ const CompetitionSignup = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <form onSubmit={handleEmailSubmit} className="space-y-2">
-                    <div className="text-left">
+                    <div>
                       <Label htmlFor="email" className="text-sm font-medium text-white">
                         Email Address
                       </Label>
