@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,17 +53,6 @@ const CompetitionSignup = () => {
               <Sparkles className="h-5 w-5" />
               <span className="text-lg">Available 24/7 • Completely Private • Evidence-Based</span>
             </div>
-          </div>
-        </div>
-
-        {/* Image */}
-        <div className="flex justify-center">
-          <div className="rounded-lg overflow-hidden shadow-2xl max-w-2xl">
-            <img 
-              src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" 
-              alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
-              className="w-full h-64 lg:h-80 object-cover"
-            />
           </div>
         </div>
 
@@ -134,10 +122,11 @@ const CompetitionSignup = () => {
           )}
         </div>
 
-        {/* Contest Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 items-center">
+        {/* Contest Section with Image */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          {/* Contest Details */}
           <div className="space-y-6">
-            <div className="text-center">
+            <div className="text-center lg:text-left">
               <Badge className="bg-purple-500/20 text-white px-4 py-2 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm mb-4">
                 🏆 Win a Mental Wellness Retreat in Sri Lanka
               </Badge>
@@ -147,15 +136,13 @@ const CompetitionSignup = () => {
               {/* Contest Details */}
               <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
                 <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left text-white/90 text-sm">
+                <div className="grid grid-cols-1 gap-3 text-left text-white/90 text-sm">
                   <div className="space-y-2">
                     <p>✈️ Round-trip flights covered</p>
                     <p>🏔️ 5 nights in scenic Ella mountains</p>
                     <p>🧘‍♀️ Daily yoga & meditation sessions</p>
                     <p>❤️‍🩹 Guided therapy & wellness coaching</p>
                     <p>💆‍♀️ Daily massages included</p>
-                  </div>
-                  <div className="space-y-2">
                     <p>📱 Complete digital detox program</p>
                     <p>🌿 Mindfulness & nature immersion</p>
                     <p>🥗 Healthy organic meals included</p>
@@ -164,6 +151,17 @@ const CompetitionSignup = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Image */}
+          <div className="flex justify-center lg:justify-end">
+            <div className="rounded-lg overflow-hidden shadow-2xl max-w-full">
+              <img 
+                src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" 
+                alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
+                className="w-full h-64 lg:h-80 object-cover"
+              />
             </div>
           </div>
         </div>
