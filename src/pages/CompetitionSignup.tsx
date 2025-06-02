@@ -6,13 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
-
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
-  
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) return;
@@ -28,7 +26,6 @@ const CompetitionSignup = () => {
       setIsSubmittingEmail(false);
     }
   };
-
   return <div className="min-h-screen wellness-gradient p-6">
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
@@ -97,7 +94,7 @@ const CompetitionSignup = () => {
                       </Label>
                       <Input id="email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm" />
                     </div>
-                    <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="px-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600">
+                    <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="px-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-center">
                       {isSubmittingEmail ? <>
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
                           Signing Up...
