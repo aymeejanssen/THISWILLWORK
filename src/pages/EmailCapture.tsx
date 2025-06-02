@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle, X, Mail, Sparkles } from 'lucide-react';
+import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle, X, Mail, Sparkles, Plane, MapPin, Lotus } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ConsentModal from '../components/ConsentModal';
@@ -200,6 +199,54 @@ const EmailCapture = () => {
           </p>
         </div>
 
+        {/* Contest Announcement */}
+        <Card className="shadow-xl border-none bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 overflow-hidden">
+          <CardContent className="pt-6 pb-6">
+            <div className="text-center space-y-4">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Lotus className="h-8 w-8 text-emerald-600" />
+                <Badge className="bg-emerald-600 text-white px-6 py-3 text-xl font-bold">
+                  🏆 EXCLUSIVE CONTEST
+                </Badge>
+                <Plane className="h-8 w-8 text-emerald-600" />
+              </div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Win a 7-Day Mental Wellness Retreat in Sri Lanka!</h2>
+              <p className="text-gray-700 leading-tight text-xl mb-6 max-w-3xl mx-auto">
+                Join our pre-launch and get a chance to win an all-expenses-paid wellness journey featuring:
+              </p>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-6">
+                <div className="bg-white/80 rounded-lg p-4 text-center">
+                  <Lotus className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
+                  <h4 className="font-semibold text-gray-800">Daily Yoga</h4>
+                  <p className="text-sm text-gray-600">Sunrise sessions</p>
+                </div>
+                <div className="bg-white/80 rounded-lg p-4 text-center">
+                  <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                  <h4 className="font-semibold text-gray-800">Guided Therapy</h4>
+                  <p className="text-sm text-gray-600">1-on-1 sessions</p>
+                </div>
+                <div className="bg-white/80 rounded-lg p-4 text-center">
+                  <MapPin className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                  <h4 className="font-semibold text-gray-800">Digital Detox</h4>
+                  <p className="text-sm text-gray-600">Offline time</p>
+                </div>
+                <div className="bg-white/80 rounded-lg p-4 text-center">
+                  <Heart className="h-8 w-8 text-pink-600 mx-auto mb-2" />
+                  <h4 className="font-semibold text-gray-800">Mindfulness</h4>
+                  <p className="text-sm text-gray-600">Meditation & nature</p>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 max-w-2xl mx-auto">
+                <p className="text-emerald-800 font-medium">
+                  ✨ <strong>Worth $3,500+</strong> • Beautiful beachfront resort • Professional wellness coaches • All meals included
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Launch Announcement */}
         <Card className="shadow-xl border-none bg-gradient-to-br from-yellow-100 via-orange-100 to-red-100 overflow-hidden w-full">
           <CardContent className="pt-6 pb-6">
@@ -225,9 +272,9 @@ const EmailCapture = () => {
             <CardHeader>
               <CardTitle className="text-2xl text-center wellness-text-gradient flex items-center justify-center gap-2">
                 <Mail className="h-6 w-6" />
-                Reserve Your Spot
+                Reserve Your Spot & Enter Contest
               </CardTitle>
-              <p className="text-gray-600 text-center">Enter your email to be notified when we launch and get exclusive early access</p>
+              <p className="text-gray-600 text-center">Enter your email to join our pre-launch list and automatically enter the Sri Lanka wellness retreat contest!</p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -253,12 +300,12 @@ const EmailCapture = () => {
                   {isSubmittingEmail ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Reserving Your Spot...
+                      Entering Contest...
                     </>
                   ) : (
                     <>
-                      <Mail className="h-4 w-4 mr-2" />
-                      Get Early Access
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Join Pre-Launch & Enter Contest
                     </>
                   )}
                 </Button>
@@ -267,6 +314,10 @@ const EmailCapture = () => {
               <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
                 <h4 className="font-semibold text-green-800 mb-2">What you'll get:</h4>
                 <ul className="text-sm text-green-700 space-y-1">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Automatic entry into Sri Lanka retreat contest
+                  </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4" />
                     First access when we launch July 1st
@@ -296,6 +347,11 @@ const EmailCapture = () => {
                 <p className="text-gray-700 leading-relaxed">
                   Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when Mynd Ease launches on July 1st, 2025.
                 </p>
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mt-4">
+                  <p className="text-sm text-emerald-700 font-medium">
+                    🏆 <strong>Contest Entry Confirmed!</strong> You're now entered to win the 7-day wellness retreat in Sri Lanka. Winner will be announced closer to launch date.
+                  </p>
+                </div>
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4">
                   <p className="text-sm text-blue-700">
                     Your assessment results have been saved and will be ready for you when we launch. Get ready to start your personalized AI wellness journey!
