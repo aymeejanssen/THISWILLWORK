@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
+
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -82,7 +83,7 @@ const CompetitionSignup = () => {
             {!emailSubmitted ? <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
                 <CardHeader className="text-center pb-1 px-[5px] pt-3">
                   <CardTitle className="text-2xl">
-                    Join <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">Mynd Ease</span> Pre-Launch
+                    Join <span className="wellness-text-gradient">Mynd Ease</span> Pre-Launch
                   </CardTitle>
                   <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
                 </CardHeader>
@@ -94,14 +95,15 @@ const CompetitionSignup = () => {
                       </Label>
                       <Input id="email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm" />
                     </div>
-                    <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="px-8 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-center">
-                      {isSubmittingEmail ? <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Signing Up...
-                        </> : <>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Join Pre-Launch List & Chance to Win Trip
-                        </>}
+                    <div className="flex justify-center">
+                      <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600">
+                        {isSubmittingEmail ? <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Signing Up...
+                          </> : <>
+                            <Mail className="h-4 w-4 mr-2" />
+                            Join Pre-Launch List & Chance to Win Trip
+                          </>}
                     </Button>
                   </form>
                   
@@ -196,4 +198,5 @@ const CompetitionSignup = () => {
       </div>
     </div>;
 };
+
 export default CompetitionSignup;
