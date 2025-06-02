@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +50,7 @@ const CompetitionSignup = () => {
         {/* Contest Badge - Moved above email signup */}
         <div className="text-center">
           <Badge className="bg-purple-500/20 text-white px-4 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm py-[8px]">
-            🏆 Win a Mental Wellness Retreat in Sri Lanka
+            🏆 🇱🇰 Win a Mental Wellness Retreat in Sri Lanka
           </Badge>
         </div>
 
