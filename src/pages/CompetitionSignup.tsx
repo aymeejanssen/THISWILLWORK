@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,23 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Sparkles } from 'lucide-react';
-
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
-
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) return;
-    
     setIsSubmittingEmail(true);
-    
     try {
       localStorage.setItem('prelaunch_email', email);
       localStorage.setItem('prelaunch_signup_date', new Date().toISOString());
-      
       console.log('Pre-launch email captured:', email);
       setEmailSubmitted(true);
     } catch (err) {
@@ -32,9 +26,7 @@ const CompetitionSignup = () => {
       setIsSubmittingEmail(false);
     }
   };
-
-  return (
-    <div className="min-h-screen wellness-gradient p-6">
+  return <div className="min-h-screen wellness-gradient p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-6">
@@ -59,8 +51,7 @@ const CompetitionSignup = () => {
 
         {/* Email Signup Section */}
         <div className="max-w-lg mx-auto">
-          {!emailSubmitted ? (
-            <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
+          {!emailSubmitted ? <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
               <CardHeader className="text-center">
                 <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
                 <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
@@ -71,32 +62,16 @@ const CompetitionSignup = () => {
                     <Label htmlFor="email" className="text-sm font-medium text-white">
                       Email Address
                     </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm"
-                    />
+                    <Input id="email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm" />
                   </div>
-                  <Button 
-                    type="submit" 
-                    disabled={!email || !email.includes('@') || isSubmittingEmail}
-                    className="w-full bg-white text-gray-900 hover:bg-white/90"
-                  >
-                    {isSubmittingEmail ? (
-                      <>
+                  <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="w-full bg-white text-gray-900 hover:bg-white/90">
+                    {isSubmittingEmail ? <>
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         Signing Up...
-                      </>
-                    ) : (
-                      <>
+                      </> : <>
                         <Mail className="h-4 w-4 mr-2" />
                         Join Pre-Launch List
-                      </>
-                    )}
+                      </>}
                   </Button>
                 </form>
                 
@@ -106,9 +81,7 @@ const CompetitionSignup = () => {
                   <p>✓ Automatic contest entry below 👇</p>
                 </div>
               </CardContent>
-            </Card>
-          ) : (
-            <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
+            </Card> : <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
               <CardContent className="p-6 text-center space-y-4">
                 <CheckCircle className="h-8 w-8 text-white mx-auto" />
                 <h3 className="text-xl font-bold text-white">You're All Set!</h3>
@@ -119,8 +92,7 @@ const CompetitionSignup = () => {
                   🏆 Contest entry confirmed! Scroll down to see contest details.
                 </p>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
         </div>
 
         {/* Contest Section - Vertical Layout */}
@@ -140,28 +112,24 @@ const CompetitionSignup = () => {
                 <div className="space-y-3">
                   {/* First Row */}
                   <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
-                    <p>✈️ Round-trip flights covered</p>
-                    <p>🏔️ 5 nights in scenic Ella mountains</p>
-                    <p>🧘‍♀️ Daily yoga & meditation sessions</p>
-                    <p>❤️‍🩹 Guided therapy & wellness coaching</p>
+                    <p className="text-left">✈️ Round-trip flights covered</p>
+                    <p className="text-left">🏔️ 5 nights in scenic Ella mountains</p>
+                    <p className="text-left">🧘‍♀️ Daily yoga & meditation sessions</p>
+                    <p className="text-left">❤️‍🩹 Guided therapy & wellness coaching</p>
                   </div>
                   {/* Second Row */}
                   <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
-                    <p>💆‍♀️ Daily massages included</p>
-                    <p>📱 Complete digital detox program</p>
-                    <p>🌿 Mindfulness & nature immersion</p>
-                    <p>🥗 Healthy organic meals included</p>
+                    <p className="text-left">💆‍♀️ Daily massages included</p>
+                    <p className="text-left">📱 Complete digital detox program</p>
+                    <p className="text-left">🌿 Mindfulness & nature immersion</p>
+                    <p className="text-left">🥗 Healthy organic meals included</p>
                   </div>
                 </div>
               </div>
               
               {/* Image - Right Side */}
               <div className="rounded-lg overflow-hidden shadow-2xl">
-                <img 
-                  src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" 
-                  alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
-                  className="w-full h-64 lg:h-80 object-cover"
-                />
+                <img src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination" className="w-full h-64 lg:h-80 object-cover" />
               </div>
             </div>
           </div>
@@ -169,10 +137,7 @@ const CompetitionSignup = () => {
 
         {/* Assessment Button */}
         <div className="text-center">
-          <Button 
-            onClick={() => navigate('/assessment')}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-lg"
-          >
+          <Button onClick={() => navigate('/assessment')} className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-lg">
             Take 12 Questions to Resolve Trauma & Get Insights
           </Button>
           <p className="text-white/80 text-sm mt-2">
@@ -180,8 +145,6 @@ const CompetitionSignup = () => {
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CompetitionSignup;
