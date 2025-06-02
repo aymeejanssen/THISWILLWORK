@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
 
@@ -213,6 +214,19 @@ const CompetitionSignup = () => {
                 />
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Transition Section */}
+        <div className="max-w-4xl mx-auto py-8">
+          <div className="flex items-center gap-4">
+            <Separator className="flex-1 bg-white/30" />
+            <div className="px-6 py-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <p className="text-white/90 text-center text-sm font-medium">
+                Ready to go deeper? Let's get to know your wellness journey
+              </p>
+            </div>
+            <Separator className="flex-1 bg-white/30" />
           </div>
         </div>
 
