@@ -32,7 +32,7 @@ const CompetitionSignup = () => {
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
         <div className="text-center space-y-3">
-          <Badge className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 text-purple-900 border-0 px-6 py-3 text-xl font-bold backdrop-blur-sm shadow-lg animate-pulse">
+          <Badge className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 text-white border-0 px-6 py-3 text-xl font-bold backdrop-blur-sm shadow-lg animate-pulse">
             Launching July 1st, 2025
           </Badge>
           
