@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,18 +33,18 @@ const CompetitionSignup = () => {
 
   return (
     <div className="min-h-screen wellness-gradient p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header Section */}
-        <div className="text-center space-y-6">
+        <div className="text-center space-y-4">
           <Badge className="bg-white text-gray-900 px-6 py-3 text-xl font-bold">
             Launching July 1st, 2025
           </Badge>
           
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h1 className="text-4xl font-bold text-white">
               Mynd Ease
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+            <p className="text-xl text-white/90 max-w-2xl mx-auto leading-tight">
               Personalized AI wellness coach to help you heal from trauma, build resilience, and improve your mental wellness.
             </p>
           </div>
