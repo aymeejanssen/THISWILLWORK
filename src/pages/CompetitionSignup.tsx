@@ -196,7 +196,11 @@ const CompetitionSignup = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               {/* Contest Details - Left Side */}
               <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
-                <h3 className="text-2xl text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
+                <h3 className="text-3xl font-bold text-white bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent shadow-lg relative">
+                  <span className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 text-transparent bg-clip-text drop-shadow-lg">
+                    6-Day All-Expenses-Paid Wellness Journey Includes:
+                  </span>
+                </h3>
                 <div className="space-y-3">
                   {/* First Row */}
                   <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
