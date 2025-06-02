@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
+
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -71,7 +72,7 @@ const CompetitionSignup = () => {
           {/* Center - Main Signup Form */}
           <div>
             {!emailSubmitted ? <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
-                <CardHeader className="text-center pb-2 px-[5px] py-0">
+                <CardHeader className="text-center pb-2 px-[5px] pt-3">
                   <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
                   <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
                 </CardHeader>
@@ -189,4 +190,5 @@ const CompetitionSignup = () => {
       </div>
     </div>;
 };
+
 export default CompetitionSignup;
