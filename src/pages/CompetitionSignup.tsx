@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,7 @@ const CompetitionSignup = () => {
 
   return (
     <div className="min-h-screen wellness-gradient p-6">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-6">
           <Badge className="bg-white text-gray-900 px-6 py-3 text-xl font-bold">
@@ -122,45 +123,41 @@ const CompetitionSignup = () => {
           )}
         </div>
 
-        {/* Contest Section with Image */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* Contest Details */}
+        {/* Contest Section with Image - Side by Side Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          {/* Contest Details - Left Side */}
           <div className="space-y-6">
-            <div className="text-center lg:text-left">
-              <Badge className="bg-purple-500/20 text-white px-4 py-2 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm mb-4">
-                🏆 Win a Mental Wellness Retreat in Sri Lanka
-              </Badge>
-              
-              <h2 className="text-2xl font-bold text-white mb-4">Enter Our Launch Contest</h2>
-              
-              {/* Contest Details */}
-              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
-                <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
-                <div className="grid grid-cols-1 gap-3 text-left text-white/90 text-sm">
-                  <div className="space-y-2">
-                    <p>✈️ Round-trip flights covered</p>
-                    <p>🏔️ 5 nights in scenic Ella mountains</p>
-                    <p>🧘‍♀️ Daily yoga & meditation sessions</p>
-                    <p>❤️‍🩹 Guided therapy & wellness coaching</p>
-                    <p>💆‍♀️ Daily massages included</p>
-                    <p>📱 Complete digital detox program</p>
-                    <p>🌿 Mindfulness & nature immersion</p>
-                    <p>🥗 Healthy organic meals included</p>
-                    <p>👨‍🍳 Daily activities like cooking classes</p>
-                    <p>🧘 Personal wellness assessments</p>
-                  </div>
-                </div>
+            <Badge className="bg-purple-500/20 text-white px-4 py-2 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm">
+              🏆 Win a Mental Wellness Retreat in Sri Lanka
+            </Badge>
+            
+            <h2 className="text-2xl font-bold text-white">Enter Our Launch Contest</h2>
+            
+            {/* Contest Details Box */}
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
+              <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
+              <div className="space-y-2 text-white/90 text-sm">
+                <p>✈️ Round-trip flights covered</p>
+                <p>🏔️ 5 nights in scenic Ella mountains</p>
+                <p>🧘‍♀️ Daily yoga & meditation sessions</p>
+                <p>❤️‍🩹 Guided therapy & wellness coaching</p>
+                <p>💆‍♀️ Daily massages included</p>
+                <p>📱 Complete digital detox program</p>
+                <p>🌿 Mindfulness & nature immersion</p>
+                <p>🥗 Healthy organic meals included</p>
+                <p>👨‍🍳 Daily activities like cooking classes</p>
+                <p>🧘 Personal wellness assessments</p>
               </div>
             </div>
           </div>
 
-          {/* Image */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="rounded-lg overflow-hidden shadow-2xl max-w-full">
+          {/* Image - Right Side */}
+          <div className="h-full flex items-center">
+            <div className="rounded-lg overflow-hidden shadow-2xl w-full">
               <img 
                 src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" 
                 alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
-                className="w-full h-64 lg:h-80 object-cover"
+                className="w-full h-80 lg:h-96 object-cover"
               />
             </div>
           </div>
