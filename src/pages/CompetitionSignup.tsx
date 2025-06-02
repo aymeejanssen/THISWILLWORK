@@ -36,8 +36,10 @@ const CompetitionSignup = () => {
           </Badge>
           
           <div className="space-y-1">
-            <h1 className="text-4xl font-bold text-white">
-              Mynd Ease
+            <h1 className="text-4xl font-bold">
+              <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">
+                Mynd Ease
+              </span>
             </h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
               Personalized AI wellness coach to help you heal from trauma, build resilience, and improve your mental wellness.
