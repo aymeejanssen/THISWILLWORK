@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
-
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -50,7 +48,7 @@ const CompetitionSignup = () => {
 
         {/* Contest Badge - Moved above email signup */}
         <div className="text-center">
-          <Badge className="bg-purple-500/20 text-white px-4 py-2 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm">
+          <Badge className="bg-purple-500/20 text-white px-4 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm py-[8px]">
             🏆 Win a Mental Wellness Retreat in Sri Lanka
           </Badge>
         </div>
@@ -196,5 +194,4 @@ const CompetitionSignup = () => {
       </div>
     </div>;
 };
-
 export default CompetitionSignup;
