@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -136,17 +137,21 @@ const CompetitionSignup = () => {
               {/* Contest Details - Left Side */}
               <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
                 <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
-                <div className="space-y-2 text-white/90 text-sm">
-                  <p>✈️ Round-trip flights covered</p>
-                  <p>🏔️ 5 nights in scenic Ella mountains</p>
-                  <p>🧘‍♀️ Daily yoga & meditation sessions</p>
-                  <p>❤️‍🩹 Guided therapy & wellness coaching</p>
-                  <p>💆‍♀️ Daily massages included</p>
-                  <p>📱 Complete digital detox program</p>
-                  <p>🌿 Mindfulness & nature immersion</p>
-                  <p>🥗 Healthy organic meals included</p>
-                  <p>👨‍🍳 Daily activities like cooking classes</p>
-                  <p>🧘 Personal wellness assessments</p>
+                <div className="space-y-3">
+                  {/* First Row */}
+                  <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
+                    <p>✈️ Round-trip flights covered</p>
+                    <p>🏔️ 5 nights in scenic Ella mountains</p>
+                    <p>🧘‍♀️ Daily yoga & meditation sessions</p>
+                    <p>❤️‍🩹 Guided therapy & wellness coaching</p>
+                  </div>
+                  {/* Second Row */}
+                  <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
+                    <p>💆‍♀️ Daily massages included</p>
+                    <p>📱 Complete digital detox program</p>
+                    <p>🌿 Mindfulness & nature immersion</p>
+                    <p>🥗 Healthy organic meals included</p>
+                  </div>
                 </div>
               </div>
               
