@@ -118,10 +118,10 @@ const OnboardingFlow = ({
     
     // For "other" category, we only have one open-ended question
     if (selectedConcern === 'other' || newResponses.length >= questions.length) {
-      // Complete the assessment and navigate to summary
+      // Complete the assessment and navigate to completion page
       completeAssessment();
       onClose(); // Close the modal
-      navigate('/assessment-summary'); // Navigate to summary page
+      navigate('/assessment-complete'); // Navigate to completion page
     } else {
       setCurrentStep(currentStep + 1);
     }
