@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Star, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
+import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
 
 const CompetitionSignup = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const CompetitionSignup = () => {
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
         <div className="text-center space-y-3">
-          <Badge className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 text-white border-0 px-6 py-3 text-xl font-bold backdrop-blur-sm shadow-lg animate-pulse">
+          <Badge className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 text-white border-0 px-6 py-3 text-xl backdrop-blur-sm shadow-lg animate-pulse">
             Launching July 1st, 2025
           </Badge>
           
@@ -172,7 +173,7 @@ const CompetitionSignup = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               {/* Contest Details - Left Side */}
               <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
-                <h3 className="text-2xl font-bold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
+                <h3 className="text-2xl text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
                 <div className="space-y-3">
                   {/* First Row */}
                   <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
@@ -220,50 +221,6 @@ const CompetitionSignup = () => {
           <p className="text-white/80 text-sm mt-2">
             Help us understand your wellness journey • 5 minutes
           </p>
-        </div>
-
-        {/* Social Proof Section */}
-        <div className="max-w-4xl mx-auto py-12">
-          <h2 className="text-3xl font-bold text-white text-center mb-8">
-            Join Thousands on Their Healing Journey
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-yellow-300 text-yellow-300" />)}
-                </div>
-              </div>
-              <p className="text-white/90 text-sm mb-4">
-                "This AI coach helped me understand my anxiety patterns in ways traditional therapy never did. Life-changing!"
-              </p>
-              <p className="text-white/70 text-xs">- Sarah M., Teacher</p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-yellow-300 text-yellow-300" />)}
-                </div>
-              </div>
-              <p className="text-white/90 text-sm mb-4">
-                "Finally, a wellness app that actually understands trauma. The personalized insights are incredible."
-              </p>
-              <p className="text-white/70 text-xs">- Michael R., Engineer</p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-yellow-300 text-yellow-300" />)}
-                </div>
-              </div>
-              <p className="text-white/90 text-sm mb-4">
-                "The 24/7 support and evidence-based approaches make this so much better than other wellness apps."
-              </p>
-              <p className="text-white/70 text-xs">- Lisa K., Nurse</p>
-            </div>
-          </div>
         </div>
 
         {/* Features Preview */}
@@ -336,13 +293,7 @@ const CompetitionSignup = () => {
 
         {/* Footer */}
         <div className="max-w-4xl mx-auto py-12 border-t border-white/20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">Contact Us</h3>
-              <p className="text-white/80 mb-2">questions@myndeaseapp.com</p>
-              <p className="text-white/80">Available 9 AM - 6 PM PST</p>
-            </div>
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
             <div>
               <h3 className="text-xl font-bold text-white mb-4">Contest Details</h3>
               <div className="flex items-center justify-center md:justify-start gap-2 text-white/80 mb-2">
