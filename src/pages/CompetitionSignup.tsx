@@ -99,7 +99,7 @@ const CompetitionSignup = () => {
                 </form>
                 
                 <div className="text-sm text-white/80 text-center">
-                  <div className="flex items-center justify-center gap-4 flex-wrap">
+                  <div className="flex items-center justify-center gap-4 flex-wrap leading-tight">
                     <span>✓ Free trial when we launch</span>
                     <span>✓ First access July 1st</span>
                     <span>✓ Automatic contest entry below 👇</span>
