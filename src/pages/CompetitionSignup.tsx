@@ -80,10 +80,10 @@ const CompetitionSignup = () => {
               <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
                 <CardHeader className="text-center">
                   <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
-                  <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka 🇱🇰</p>
+                  <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <form onSubmit={handleEmailSubmit} className="space-y-4">
+                  <form onSubmit={handleEmailSubmit} className="space-y-2">
                     <div className="text-left">
                       <Label htmlFor="email" className="text-sm font-medium text-white">
                         Email Address
