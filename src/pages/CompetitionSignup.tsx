@@ -49,7 +49,7 @@ const CompetitionSignup = () => {
 
         {/* Contest Badge - Moved above email signup */}
         <div className="text-center">
-          <Badge className="bg-purple-500/20 text-white px-4 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm py-[8px]">
+          <Badge className="text-white px-4 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm py-[8px] bg-wellness-yellow">
             🏆 Win a Mental Wellness Retreat in Sri Lanka 🇱🇰
           </Badge>
         </div>
@@ -98,7 +98,7 @@ const CompetitionSignup = () => {
                       <Input id="email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm" />
                     </div>
                     <div className="flex justify-center">
-                      <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600">
+                      <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="px-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-slate-50">
                         {isSubmittingEmail ? <>
                             <Loader2 className="h-4 w-4 animate-spin mr-2" />
                             Signing Up...
