@@ -197,7 +197,7 @@ const EmailCapture = () => {
                 
                 {/* Contest Details */}
                 <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
-                  <h3 className="text-lg font-semibold text-white">7-Day All-Expenses-Paid Wellness Journey Includes:</h3>
+                  <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left text-white/90 text-sm">
                     <div className="space-y-2">
                       <p>✈️ Round-trip flights covered</p>
@@ -209,7 +209,7 @@ const EmailCapture = () => {
                       <p>📱 Complete digital detox program</p>
                       <p>🌿 Mindfulness & nature immersion</p>
                       <p>🥗 Healthy organic meals included</p>
-                      <p>🏖️ Beautiful beachfront resort access</p>
+                      <p>🏞️ Beautiful mountain resort accommodation</p>
                     </div>
                   </div>
                 </div>
