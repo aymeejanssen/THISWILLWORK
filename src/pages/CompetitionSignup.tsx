@@ -88,7 +88,9 @@ const CompetitionSignup = () => {
               <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
                 <CardHeader className="text-center pb-1 px-[5px] pt-3">
                   <CardTitle className="text-2xl">
-                    Join <span className="wellness-text-gradient">Mynd Ease</span> Pre-Launch
+                    <span className="text-white">Join </span>
+                    <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">Mynd Ease</span>
+                    <span className="text-white"> Pre-Launch</span>
                   </CardTitle>
                   <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
                 </CardHeader>
