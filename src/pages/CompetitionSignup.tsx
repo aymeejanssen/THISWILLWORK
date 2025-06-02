@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -177,6 +176,17 @@ const CompetitionSignup = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Prize Mention Line */}
+        <div className="text-center py-2">
+          <div className="max-w-md mx-auto">
+            <div className="h-px bg-white/30 mb-3"></div>
+            <p className="text-white/90 text-sm font-medium">
+              🏆 About your prize: A 6-day wellness retreat in beautiful Sri Lanka
+            </p>
+            <div className="h-px bg-white/30 mt-3"></div>
           </div>
         </div>
 
