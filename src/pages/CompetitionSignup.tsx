@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -87,7 +88,7 @@ const CompetitionSignup = () => {
                     ) : (
                       <>
                         <Mail className="h-4 w-4 mr-2" />
-                        Join Pre-Launch List
+                        Join Pre-Launch List & Chance to Win Trip 🇱🇰
                       </>
                     )}
                   </Button>
@@ -178,3 +179,4 @@ const CompetitionSignup = () => {
 };
 
 export default CompetitionSignup;
+
