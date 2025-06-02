@@ -31,7 +31,7 @@ const CompetitionSignup = () => {
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
         <div className="text-center space-y-3">
-          <Badge className="bg-white text-gray-900 px-6 py-3 text-xl font-bold">
+          <Badge className="bg-purple-500/80 text-white border-purple-300/50 px-6 py-3 text-xl font-bold backdrop-blur-sm">
             Launching July 1st, 2025
           </Badge>
           
