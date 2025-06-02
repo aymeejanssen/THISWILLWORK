@@ -44,10 +44,10 @@ const CompetitionSignup = () => {
           
           <div className="space-y-4">
             <h1 className="text-4xl font-bold text-white">
-              AI Wellness Coach
+              Mynd Ease
             </h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Personalized therapy sessions powered by AI to help you heal from trauma, build resilience, and improve your mental wellness.
+              Personalized AI wellness coach to help you heal from trauma, build resilience, and improve your mental wellness.
             </p>
             
             <div className="flex items-center justify-center gap-2 text-white/80">
@@ -62,8 +62,8 @@ const CompetitionSignup = () => {
           {!emailSubmitted ? (
             <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
               <CardHeader className="text-center">
-                <CardTitle className="text-white text-2xl">Get Early Access</CardTitle>
-                <p className="text-white/90">Be the first to experience AI wellness coaching with our free trial</p>
+                <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
+                <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -113,7 +113,7 @@ const CompetitionSignup = () => {
                 <CheckCircle className="h-8 w-8 text-white mx-auto" />
                 <h3 className="text-xl font-bold text-white">You're All Set!</h3>
                 <p className="text-white/90">
-                  Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when we launch July 1st.
+                  Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when Mynd Ease launches July 1st.
                 </p>
                 <p className="text-sm text-white font-medium">
                   🏆 Contest entry confirmed! Scroll down to see contest details.
