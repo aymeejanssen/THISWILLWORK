@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
+
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -49,7 +50,7 @@ const CompetitionSignup = () => {
 
         {/* Contest Badge - Moved above email signup */}
         <div className="text-center">
-          <Badge className="bg-white/20 text-white px-4 text-lg font-semibold border border-white/30 backdrop-blur-sm py-[8px] shadow-lg">
+          <Badge className="bg-gradient-to-r from-yellow-200/20 via-orange-200/20 to-pink-200/20 text-white px-4 text-lg font-semibold border border-white/30 backdrop-blur-sm py-[8px] shadow-lg">
             🏆 Win a Mental Wellness Retreat in Sri Lanka 🇱🇰
           </Badge>
         </div>
