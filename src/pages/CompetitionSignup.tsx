@@ -233,11 +233,11 @@ const CompetitionSignup = () => {
         </div>
 
         {/* Features Preview */}
-        <div className="max-w-4xl mx-auto py-12">
+        <div className="max-w-4xl mx-auto py-12 bg-gradient-to-br from-orange-200/10 via-peach-200/10 to-pink-200/10 rounded-2xl backdrop-blur-sm border border-white/10">
           <h2 className="text-3xl font-bold text-white text-center mb-8">
             What Makes Mynd Ease Different
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-6">
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
               <Brain className="h-8 w-8 text-purple-300 mb-4" />
               <h3 className="text-xl font-semibold text-white mb-3">AI-Powered Trauma Recovery</h3>
