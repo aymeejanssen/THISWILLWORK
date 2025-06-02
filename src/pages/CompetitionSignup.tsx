@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
+
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -49,7 +50,7 @@ const CompetitionSignup = () => {
 
         {/* Contest Badge - Moved above email signup */}
         <div className="text-center">
-          <Badge className="bg-gradient-to-r from-orange-200/50 via-yellow-200/50 to-yellow-300/50 text-slate-700 px-4 text-lg font-medium border border-orange-200/30 backdrop-blur-sm py-[8px] shadow-md">
+          <Badge className="bg-gradient-to-r from-orange-200/50 via-yellow-200/60 to-yellow-300/70 text-slate-700 px-4 text-lg font-medium border border-orange-200/30 backdrop-blur-sm py-[8px] shadow-md">
             🏆 Win a Mental Wellness Retreat in Sri Lanka for Two 🇱🇰
           </Badge>
         </div>
@@ -82,7 +83,7 @@ const CompetitionSignup = () => {
           <div>
             {!emailSubmitted ? <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
                 <CardHeader className="text-center pb-1 px-[5px] pt-3">
-                  <CardTitle className="text-4xl">
+                  <CardTitle className="text-2xl">
                     <span className="text-white">Join </span>
                     <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">Mynd Ease</span>
                     <span className="text-white"> Pre-Launch</span>
@@ -200,10 +201,9 @@ const CompetitionSignup = () => {
                   </div>
                 </div>
                 
-                {/* Image - Right Side with fade overlay */}
-                <div className="lg:border-l lg:border-white/20 relative">
+                {/* Image - Right Side */}
+                <div className="lg:border-l lg:border-white/20">
                   <img src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination" className="w-full h-64 lg:h-80 object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-[#A78AB0]/40 lg:bg-gradient-to-r lg:from-[#A78AB0]/30 lg:via-transparent lg:to-transparent"></div>
                 </div>
               </div>
             </div>
