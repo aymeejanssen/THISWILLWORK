@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
+
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -31,12 +32,12 @@ const CompetitionSignup = () => {
       <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
         <div className="text-center space-y-3">
-          <Badge className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 text-white border-0 px-4 py-2 text-sm backdrop-blur-sm shadow-lg animate-pulse">
+          <Badge className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 text-white border-0 px-3 py-1 text-xs backdrop-blur-sm shadow-lg animate-pulse">
             Launching July 1st, 2025
           </Badge>
           
           <div className="space-y-1">
-            <h1 className="text-5xl font-bold">
+            <h1 className="text-6xl font-bold">
               <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">
                 Mynd Ease
               </span>
@@ -184,14 +185,14 @@ const CompetitionSignup = () => {
                 <div className="p-6 pt-0 space-y-4">
                   <div className="space-y-3">
                     {/* First Row */}
-                    <div className="grid grid-cols-1 gap-2 text-white/90 text-sm">
+                    <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
                       <p className="text-left">✈️ Round-trip flights covered</p>
                       <p className="text-left">🏔️ 5 nights in scenic Ella mountains</p>
                       <p className="text-left">🧘‍♀️ Daily yoga & meditation sessions</p>
                       <p className="text-left">❤️‍🩹 Guided therapy & wellness coaching</p>
                     </div>
                     {/* Second Row */}
-                    <div className="grid grid-cols-1 gap-2 text-white/90 text-sm">
+                    <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
                       <p className="text-left">💆‍♀️ Daily massages included</p>
                       <p className="text-left">📱 Complete digital detox program</p>
                       <p className="text-left">🌿 Mindfulness & nature immersion</p>
