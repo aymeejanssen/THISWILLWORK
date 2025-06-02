@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -186,21 +187,21 @@ const CompetitionSignup = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               {/* Contest Details - Left Side */}
               <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
-                <h3 className="text-lg font-semibold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
+                <h3 className="text-xl font-bold text-white">6-Day All-Expenses-Paid Wellness Journey Includes:</h3>
                 <div className="space-y-3">
                   {/* First Row */}
                   <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
-                    <p className="text-left">✈️ Round-trip flights covered</p>
-                    <p className="text-left">🏔️ 5 nights in scenic Ella mountains</p>
-                    <p className="text-left">🧘‍♀️ Daily yoga & meditation sessions</p>
-                    <p className="text-left">❤️‍🩹 Guided therapy & wellness coaching</p>
+                    <p className="text-left font-bold">✈️ Round-trip flights covered</p>
+                    <p className="text-left font-bold">🏔️ 5 nights in scenic Ella mountains</p>
+                    <p className="text-left font-bold">🧘‍♀️ Daily yoga & meditation sessions</p>
+                    <p className="text-left font-bold">❤️‍🩹 Guided therapy & wellness coaching</p>
                   </div>
                   {/* Second Row */}
                   <div className="grid grid-cols-2 gap-2 text-white/90 text-sm">
-                    <p className="text-left">💆‍♀️ Daily massages included</p>
-                    <p className="text-left">📱 Complete digital detox program</p>
-                    <p className="text-left">🌿 Mindfulness & nature immersion</p>
-                    <p className="text-left">🥗 Healthy organic meals included</p>
+                    <p className="text-left font-bold">💆‍♀️ Daily massages included</p>
+                    <p className="text-left font-bold">📱 Complete digital detox program</p>
+                    <p className="text-left font-bold">🌿 Mindfulness & nature immersion</p>
+                    <p className="text-left font-bold">🥗 Healthy organic meals included</p>
                   </div>
                 </div>
               </div>
