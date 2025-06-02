@@ -50,8 +50,8 @@ const CompetitionSignup = () => {
 
         {/* Contest Badge - Moved above email signup */}
         <div className="text-center">
-          <Badge className="bg-gradient-to-r from-yellow-200/20 via-orange-200/20 to-pink-200/20 text-white px-4 text-lg font-semibold border border-white/30 backdrop-blur-sm py-[8px] shadow-lg">
-            🏆 Win a Mental Wellness Retreat in Sri Lanka 🇱🇰
+          <Badge className="bg-gradient-to-r from-yellow-300/30 via-orange-300/25 to-pink-300/20 text-white px-4 text-lg font-semibold border border-white/30 backdrop-blur-sm py-[8px] shadow-lg">
+            🏆 Win a Mental Wellness Retreat in Sri Lanka for Two 🇱🇰
           </Badge>
         </div>
 
