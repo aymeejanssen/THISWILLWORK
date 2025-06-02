@@ -41,7 +41,7 @@ const CompetitionSignup = () => {
           
           <div className="space-y-1">
             <h1 className="text-4xl font-bold">
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">
                 Mynd Ease
               </span>
             </h1>
