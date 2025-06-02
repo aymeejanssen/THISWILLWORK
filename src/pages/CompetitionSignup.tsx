@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,18 +33,18 @@ const CompetitionSignup = () => {
 
   return (
     <div className="min-h-screen wellness-gradient p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-4">
         {/* Header Section */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-3">
           <Badge className="bg-white text-gray-900 px-6 py-3 text-xl font-bold">
             Launching July 1st, 2025
           </Badge>
           
-          <div className="space-y-2">
+          <div className="space-y-1">
             <h1 className="text-4xl font-bold text-white">
               Mynd Ease
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto leading-tight">
+            <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
               Personalized AI wellness coach to help you heal from trauma, build resilience, and improve your mental wellness.
             </p>
           </div>
@@ -55,7 +56,7 @@ const CompetitionSignup = () => {
             <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
               <CardHeader className="text-center">
                 <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
-                <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka</p>
+                <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka 🇱🇰</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <form onSubmit={handleEmailSubmit} className="space-y-4">
