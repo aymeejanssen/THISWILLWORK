@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
-
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -276,7 +274,7 @@ const CompetitionSignup = () => {
             
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
               <h3 className="text-lg font-semibold text-white mb-2">How does the Sri Lanka trip contest work?</h3>
-              <p className="text-white/90">Every pre-launch signup is automatically entered. We'll randomly select one winner in June 2025 for a 6-day wellness retreat in beautiful Ella, Sri Lanka.</p>
+              <p className="text-white/90">Every pre-launch signup is automatically entered. We'll randomly select one winner in July 2025 for a 6-day wellness retreat in beautiful Ella, Sri Lanka.</p>
             </div>
             
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
@@ -292,30 +290,7 @@ const CompetitionSignup = () => {
         </div>
 
         {/* Footer */}
-        <div className="max-w-4xl mx-auto py-12 border-t border-white/20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">Contest Details</h3>
-              <div className="flex items-center justify-center md:justify-start gap-2 text-white/80 mb-2">
-                <MapPin className="h-4 w-4" />
-                <span>Ella, Sri Lanka</span>
-              </div>
-              <p className="text-white/80">Winner announced June 15, 2025</p>
-            </div>
-            
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">Follow Journey</h3>
-              <p className="text-white/80 mb-2">Stay updated on our progress</p>
-              <p className="text-white/80">Launch countdown starts soon!</p>
-            </div>
-          </div>
-          
-          <div className="text-center mt-8 pt-8 border-t border-white/20">
-            <p className="text-white/60 text-sm">
-              © 2025 Mynd Ease. Healing journeys start here. 
-            </p>
-          </div>
-        </div>
+        
       </div>
     </div>;
 };
