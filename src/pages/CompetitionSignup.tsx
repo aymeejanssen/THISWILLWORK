@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Loader2, Mail } from 'lucide-react';
+import { CheckCircle, Loader2, Mail, Calendar, Gift, Users } from 'lucide-react';
 
 const CompetitionSignup = () => {
   const navigate = useNavigate();
@@ -49,72 +50,119 @@ const CompetitionSignup = () => {
           </div>
         </div>
 
-        {/* Email Signup Section */}
-        <div className="max-w-lg mx-auto">
-          {!emailSubmitted ? (
-            <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
-              <CardHeader className="text-center">
-                <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
-                <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka 🇱🇰</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <form onSubmit={handleEmailSubmit} className="space-y-4">
-                  <div className="text-left">
-                    <Label htmlFor="email" className="text-sm font-medium text-white">
-                      Email Address
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={!email || !email.includes('@') || isSubmittingEmail}
-                    className="w-full bg-white text-gray-900 hover:bg-white/90"
-                  >
-                    {isSubmittingEmail ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Signing Up...
-                      </>
-                    ) : (
-                      <>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Join Pre-Launch List & Chance to Win Trip
-                      </>
-                    )}
-                  </Button>
-                </form>
-                
-                <div className="text-sm text-white/80 text-center">
-                  <div className="flex items-center justify-center gap-2 flex-wrap leading-tight">
-                    <span>✓ Free trial when we launch</span>
-                    <span>✓ First access July 1st</span>
-                    <span>✓ Automatic contest entry below 👇</span>
-                  </div>
+        {/* Email Signup Section with Side Elements */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center max-w-5xl mx-auto">
+          {/* Left Side - Benefits */}
+          <div className="hidden lg:block space-y-4">
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+              <div className="flex items-center gap-3 text-white">
+                <Calendar className="h-6 w-6 text-yellow-300" />
+                <div>
+                  <h3 className="font-semibold">Early Access</h3>
+                  <p className="text-sm text-white/80">First to try July 1st</p>
                 </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
-              <CardContent className="p-6 text-center space-y-4">
-                <CheckCircle className="h-8 w-8 text-white mx-auto" />
-                <h3 className="text-xl font-bold text-white">You're All Set!</h3>
-                <p className="text-white/90">
-                  Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when Mynd Ease launches July 1st.
-                </p>
-                <p className="text-sm text-white font-medium">
-                  🏆 Contest entry confirmed! Scroll down to see contest details.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+              <div className="flex items-center gap-3 text-white">
+                <Gift className="h-6 w-6 text-pink-300" />
+                <div>
+                  <h3 className="font-semibold">Free Trial</h3>
+                  <p className="text-sm text-white/80">No cost to start</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Center - Main Signup Form */}
+          <div>
+            {!emailSubmitted ? (
+              <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
+                <CardHeader className="text-center">
+                  <CardTitle className="text-white text-2xl">Join Mynd Ease Pre-Launch</CardTitle>
+                  <p className="text-white/90">Get early access & a chance to win a trip to Sri Lanka 🇱🇰</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <form onSubmit={handleEmailSubmit} className="space-y-4">
+                    <div className="text-left">
+                      <Label htmlFor="email" className="text-sm font-medium text-white">
+                        Email Address
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={!email || !email.includes('@') || isSubmittingEmail}
+                      className="w-full bg-white text-gray-900 hover:bg-white/90"
+                    >
+                      {isSubmittingEmail ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Signing Up...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Join Pre-Launch List & Chance to Win Trip
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                  
+                  <div className="text-sm text-white/80 text-center">
+                    <div className="flex items-center justify-center gap-2 flex-wrap leading-tight">
+                      <span>✓ Free trial when we launch</span>
+                      <span>✓ First access July 1st</span>
+                      <span>✓ Automatic contest entry below 👇</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
+                <CardContent className="p-6 text-center space-y-4">
+                  <CheckCircle className="h-8 w-8 text-white mx-auto" />
+                  <h3 className="text-xl font-bold text-white">You're All Set!</h3>
+                  <p className="text-white/90">
+                    Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when Mynd Ease launches July 1st.
+                  </p>
+                  <p className="text-sm text-white font-medium">
+                    🏆 Contest entry confirmed! Scroll down to see contest details.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Side - Contest Highlight */}
+          <div className="hidden lg:block space-y-4">
+            <div className="bg-purple-500/20 backdrop-blur-sm p-4 rounded-lg border border-purple-300/30">
+              <div className="flex items-center gap-3 text-white">
+                <Gift className="h-6 w-6 text-purple-300" />
+                <div>
+                  <h3 className="font-semibold">Win Sri Lanka Trip</h3>
+                  <p className="text-sm text-white/80">6-day wellness retreat</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+              <div className="flex items-center gap-3 text-white">
+                <Users className="h-6 w-6 text-green-300" />
+                <div>
+                  <h3 className="font-semibold">Join Community</h3>
+                  <p className="text-sm text-white/80">Connect with others</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Contest Section - Vertical Layout */}
