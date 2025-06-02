@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,13 @@ const CompetitionSignup = () => {
           </div>
         </div>
 
+        {/* Contest Badge - Moved above email signup */}
+        <div className="text-center">
+          <Badge className="bg-purple-500/20 text-white px-4 py-2 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm">
+            🏆 Win a Mental Wellness Retreat in Sri Lanka
+          </Badge>
+        </div>
+
         {/* Email Signup Section with Side Elements */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center max-w-5xl mx-auto">
           {/* Left Side - Benefits */}
@@ -86,7 +94,7 @@ const CompetitionSignup = () => {
                       </Label>
                       <Input id="email" type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm" />
                     </div>
-                    <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="w-full bg-white text-gray-900 hover:bg-white/90">
+                    <Button type="submit" disabled={!email || !email.includes('@') || isSubmittingEmail} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600">
                       {isSubmittingEmail ? <>
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
                           Signing Up...
@@ -145,10 +153,6 @@ const CompetitionSignup = () => {
         {/* Contest Section - Vertical Layout */}
         <div className="space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-6">
-            <Badge className="bg-purple-500/20 text-white px-4 py-2 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm">
-              🏆 Win a Mental Wellness Retreat in Sri Lanka
-            </Badge>
-            
             {/* Contest Details Box with Image - Side by Side */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               {/* Contest Details - Left Side */}
@@ -182,7 +186,7 @@ const CompetitionSignup = () => {
 
         {/* Assessment Button */}
         <div className="text-center">
-          <Button onClick={() => navigate('/assessment')} className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-lg">
+          <Button onClick={() => navigate('/assessment')} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 px-8 py-4 text-lg rounded-lg">
             Take 12 Questions to Resolve Trauma & Get Insights
           </Button>
           <p className="text-white/80 text-sm mt-2">
