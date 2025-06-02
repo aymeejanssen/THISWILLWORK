@@ -168,7 +168,7 @@ const CompetitionSignup = () => {
         <div className="space-y-8 max-w-4xl mx-auto">
           <div className="text-center space-y-6">
             {/* Unified Contest Details and Image */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden shadow-2xl">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
               {/* Contest Details Header */}
               <div className="p-6 pb-4">
                 <h3 className="font-bold text-white bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300 bg-clip-text text-transparent shadow-lg relative mb-4 mx-0 py-[10px] text-3xl text-center">
