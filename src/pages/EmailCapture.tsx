@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -103,12 +104,12 @@ const EmailCapture = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white p-6">
+      <div className="min-h-screen wellness-gradient p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-gray-600" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing Your Responses</h2>
-            <p className="text-gray-600">Please wait while we process your assessment...</p>
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-white" />
+            <h2 className="text-2xl font-bold text-white mb-2">Analyzing Your Responses</h2>
+            <p className="text-white/80">Please wait while we process your assessment...</p>
           </div>
         </div>
       </div>
@@ -117,12 +118,12 @@ const EmailCapture = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white p-6">
+      <div className="min-h-screen wellness-gradient p-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-red-800 mb-4">Something went wrong</h2>
-            <p className="text-red-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()} className="bg-gray-900 hover:bg-gray-800 text-white">
+            <h2 className="text-2xl font-bold text-white mb-4">Something went wrong</h2>
+            <p className="text-white/80 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
               Try Again
             </Button>
           </div>
@@ -133,7 +134,7 @@ const EmailCapture = () => {
 
   if (showConsentModal) {
     return (
-      <div className="min-h-screen bg-white p-6">
+      <div className="min-h-screen wellness-gradient p-6">
         <ConsentModal
           isOpen={showConsentModal}
           onConsent={grantConsent}
@@ -145,12 +146,12 @@ const EmailCapture = () => {
 
   if (showDataManagement) {
     return (
-      <div className="min-h-screen bg-white p-6">
+      <div className="min-h-screen wellness-gradient p-6">
         <div className="max-w-6xl mx-auto space-y-6">
           <Button 
             variant="ghost" 
             onClick={() => setShowDataManagement(false)} 
-            className="mb-4"
+            className="mb-4 text-white hover:bg-white/20"
           >
             ← Back to Summary
           </Button>
@@ -161,13 +162,13 @@ const EmailCapture = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-3xl mx-auto space-y-8">
+    <div className="min-h-screen wellness-gradient p-6">
+      <div className="max-w-4xl mx-auto space-y-8">
         {/* Privacy Notice */}
-        <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-gray-600" />
-            <span className="text-sm text-gray-700">
+            <Shield className="h-4 w-4 text-white" />
+            <span className="text-sm text-white">
               Your privacy is protected. Data processed with your consent.
             </span>
           </div>
@@ -175,7 +176,7 @@ const EmailCapture = () => {
             variant="outline" 
             size="sm"
             onClick={() => setShowDataManagement(true)}
-            className="text-gray-600"
+            className="text-white border-white/30 hover:bg-white/20"
           >
             Manage Data
           </Button>
@@ -183,53 +184,68 @@ const EmailCapture = () => {
 
         {/* Header */}
         <div className="text-center space-y-4">
-          <Badge className="bg-green-100 text-green-800 border-green-200">
+          <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
             <CheckCircle className="h-3 w-3 mr-1" />
             Assessment Complete
           </Badge>
-          <h1 className="text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold text-white">Your Journey Starts Here</h1>
+          <p className="text-lg text-white/90 max-w-2xl mx-auto">
             You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
           </p>
         </div>
 
         {/* Main Content */}
         <div className="space-y-8">
-          {/* Launch & Contest Section */}
-          <div className="text-center space-y-6">
-            <Badge className="bg-gray-900 text-white px-4 py-2 text-lg font-semibold">
-              Launching July 1st, 2025
-            </Badge>
-            
-            <div className="space-y-4">
-              <Badge className="bg-purple-100 text-purple-800 px-4 py-2 text-lg font-semibold border-purple-200">
-                🏆 Win a Mental Wellness Retreat in Sri Lanka
-              </Badge>
-              <h2 className="text-2xl font-bold text-gray-900">Join Our Pre-Launch & Enter to Win</h2>
-              
-              {/* Contest Details */}
-              <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">7-Day All-Expenses-Paid Wellness Journey Includes:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left text-gray-700">
-                  <div className="space-y-2">
-                    <p>✈️ Round-trip flights covered</p>
-                    <p>🏔️ 5 nights in scenic Ella mountains</p>
-                    <p>🧘‍♀️ Daily yoga & meditation sessions</p>
-                    <p>💆‍♀️ Guided therapy & wellness coaching</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p>📱 Complete digital detox program</p>
-                    <p>🌿 Mindfulness & nature immersion</p>
-                    <p>🥗 Healthy organic meals included</p>
-                    <p>🏖️ Beautiful beachfront resort access</p>
+          {/* Launch & Contest Section with Image */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="space-y-6">
+              <div className="text-center lg:text-left">
+                <Badge className="bg-white text-gray-900 px-4 py-2 text-lg font-semibold mb-4">
+                  Launching July 1st, 2025
+                </Badge>
+                
+                <div className="space-y-4">
+                  <Badge className="bg-purple-500/20 text-white px-4 py-2 text-lg font-semibold border border-purple-300/30 backdrop-blur-sm">
+                    🏆 Win a Mental Wellness Retreat in Sri Lanka
+                  </Badge>
+                  <h2 className="text-2xl font-bold text-white">Join Our Pre-Launch & Enter to Win</h2>
+                  
+                  {/* Contest Details */}
+                  <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 space-y-4">
+                    <h3 className="text-lg font-semibold text-white">7-Day All-Expenses-Paid Wellness Journey Includes:</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left text-white/90 text-sm">
+                      <div className="space-y-2">
+                        <p>✈️ Round-trip flights covered</p>
+                        <p>🏔️ 5 nights in scenic Ella mountains</p>
+                        <p>🧘‍♀️ Daily yoga & meditation sessions</p>
+                        <p>💆‍♀️ Guided therapy & wellness coaching</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p>📱 Complete digital detox program</p>
+                        <p>🌿 Mindfulness & nature immersion</p>
+                        <p>🥗 Healthy organic meals included</p>
+                        <p>🏖️ Beautiful beachfront resort access</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                <p className="text-white/80 max-w-xl mx-auto lg:mx-0 mt-4">
+                  Be among the first to experience AI wellness coaching for your <span className="font-semibold">{primaryConcern}</span> challenges with our free trial.
+                </p>
               </div>
             </div>
 
-            <p className="text-gray-600 max-w-xl mx-auto">
-              Be among the first to experience AI wellness coaching for your <span className="font-semibold">{primaryConcern}</span> challenges with our free trial.
-            </p>
+            {/* Image */}
+            <div className="order-first lg:order-last">
+              <div className="rounded-lg overflow-hidden shadow-2xl">
+                <img 
+                  src="/lovable-uploads/60238d89-a492-481c-b83f-c3df812a3ac0.png" 
+                  alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
+                  className="w-full h-64 lg:h-80 object-cover"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Email Form */}
@@ -237,7 +253,7 @@ const EmailCapture = () => {
             <div className="max-w-md mx-auto space-y-4">
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div className="text-left">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="email" className="text-sm font-medium text-white">
                     Email Address
                   </Label>
                   <Input
@@ -247,13 +263,13 @@ const EmailCapture = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="mt-1"
+                    className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm"
                   />
                 </div>
                 <Button 
                   type="submit" 
                   disabled={!email || !email.includes('@') || isSubmittingEmail}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+                  className="w-full bg-white text-gray-900 hover:bg-white/90"
                 >
                   {isSubmittingEmail ? (
                     <>
@@ -269,7 +285,7 @@ const EmailCapture = () => {
                 </Button>
               </form>
               
-              <div className="text-sm text-gray-600 space-y-1">
+              <div className="text-sm text-white/80 space-y-1 text-center">
                 <p>✓ Automatic contest entry</p>
                 <p>✓ Free trial when we launch</p>
                 <p>✓ First access July 1st</p>
@@ -277,13 +293,13 @@ const EmailCapture = () => {
             </div>
           ) : (
             <div className="max-w-md mx-auto">
-              <div className="bg-green-50 p-6 rounded-lg border border-green-200 text-center space-y-4">
-                <CheckCircle className="h-8 w-8 text-green-600 mx-auto" />
-                <h3 className="text-xl font-bold text-gray-900">You're All Set!</h3>
-                <p className="text-gray-700">
+              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20 text-center space-y-4">
+                <CheckCircle className="h-8 w-8 text-white mx-auto" />
+                <h3 className="text-xl font-bold text-white">You're All Set!</h3>
+                <p className="text-white/90">
                   Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when we launch July 1st.
                 </p>
-                <p className="text-sm text-green-700 font-medium">
+                <p className="text-sm text-white font-medium">
                   🏆 Contest entry confirmed! Winner announced closer to launch date.
                 </p>
               </div>
@@ -293,29 +309,29 @@ const EmailCapture = () => {
 
         {/* AI Insights Preview */}
         {aiInsights && aiInsights.insights.length > 0 && (
-          <div className="border border-gray-200 rounded-lg p-6">
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Preview: Your Personalized Insights</h2>
-              <p className="text-gray-600">Here's a preview of what our AI has identified about your situation</p>
+              <h2 className="text-2xl font-bold text-white mb-2">Preview: Your Personalized Insights</h2>
+              <p className="text-white/80">Here's a preview of what our AI has identified about your situation</p>
             </div>
             
             {aiInsights.insights.slice(0, 1).map((insight, index) => (
               <div key={index} className="space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="p-2 bg-purple-100 rounded-full">
-                    <Heart className="h-4 w-4 text-purple-600" />
+                  <div className="p-2 bg-purple-500/20 rounded-full backdrop-blur-sm">
+                    <Heart className="h-4 w-4 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-lg text-gray-900 mb-2">{insight.title}</h4>
-                    <p className="text-gray-700 mb-3">{insight.description}</p>
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <h5 className="font-medium text-gray-800 mb-2">Reframing Perspective</h5>
-                      <p className="text-gray-700 text-sm">{insight.reframe}</p>
+                    <h4 className="font-semibold text-lg text-white mb-2">{insight.title}</h4>
+                    <p className="text-white/90 mb-3">{insight.description}</p>
+                    <div className="bg-white/5 p-4 rounded-lg border border-white/10 backdrop-blur-sm">
+                      <h5 className="font-medium text-white mb-2">Reframing Perspective</h5>
+                      <p className="text-white/80 text-sm">{insight.reframe}</p>
                     </div>
                   </div>
                 </div>
-                <div className="text-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-sm text-yellow-800">
+                <div className="text-center p-3 bg-yellow-500/20 rounded-lg border border-yellow-300/30 backdrop-blur-sm">
+                  <p className="text-sm text-white">
                     📧 Get your complete personalized analysis when we launch July 1st!
                   </p>
                 </div>
@@ -325,7 +341,7 @@ const EmailCapture = () => {
         )}
 
         <div className="flex justify-center">
-          <Button onClick={() => navigate('/')} variant="outline">
+          <Button onClick={() => navigate('/')} variant="outline" className="border-white/30 text-white hover:bg-white/20">
             Take Assessment Again
           </Button>
         </div>
