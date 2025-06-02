@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
-
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -83,7 +82,7 @@ const CompetitionSignup = () => {
           <div>
             {!emailSubmitted ? <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
                 <CardHeader className="text-center pb-1 px-[5px] pt-3">
-                  <CardTitle className="text-2xl">
+                  <CardTitle className="text-4xl">
                     <span className="text-white">Join </span>
                     <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">Mynd Ease</span>
                     <span className="text-white"> Pre-Launch</span>
