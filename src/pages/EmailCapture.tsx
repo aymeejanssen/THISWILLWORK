@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
-import { Brain, Heart, Users, Briefcase, Compass, UserCircle, CheckCircle, ArrowRight, Loader2, Clock, Zap, Calendar, MessageCircle, Shield, Star, Headphones, AlertTriangle, X, Mail, Sparkles, Plane, MapPin, Flower2 } from 'lucide-react';
+import { Brain, Heart, CheckCircle, Loader2, Shield, Mail, Sparkles, Flower2 } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import { supabase } from '../integrations/supabase/client';
 import ConsentModal from '../components/ConsentModal';
@@ -104,7 +103,7 @@ const EmailCapture = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[60vh]">
           <Card className="shadow-lg p-8 text-center">
             <CardContent>
@@ -120,7 +119,7 @@ const EmailCapture = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-4xl mx-auto">
           <Card className="shadow-lg border-red-200">
             <CardContent className="pt-6 text-center">
@@ -138,7 +137,7 @@ const EmailCapture = () => {
 
   if (showConsentModal) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-6">
         <ConsentModal
           isOpen={showConsentModal}
           onConsent={grantConsent}
@@ -150,7 +149,7 @@ const EmailCapture = () => {
 
   if (showDataManagement) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-6xl mx-auto space-y-6">
           <Button 
             variant="ghost" 
@@ -166,14 +165,14 @@ const EmailCapture = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto space-y-8">
         {/* Privacy Notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">
+              <Shield className="h-4 w-4 text-gray-600" />
+              <span className="text-sm text-gray-700">
                 Your privacy is protected. Data processed with your consent.
               </span>
             </div>
@@ -181,7 +180,7 @@ const EmailCapture = () => {
               variant="outline" 
               size="sm"
               onClick={() => setShowDataManagement(true)}
-              className="text-blue-600 border-blue-300"
+              className="text-gray-600"
             >
               Manage Data
             </Button>
@@ -189,222 +188,139 @@ const EmailCapture = () => {
         </div>
 
         {/* Header Section */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-2">
-            <CheckCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">Assessment Complete</span>
-          </div>
-          <h1 className="text-4xl font-bold wellness-text-gradient">Your Journey Starts Here</h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-tight">
+        <div className="text-center space-y-4">
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Assessment Complete
+          </Badge>
+          <h1 className="text-4xl font-bold text-gray-900">Your Journey Starts Here</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             You are not alone in this journey, and your willingness to address these challenges speaks volumes about your strength and commitment to your well-being.
           </p>
         </div>
 
-        {/* Contest Announcement */}
-        <Card className="shadow-xl border-none bg-gradient-to-br from-emerald-100 via-teal-100 to-cyan-100 overflow-hidden">
-          <CardContent className="pt-6 pb-6">
-            <div className="text-center space-y-4">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Flower2 className="h-8 w-8 text-emerald-600" />
-                <Badge className="bg-emerald-600 text-white px-6 py-3 text-xl font-bold">
-                  🏆 EXCLUSIVE CONTEST
+        {/* Main Content Card */}
+        <Card className="shadow-sm border-gray-200">
+          <CardContent className="pt-8 pb-8">
+            <div className="text-center space-y-6">
+              {/* Contest Section */}
+              <div className="space-y-4">
+                <Badge className="bg-purple-100 text-purple-800 px-4 py-2 text-lg font-semibold border-purple-200">
+                  🏆 Win a Mental Wellness Retreat in Sri Lanka
                 </Badge>
-                <Plane className="h-8 w-8 text-emerald-600" />
-              </div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Win a 7-Day Mental Wellness Retreat in Sri Lanka!</h2>
-              <p className="text-gray-700 leading-tight text-xl mb-6 max-w-3xl mx-auto">
-                Join our pre-launch and get a chance to win an all-expenses-paid wellness journey featuring:
-              </p>
-              
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-6">
-                <div className="bg-white/80 rounded-lg p-4 text-center">
-                  <Flower2 className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
-                  <h4 className="font-semibold text-gray-800">Daily Yoga</h4>
-                  <p className="text-sm text-gray-600">Sunrise sessions</p>
-                </div>
-                <div className="bg-white/80 rounded-lg p-4 text-center">
-                  <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                  <h4 className="font-semibold text-gray-800">Guided Therapy</h4>
-                  <p className="text-sm text-gray-600">1-on-1 sessions</p>
-                </div>
-                <div className="bg-white/80 rounded-lg p-4 text-center">
-                  <MapPin className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                  <h4 className="font-semibold text-gray-800">Digital Detox</h4>
-                  <p className="text-sm text-gray-600">Offline time</p>
-                </div>
-                <div className="bg-white/80 rounded-lg p-4 text-center">
-                  <Heart className="h-8 w-8 text-pink-600 mx-auto mb-2" />
-                  <h4 className="font-semibold text-gray-800">Mindfulness</h4>
-                  <p className="text-sm text-gray-600">Meditation & nature</p>
-                </div>
-              </div>
-
-              <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 max-w-2xl mx-auto">
-                <p className="text-emerald-800 font-medium">
-                  ✨ <strong>Worth $3,500+</strong> • Beautiful beachfront resort • Professional wellness coaches • All meals included
+                <h2 className="text-2xl font-bold text-gray-900">Join Our Pre-Launch & Enter to Win</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  7-day all-expenses-paid wellness journey featuring guided therapy sessions, daily yoga, digital detox, and mindfulness practices at a beautiful beachfront resort.
                 </p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Launch Announcement */}
-        <Card className="shadow-xl border-none bg-gradient-to-br from-yellow-100 via-orange-100 to-red-100 overflow-hidden w-full">
-          <CardContent className="pt-6 pb-6">
-            <div className="text-center space-y-4">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Sparkles className="h-6 w-6 text-orange-600" />
-                <Badge className="bg-orange-600 text-white px-4 py-2 text-lg font-bold">
+              {/* Launch Date */}
+              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <Badge className="bg-gray-800 text-white px-4 py-2 mb-3">
                   Launching July 1st, 2025
                 </Badge>
-                <Sparkles className="h-6 w-6 text-orange-600" />
+                <p className="text-gray-700 max-w-xl mx-auto">
+                  Be among the first to experience AI wellness coaching for your <span className="font-semibold">{primaryConcern}</span> challenges.
+                </p>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Be Among the First to Experience AI Wellness Coaching</h2>
-              <p className="text-gray-700 leading-tight text-lg mb-6 max-w-2xl mx-auto">
-                Join our exclusive pre-launch list and be the first to access personalized AI coaching for your <span className="font-semibold text-purple-700">{primaryConcern}</span> challenges when we officially launch.
-              </p>
+
+              {/* Email Form */}
+              {!emailSubmitted ? (
+                <div className="max-w-md mx-auto space-y-4">
+                  <form onSubmit={handleEmailSubmit} className="space-y-4">
+                    <div className="text-left">
+                      <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                        Email Address
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="mt-1"
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      disabled={!email || !email.includes('@') || isSubmittingEmail}
+                      className="w-full bg-purple-600 hover:bg-purple-700"
+                    >
+                      {isSubmittingEmail ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Entering Contest...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Join Pre-Launch & Enter Contest
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                  
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>✓ Automatic contest entry</p>
+                    <p>✓ First access when we launch</p>
+                    <p>✓ Exclusive pre-launch pricing</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="max-w-md mx-auto space-y-4">
+                  <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+                    <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">You're All Set!</h3>
+                    <p className="text-gray-700 mb-4">
+                      Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when we launch.
+                    </p>
+                    <p className="text-sm text-green-700 font-medium">
+                      🏆 Contest entry confirmed! Winner announced closer to launch date.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Email Capture Form */}
-        {!emailSubmitted ? (
-          <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 max-w-2xl mx-auto">
+        {/* AI Insights Preview */}
+        {aiInsights && aiInsights.insights.length > 0 && (
+          <Card className="shadow-sm border-gray-200">
             <CardHeader>
-              <CardTitle className="text-2xl text-center wellness-text-gradient flex items-center justify-center gap-2">
-                <Mail className="h-6 w-6" />
-                Reserve Your Spot & Enter Contest
-              </CardTitle>
-              <p className="text-gray-600 text-center">Enter your email to join our pre-launch list and automatically enter the Sri Lanka wellness retreat contest!</p>
+              <CardTitle className="text-2xl text-gray-900 text-center">Preview: Your Personalized Insights</CardTitle>
+              <p className="text-gray-600 text-center">Here's a preview of what our AI has identified about your situation</p>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleEmailSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email Address
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  disabled={!email || !email.includes('@') || isSubmittingEmail}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-lg py-3"
-                >
-                  {isSubmittingEmail ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Entering Contest...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Join Pre-Launch & Enter Contest
-                    </>
-                  )}
-                </Button>
-              </form>
-              
-              <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                <h4 className="font-semibold text-green-800 mb-2">What you'll get:</h4>
-                <ul className="text-sm text-green-700 space-y-1">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Automatic entry into Sri Lanka retreat contest
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    First access when we launch July 1st
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Exclusive pre-launch pricing
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    Your assessment results saved for launch day
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="shadow-xl bg-gradient-to-r from-green-50 to-blue-50 border-green-200 max-w-2xl mx-auto">
-            <CardContent className="pt-6 pb-6 text-center">
-              <div className="space-y-4">
-                <div className="flex items-center justify-center">
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  </div>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">You're All Set!</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when Mynd Ease launches on July 1st, 2025.
-                </p>
-                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mt-4">
-                  <p className="text-sm text-emerald-700 font-medium">
-                    🏆 <strong>Contest Entry Confirmed!</strong> You're now entered to win the 7-day wellness retreat in Sri Lanka. Winner will be announced closer to launch date.
-                  </p>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4">
-                  <p className="text-sm text-blue-700">
-                    Your assessment results have been saved and will be ready for you when we launch. Get ready to start your personalized AI wellness journey!
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* AI Insights Section - Same as original */}
-        {aiInsights && aiInsights.insights.length > 0 && (
-          <div className="space-y-6">
-            <Card className="shadow-xl bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-              <CardHeader>
-                <CardTitle className="text-3xl wellness-text-gradient mb-2 text-center">Preview: Your Personalized Insights</CardTitle>
-                <p className="text-gray-600 text-lg text-center">Here's a preview of what our AI has identified about your situation</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {aiInsights.insights.slice(0, 1).map((insight, index) => (
-                    <div key={index} className="bg-white rounded-lg p-6 shadow-md border border-purple-100">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-purple-100 rounded-full">
-                          <Heart className="h-5 w-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-xl text-purple-800 mb-2">{insight.title}</h4>
-                          <div className="text-gray-700 leading-relaxed mb-3">
-                            <p className="mb-2">{insight.description}</p>
-                          </div>
-                          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <h5 className="font-semibold text-blue-800 mb-2">Reframing Perspective</h5>
-                            <p className="text-blue-700">{insight.reframe}</p>
-                          </div>
-                          <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                            <p className="text-sm text-yellow-800 font-medium">
-                              📧 Get your complete personalized analysis when we launch July 1st!
-                            </p>
-                          </div>
-                        </div>
+              {aiInsights.insights.slice(0, 1).map((insight, index) => (
+                <div key={index} className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-purple-100 rounded-full">
+                      <Heart className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg text-gray-900 mb-2">{insight.title}</h4>
+                      <p className="text-gray-700 mb-3">{insight.description}</p>
+                      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h5 className="font-medium text-gray-800 mb-2">Reframing Perspective</h5>
+                        <p className="text-gray-700 text-sm">{insight.reframe}</p>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                  <div className="text-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p className="text-sm text-yellow-800">
+                      📧 Get your complete personalized analysis when we launch July 1st!
+                    </p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              ))}
+            </CardContent>
+          </Card>
         )}
 
-        <div className="flex justify-center gap-4">
-          <Button onClick={() => navigate('/')} variant="outline" size="lg">
+        <div className="flex justify-center">
+          <Button onClick={() => navigate('/')} variant="outline">
             Take Assessment Again
           </Button>
         </div>
