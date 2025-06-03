@@ -31,6 +31,10 @@ const CompetitionSignup = () => {
     }
   };
 
+  const handleAssessmentClick = () => {
+    navigate('/assessment', { state: { returnTo: '/competition' } });
+  };
+
   return (
     <div className="min-h-screen wellness-gradient p-4 sm:p-6">
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
@@ -253,7 +257,7 @@ const CompetitionSignup = () => {
         {/* Assessment Button */}
         <div className="text-center px-4">
           <Button 
-            onClick={() => navigate('/assessment')} 
+            onClick={handleAssessmentClick}
             style={{ background: 'linear-gradient(to right, #F3B883, #F4AB95)', color: '#FFFFFF' }}
             className="w-full sm:w-auto border border-orange-200/30 backdrop-blur-sm hover:opacity-90 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg rounded-lg"
           >
