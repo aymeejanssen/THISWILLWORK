@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -167,7 +166,7 @@ const CompetitionSignup = () => {
         </div>
 
         {/* Contest Section - Unified Layout */}
-        <div className="space-y-8 max-w-4xl mx-auto">
+        <div className="space-y-8 max-w-5xl mx-auto">
           <div className="text-center space-y-6">
             {/* Unified Contest Details and Image */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
