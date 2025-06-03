@@ -254,9 +254,11 @@ const CompetitionSignup = () => {
         <div className="text-center px-4">
           <Button 
             onClick={() => navigate('/assessment')} 
-            className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-lg"
+            style={{ background: 'linear-gradient(to right, #F3B883, #F4AB95)', color: '#FFFFFF' }}
+            className="w-full sm:w-auto border border-orange-200/30 backdrop-blur-sm hover:opacity-90 px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg rounded-lg"
           >
-            Take 12 Questions to Resolve Trauma & Get Insights
+            <span className="block sm:hidden">Take 12 Questions</span>
+            <span className="hidden sm:block">Take 12 Questions to Resolve Trauma & Get Insights</span>
           </Button>
           <p className="text-white/80 text-xs sm:text-sm mt-2">
             Help us understand your wellness journey • 5 minutes
