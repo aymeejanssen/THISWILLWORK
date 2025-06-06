@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const isListeningRef = useRef(false);
+  const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Audio level monitoring
   const startAudioLevelMonitoring = useCallback(async () => {
@@ -139,15 +141,20 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   };
 
-  // Add the missing stopListening function
+  // Stop listening function
   const stopListening = useCallback(() => {
     console.log("🎙️ stopListening called");
+    
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
     
     if (recognitionRef.current && isListeningRef.current) {
       console.log("🎙️ Actually stopping speech recognition...");
       try {
-        recognitionRef.current.abort();
-        console.log("🎙️ Speech recognition aborted");
+        recognitionRef.current.stop();
+        console.log("🎙️ Speech recognition stopped");
       } catch (error) {
         console.error("🎙️ Error stopping recognition:", error);
       }
@@ -156,7 +163,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   }, []);
 
-  // EXACTLY like assessment - simple speech recognition
+  // Setup speech recognition with improved error handling
   const setupSpeechRecognition = useCallback(() => {
     console.log('🎙️ Setting up speech recognition...');
     
@@ -168,21 +175,21 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
     
-    // EXACT same settings as assessment
-    recognitionRef.current.continuous = false;
+    // Optimized settings for continuous listening
+    recognitionRef.current.continuous = true;
     recognitionRef.current.interimResults = true;
     recognitionRef.current.lang = 'en-US';
     recognitionRef.current.maxAlternatives = 1;
 
     recognitionRef.current.onstart = () => {
-      console.log("🎙️ ✅ Speech recognition ACTUALLY started");
+      console.log("🎙️ ✅ Speech recognition STARTED");
       setIsUserSpeaking(true);
       isListeningRef.current = true;
       setLiveTranscript('');
     };
 
     recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-      console.log("🎙️ Speech result received", event);
+      console.log("🎙️ Speech result received");
       let interimTranscript = '';
       let finalTranscript = '';
       
@@ -197,19 +204,22 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         }
       }
       
-      // Update live transcript (just like assessment)
+      // Update live transcript
       setLiveTranscript(interimTranscript + finalTranscript);
       
       if (finalTranscript.trim()) {
         console.log("🔄 Processing final transcript:", finalTranscript);
         setTranscript(finalTranscript);
         
+        // Stop listening and process the message
+        stopListening();
+        
         // Process the message after a short delay
         setTimeout(() => {
           if (finalTranscript.trim() && !isProcessingResponse) {
             generateAIResponse(finalTranscript.trim());
           }
-        }, 500);
+        }, 300);
       }
     };
 
@@ -218,10 +228,11 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       setIsUserSpeaking(false);
       isListeningRef.current = false;
       
-      // Auto restart if conversation is ongoing (like assessment)
-      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
+      // Auto restart if conversation is ongoing and not processing
+      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && 
+          !isProcessingResponse && microphonePermission === 'granted') {
         console.log("🔄 Auto restarting speech recognition...");
-        setTimeout(() => {
+        restartTimeoutRef.current = setTimeout(() => {
           startListening();
         }, 1000);
       }
@@ -237,9 +248,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         toast.error("Microphone access denied.");
       } else if (event.error !== 'aborted') {
         console.error("Speech recognition error:", event.error);
-        // Auto restart on other errors
+        // Auto restart on recoverable errors
         if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
-          setTimeout(() => {
+          restartTimeoutRef.current = setTimeout(() => {
             console.log("🔄 Restarting after error:", event.error);
             startListening();
           }, 2000);
@@ -248,9 +259,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     };
 
     console.log('✅ Speech recognition setup complete');
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
+  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission, stopListening]);
 
-  // Simple start listening with FORCE
+  // Start listening with improved reliability
   const startListening = useCallback(() => {
     console.log("🎙️ startListening called - checking conditions...", {
       hasRecognition: !!recognitionRef.current,
@@ -263,7 +274,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     });
 
     if (!recognitionRef.current) {
-      console.log("❌ No recognition object - setting up again...");
+      console.log("❌ No recognition object - setting up...");
       setupSpeechRecognition();
       setTimeout(() => startListening(), 500);
       return;
@@ -284,17 +295,29 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       return;
     }
 
+    if (!conversationStarted || !isMicrophoneEnabled) {
+      console.log("❌ Conversation not started or mic disabled");
+      return;
+    }
+
     try {
       console.log("🎙️ ACTUALLY starting speech recognition...");
       recognitionRef.current.start();
       console.log("🎙️ Speech recognition start() called successfully");
     } catch (error) {
       console.error("🎙️ Start listening error:", error);
-      // If start fails, try again after a short delay
-      setTimeout(() => {
-        console.log("🎙️ Retrying start listening after error...");
-        startListening();
-      }, 1000);
+      // If already started, just continue
+      if (error.name === 'InvalidStateError') {
+        console.log("🎙️ Recognition already running");
+        isListeningRef.current = true;
+        setIsUserSpeaking(true);
+      } else {
+        // Retry after a short delay for other errors
+        restartTimeoutRef.current = setTimeout(() => {
+          console.log("🎙️ Retrying start listening after error...");
+          startListening();
+        }, 1000);
+      }
     }
   }, [isAssistantSpeaking, isProcessingResponse, microphonePermission, conversationStarted, isMicrophoneEnabled, setupSpeechRecognition]);
 
@@ -304,8 +327,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     
     setIsProcessingResponse(true);
     console.log('🤖 Generating response for:', userMessage);
-
-    stopListening();
 
     try {
       const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
@@ -362,8 +383,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     console.log('🔊 Speaking:', text.substring(0, 50) + '...');
     setIsAssistantSpeaking(true);
     
-    stopListening();
-    
     try {
       await voiceService.speak(text, selectedVoice);
       console.log('🔊 Finished speaking');
@@ -388,6 +407,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setupSpeechRecognition();
     
     return () => {
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
+      }
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
@@ -418,19 +440,16 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setConversationStarted(true);
     setIsCallOngoing(true);
 
-    // CRITICAL FIX: Force speech recognition to start immediately
+    // Start speech recognition immediately after conversation starts
     setTimeout(() => {
       console.log('🎙️ FORCING speech recognition to start...');
       if (isMicrophoneEnabled && microphonePermission === 'granted') {
-        // Re-setup speech recognition to ensure it's fresh
-        setupSpeechRecognition();
-        
-        // Force start listening with multiple attempts
+        // Force start listening
         setTimeout(() => {
           console.log('🎙️ First attempt to start listening...');
           startListening();
           
-          // Backup attempt if first fails
+          // Verify it started and retry if needed
           setTimeout(() => {
             if (!isListeningRef.current) {
               console.log('🎙️ BACKUP attempt to start listening...');
@@ -450,7 +469,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         const greeting = getPersonalizedGreeting();
         speak(greeting);
       }
-    }, 1500);
+    }, 2000);
   };
 
   // End conversation
@@ -458,6 +477,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setConversationStarted(false);
     setIsCallOngoing(false);
     stopListening();
+    
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+    }
     
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach(track => track.stop());
@@ -484,10 +507,12 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
   // Toggle microphone
   const toggleMicrophone = () => {
-    setIsMicrophoneEnabled(!isMicrophoneEnabled);
-    if (!isMicrophoneEnabled && conversationStarted && microphonePermission === 'granted') {
+    const newState = !isMicrophoneEnabled;
+    setIsMicrophoneEnabled(newState);
+    
+    if (newState && conversationStarted && microphonePermission === 'granted') {
       setTimeout(() => startListening(), 500);
-    } else if (isMicrophoneEnabled) {
+    } else if (!newState) {
       stopListening();
     }
   };
@@ -670,10 +695,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
                   
-                  {/* Live transcript display - EXACTLY like assessment */}
+                  {/* Live transcript display */}
                   <div className="mt-4 w-full">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      🎙️ Live Speech Recognition (Matching Assessment):
+                      🎙️ Live Speech Recognition:
                     </label>
                     <Textarea
                       value={liveTranscript}
@@ -685,7 +710,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                       Recognition Status: {isListeningRef.current ? '🟢 LISTENING' : '🔴 NOT LISTENING'} | 
                       Permission: {microphonePermission} | 
                       Mic: {isMicrophoneEnabled ? 'ON' : 'OFF'} |
-                      Continuous: false (same as assessment) |
+                      Continuous: true |
                       HasRecognition: {recognitionRef.current ? 'YES' : 'NO'}
                     </div>
                   </div>
