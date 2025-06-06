@@ -24,7 +24,7 @@ const Index = () => {
     {
       name: "Ahmed K.",
       location: "Dubai, UAE",
-      review: "As someone who struggled to find culturally aware mental health support in my language, MindEase was a game changer. It understands my background and helps me work through challenges in a way that feels authentic.",
+      review: "Yes, very happy with it. Finally found support that understands my background and culture.",
       rating: 5
     },
     {
