@@ -58,7 +58,7 @@ const CompetitionSignup = () => {
 
         {/* Contest Badge - Moved above email signup */}
         <div className="text-center px-4">
-          <Badge style={{ background: 'linear-gradient(to right, #F3B883, #F4AB95)', color: '#FFFFFF' }} className="px-3 sm:px-4 text-sm sm:text-lg font-medium border border-orange-200/30 backdrop-blur-sm py-2 sm:py-[8px] shadow-md">
+          <Badge style={{ background: 'linear-gradient(to right, #F3B883, #F4AB95)', color: '#FFFFFF' }} className="px-6 sm:px-8 text-sm sm:text-lg font-medium border border-orange-200/30 backdrop-blur-sm py-4 sm:py-6 shadow-md rounded-xl">
             🏆 Win a Mental Wellness Retreat in Sri Lanka for Two 🇱🇰
           </Badge>
         </div>
