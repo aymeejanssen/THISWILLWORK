@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
+import { supabase } from "@/lib/supabase";
 
 const CompetitionSignup = () => {
   const navigate = useNavigate();
@@ -19,12 +20,32 @@ const CompetitionSignup = () => {
     if (!email || !email.includes('@')) return;
     setIsSubmittingEmail(true);
     try {
+      // Store in localStorage for backup
       localStorage.setItem('prelaunch_email', email);
       localStorage.setItem('prelaunch_signup_date', new Date().toISOString());
+      
+      // Send to HubSpot
+      const { data, error } = await supabase.functions.invoke('hubspot-contact', {
+        body: { 
+          email,
+          source: 'pre-launch-competition',
+          tags: ['pre-launch', 'competition-entry', 'sri-lanka-contest']
+        }
+      });
+      
+      if (error) {
+        console.error('HubSpot integration error:', error);
+        // Continue with local storage as fallback
+      } else {
+        console.log('Successfully added to HubSpot:', data);
+      }
+      
       console.log('Pre-launch email captured:', email);
       setEmailSubmitted(true);
     } catch (err) {
       console.error('Error storing email:', err);
+      // Still show success to user even if HubSpot fails
+      setEmailSubmitted(true);
     } finally {
       setIsSubmittingEmail(false);
     }
@@ -342,3 +363,5 @@ const CompetitionSignup = () => {
 };
 
 export default CompetitionSignup;
+
+```

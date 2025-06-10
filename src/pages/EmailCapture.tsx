@@ -83,14 +83,32 @@ const EmailCapture = () => {
     setIsSubmittingEmail(true);
     
     try {
-      // Store email in localStorage for now (you can integrate with Supabase later)
+      // Store email in localStorage for backup
       localStorage.setItem('prelaunch_email', email);
       localStorage.setItem('prelaunch_signup_date', new Date().toISOString());
+      
+      // Send to HubSpot with assessment data
+      const { data, error } = await supabase.functions.invoke('hubspot-contact', {
+        body: { 
+          email,
+          source: 'post-assessment-signup',
+          tags: ['post-assessment', 'competition-entry', primaryConcern.replace(/\s+/g, '-')]
+        }
+      });
+      
+      if (error) {
+        console.error('HubSpot integration error:', error);
+        // Continue with local storage as fallback
+      } else {
+        console.log('Successfully added to HubSpot with assessment data:', data);
+      }
       
       console.log('Pre-launch email captured:', email);
       setEmailSubmitted(true);
     } catch (err) {
       console.error('Error storing email:', err);
+      // Still show success to user even if HubSpot fails
+      setEmailSubmitted(true);
     } finally {
       setIsSubmittingEmail(false);
     }
