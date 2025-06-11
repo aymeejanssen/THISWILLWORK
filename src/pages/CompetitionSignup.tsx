@@ -12,22 +12,34 @@ import { supabase } from "@/integrations/supabase/client";
 const CompetitionSignup = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
   
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) return;
+    if (!email || !email.includes('@') || !fullName || !dateOfBirth) return;
     setIsSubmittingEmail(true);
     try {
       // Store in localStorage for backup
       localStorage.setItem('prelaunch_email', email);
+      localStorage.setItem('prelaunch_fullname', fullName);
+      localStorage.setItem('prelaunch_dob', dateOfBirth);
       localStorage.setItem('prelaunch_signup_date', new Date().toISOString());
+      
+      // Split full name into first and last name
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
       
       // Send to HubSpot
       const { data, error } = await supabase.functions.invoke('hubspot-contact', {
         body: { 
           email,
+          firstName,
+          lastName,
+          dateOfBirth,
           source: 'pre-launch-competition',
           tags: ['pre-launch', 'competition-entry', 'sri-lanka-contest']
         }
@@ -40,10 +52,10 @@ const CompetitionSignup = () => {
         console.log('Successfully added to HubSpot:', data);
       }
       
-      console.log('Pre-launch email captured:', email);
+      console.log('Pre-launch signup captured:', { email, fullName, dateOfBirth });
       setEmailSubmitted(true);
     } catch (err) {
-      console.error('Error storing email:', err);
+      console.error('Error storing signup:', err);
       // Still show success to user even if HubSpot fails
       setEmailSubmitted(true);
     } finally {
@@ -122,6 +134,20 @@ const CompetitionSignup = () => {
                 <CardContent className="space-y-4 px-4 sm:px-6">
                   <form onSubmit={handleEmailSubmit} className="space-y-3">
                     <div>
+                      <Label htmlFor="fullName" className="text-sm font-medium text-white">
+                        Full Name
+                      </Label>
+                      <Input 
+                        id="fullName" 
+                        type="text" 
+                        placeholder="John Doe" 
+                        value={fullName} 
+                        onChange={e => setFullName(e.target.value)} 
+                        required 
+                        className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm w-full" 
+                      />
+                    </div>
+                    <div>
                       <Label htmlFor="email" className="text-sm font-medium text-white">
                         Email Address
                       </Label>
@@ -135,10 +161,23 @@ const CompetitionSignup = () => {
                         className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm w-full" 
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="dateOfBirth" className="text-sm font-medium text-white">
+                        Date of Birth
+                      </Label>
+                      <Input 
+                        id="dateOfBirth" 
+                        type="date" 
+                        value={dateOfBirth} 
+                        onChange={e => setDateOfBirth(e.target.value)} 
+                        required 
+                        className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm w-full" 
+                      />
+                    </div>
                     <div className="flex justify-center">
                       <Button 
                         type="submit" 
-                        disabled={!email || !email.includes('@') || isSubmittingEmail} 
+                        disabled={!email || !email.includes('@') || !fullName || !dateOfBirth || isSubmittingEmail} 
                         className="w-full sm:w-auto px-4 sm:px-6 bg-white/20 text-white border border-white/30 hover:bg-white/30 backdrop-blur-sm text-xs sm:text-sm"
                       >
                         {isSubmittingEmail ? (
@@ -173,7 +212,7 @@ const CompetitionSignup = () => {
                   <CheckCircle className="h-8 w-8 text-white mx-auto" />
                   <h3 className="text-lg sm:text-xl font-bold text-white">You're All Set!</h3>
                   <p className="text-sm sm:text-base text-white/90">
-                    Thank you for joining our pre-launch list! We'll notify you at <strong>{email}</strong> when Mynd Ease launches July 1st.
+                    Thank you for joining our pre-launch list, <strong>{fullName}</strong>! We'll notify you at <strong>{email}</strong> when Mynd Ease launches July 1st.
                   </p>
                   <p className="text-sm text-white font-medium">
                     🏆 Contest entry confirmed! Scroll down to see contest details.

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -10,6 +9,7 @@ interface ContactData {
   email: string;
   firstName?: string;
   lastName?: string;
+  dateOfBirth?: string;
   source?: string;
   tags?: string[];
 }
@@ -21,7 +21,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, firstName, lastName, source = 'pre-launch-signup', tags = [] }: ContactData = await req.json();
+    const { email, firstName, lastName, dateOfBirth, source = 'pre-launch-signup', tags = [] }: ContactData = await req.json();
     
     const hubspotApiKey = Deno.env.get('HUBSPOT_API_KEY');
     
@@ -34,6 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
       email,
       ...(firstName && { firstname: firstName }),
       ...(lastName && { lastname: lastName }),
+      ...(dateOfBirth && { date_of_birth: dateOfBirth }),
       lifecyclestage: 'lead',
       // Use standard HubSpot lead status
       hs_lead_status: 'NEW',
@@ -41,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
       company: `Mynd Ease - ${source}${tags.length > 0 ? ` (${tags.join(', ')})` : ''}`
     };
 
-    console.log('Creating/updating HubSpot contact:', { email, source, tags });
+    console.log('Creating/updating HubSpot contact:', { email, firstName, lastName, dateOfBirth, source, tags });
 
     // Create or update contact in HubSpot
     const hubspotResponse = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
