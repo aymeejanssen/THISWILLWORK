@@ -95,8 +95,8 @@ const CompetitionSignup = () => {
           </Badge>
         </div>
 
-        {/* Email Signup Section with Side Elements */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-center max-w-5xl mx-auto px-4">
+        {/* Email Signup Section with Side Elements - Made wider */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 items-center max-w-7xl mx-auto px-4">
           {/* Left Side - Benefits */}
           <div className="hidden lg:block space-y-4">
             <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
@@ -119,11 +119,11 @@ const CompetitionSignup = () => {
             </div>
           </div>
 
-          {/* Center - Main Signup Form */}
-          <div className="w-full">
+          {/* Center - Main Signup Form - Made wider */}
+          <div className="w-full lg:col-span-3">
             {!emailSubmitted ? (
               <Card className="bg-white/10 backdrop-blur-sm border border-white/20">
-                <CardHeader className="text-center pb-1 px-4 sm:px-[5px] pt-3">
+                <CardHeader className="text-center pb-1 px-4 sm:px-6 pt-3">
                   <CardTitle className="text-xl sm:text-2xl">
                     <span className="text-white">Join </span>
                     <span className="bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-200 bg-clip-text text-transparent">Mynd Ease</span>
@@ -131,7 +131,7 @@ const CompetitionSignup = () => {
                   </CardTitle>
                   <p className="text-sm sm:text-base text-white/90 px-2">Get early access & a chance to win a trip to Sri Lanka</p>
                 </CardHeader>
-                <CardContent className="space-y-4 px-4 sm:px-6">
+                <CardContent className="space-y-4 px-4 sm:px-8">
                   <form onSubmit={handleEmailSubmit} className="space-y-3">
                     <div>
                       <Label htmlFor="fullName" className="text-sm font-medium text-white">
@@ -174,23 +174,21 @@ const CompetitionSignup = () => {
                         className="mt-1 bg-white/10 border-white/30 text-white placeholder:text-white/60 backdrop-blur-sm w-full" 
                       />
                     </div>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center pt-2">
                       <Button 
                         type="submit" 
                         disabled={!email || !email.includes('@') || !fullName || !dateOfBirth || isSubmittingEmail} 
-                        className="w-full sm:w-auto px-4 sm:px-6 bg-white/20 text-white border border-white/30 hover:bg-white/30 backdrop-blur-sm text-xs sm:text-sm"
+                        className="w-full bg-white/20 text-white border border-white/30 hover:bg-white/30 backdrop-blur-sm text-sm px-6 py-3"
                       >
                         {isSubmittingEmail ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            <span className="hidden sm:inline">Signing Up...</span>
-                            <span className="sm:hidden">Signing Up...</span>
+                            Signing Up...
                           </>
                         ) : (
                           <>
                             <Mail className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Join Pre-Launch List & Chance to Win Trip</span>
-                            <span className="sm:hidden">Join & Win Trip</span>
+                            Join Pre-Launch List & Chance to Win Trip
                           </>
                         )}
                       </Button>
