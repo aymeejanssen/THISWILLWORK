@@ -29,14 +29,16 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('HubSpot API key not configured');
     }
 
-    // Prepare contact properties
+    // Prepare contact properties using only standard HubSpot properties
     const properties = {
       email,
       ...(firstName && { firstname: firstName }),
       ...(lastName && { lastname: lastName }),
       lifecyclestage: 'lead',
-      lead_source: source,
-      ...(tags.length > 0 && { hs_lead_status: tags.join(', ') })
+      // Use standard HubSpot lead status
+      hs_lead_status: 'NEW',
+      // Store source and tags in the company field for now
+      company: `Mynd Ease - ${source}${tags.length > 0 ? ` (${tags.join(', ')})` : ''}`
     };
 
     console.log('Creating/updating HubSpot contact:', { email, source, tags });
