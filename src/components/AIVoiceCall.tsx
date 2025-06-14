@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, StopCircle } from "lucide-react";
@@ -16,6 +15,11 @@ const AIVoiceCall: React.FC = () => {
   const [transcript, setTranscript] = useState<string>('');
   const wsRef = useRef<WebSocket | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Debug and error state
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
+  const [debugResult, setDebugResult] = useState<string>("");
 
   // Audio queue and playback
   const audioQueue = useRef<Uint8Array[]>([]);
@@ -89,9 +93,27 @@ const AIVoiceCall: React.FC = () => {
     setPlaying(false);
   };
 
+  // Defensive close for AudioContext
+  const safeCloseAudioContext = async () => {
+    if (audioContextRef.current) {
+      try {
+        if (audioContextRef.current.state !== "closed") {
+          await audioContextRef.current.close();
+          console.log("AudioContext closed!");
+        } else {
+          console.log("Attempted to close an already closed AudioContext.");
+        }
+      } catch (e) {
+        console.warn("Error closing AudioContext: ", e);
+      }
+      audioContextRef.current = null;
+    }
+  };
+
   // WebSocket setup
   const connectWS = () => {
     if (wsRef.current) return;
+    setErrorMsg(null); // Reset errors on connect
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -99,22 +121,22 @@ const AIVoiceCall: React.FC = () => {
       setConnected(true);
       setReplyText('');
       setTranscript('');
-      // Start mic upon connection
       startMicStream();
     };
 
     ws.onmessage = (event) => {
       try {
         const data: MessageEventData = JSON.parse(event.data);
-
+        if (data.type === "error" && data.message) {
+          setErrorMsg("AI Service error: " + data.message);
+          return;
+        }
         if (data.type === 'response.audio.delta' && data.delta) {
-          // Push to playback queue
           audioQueue.current.push(base64ToUint8(data.delta));
           playAudioQueue();
         }
         if (data.type === 'response.audio.done') {
-          // Conversation turn finished
-          // Do nothing, let UI react
+          // No specific UI needed
         }
         if (data.type === 'response.audio_transcript.delta' && data.delta) {
           setReplyText((prev) => prev + data.delta);
@@ -122,12 +144,8 @@ const AIVoiceCall: React.FC = () => {
         if (data.type === 'response.audio_transcript.done' && data.transcript) {
           setReplyText((_) => data.transcript);
         }
-        if (data.type === 'proxy.connected') {
-          // OpenAI socket ready
-        }
-        // Receive other event types as needed
-      } catch {
-        // ignore binary chunks
+      } catch (e) {
+        // non-JSON data
       }
     };
 
@@ -136,70 +154,75 @@ const AIVoiceCall: React.FC = () => {
       stopMicStream();
       wsRef.current = null;
     };
-    ws.onerror = () => {
+    ws.onerror = (ev) => {
+      setErrorMsg("WebSocket connection failed.");
       setConnected(false);
       stopMicStream();
       wsRef.current = null;
     };
   };
 
-  // Microphone streaming
+  // Microphone streaming, with robust AudioContext checks
   const startMicStream = async () => {
     if (!navigator.mediaDevices) return;
-    if (!audioContextRef.current) {
-      audioContextRef.current = new window.AudioContext({ sampleRate: 24000 });
+    try {
+      if (audioContextRef.current == null || audioContextRef.current.state === "closed") {
+        audioContextRef.current = new window.AudioContext({ sampleRate: 24000 });
+        console.log("Created new AudioContext.");
+      } else {
+        console.log("Re-using already open AudioContext.", audioContextRef.current.state);
+      }
+      mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: 24000,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
+      const stream = mediaStreamRef.current;
+      if (!stream) return;
+      const audioContext = audioContextRef.current;
+      const input = audioContext.createMediaStreamSource(stream);
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+      processor.onaudioprocess = (event) => {
+        const inbuf = event.inputBuffer.getChannelData(0);
+        const pcm16 = new Int16Array(inbuf.length);
+        for (let i = 0; i < inbuf.length; i++) {
+          const s = Math.max(-1, Math.min(1, inbuf[i]));
+          pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+        const pcmU8 = new Uint8Array(pcm16.buffer);
+        const chunkBin = String.fromCharCode(...pcmU8);
+        const b64 = btoa(chunkBin);
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({
+            type: "input_audio_buffer.append",
+            audio: b64
+          }));
+        }
+      };
+      input.connect(processor);
+      processor.connect(audioContext.destination);
+      processorRef.current = processor;
+    } catch (e: any) {
+      setErrorMsg("Microphone or AudioContext failed: " + (e?.message || e));
     }
-    mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        sampleRate: 24000,
-        channelCount: 1,
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      }
-    });
-    const stream = mediaStreamRef.current;
-    if (!stream) return;
-
-    const audioContext = audioContextRef.current;
-    const input = audioContext.createMediaStreamSource(stream);
-    const processor = audioContext.createScriptProcessor(4096, 1, 1);
-
-    processor.onaudioprocess = (event) => {
-      const inbuf = event.inputBuffer.getChannelData(0);
-      const pcm16 = new Int16Array(inbuf.length);
-      for (let i = 0; i < inbuf.length; i++) {
-        const s = Math.max(-1, Math.min(1, inbuf[i]));
-        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-      }
-      // Convert to base64
-      const pcmU8 = new Uint8Array(pcm16.buffer);
-      const chunkBin = String.fromCharCode(...pcmU8);
-      const b64 = btoa(chunkBin);
-
-      // Send chunk to WS
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({
-          type: "input_audio_buffer.append",
-          audio: b64
-        }));
-      }
-    };
-
-    input.connect(processor);
-    processor.connect(audioContext.destination);
-    processorRef.current = processor;
   };
 
   const stopMicStream = () => {
-    processorRef.current?.disconnect();
-    processorRef.current = null;
-    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-    mediaStreamRef.current = null;
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
+    if (processorRef.current) {
+      processorRef.current.disconnect();
+      processorRef.current = null;
     }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    // Use safe close:
+    safeCloseAudioContext();
   };
 
   // Cleanup on unmount
@@ -208,15 +231,13 @@ const AIVoiceCall: React.FC = () => {
       stopMicStream();
       wsRef.current?.close();
       wsRef.current = null;
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
+      safeCloseAudioContext();
     };
-    // eslint-disable-next-line
   }, []);
 
   // UI actions
   const handleStart = () => {
+    setErrorMsg(null);
     connectWS();
   };
   const handleStop = () => {
@@ -225,6 +246,55 @@ const AIVoiceCall: React.FC = () => {
     setConnected(false);
   };
 
+  // --- DEBUG PANEL ---
+  async function testFunction(name: "ai-voice-realtime" | "text-to-speech" | "elevenlabs-agent") {
+    setDebugResult("Testing...");
+    setErrorMsg(null);
+    try {
+      if (name === "ai-voice-realtime") {
+        const ws = new WebSocket(wsUrl);
+        return new Promise<void>((resolve) => {
+          ws.onopen = () => {
+            setDebugResult("ai-voice-realtime: WebSocket connected ✅");
+            ws.close();
+            resolve();
+          };
+          ws.onerror = () => {
+            setDebugResult("ai-voice-realtime: WebSocket failed ❌");
+            resolve();
+          };
+        });
+      }
+      if (name === "text-to-speech") {
+        const res = await fetch(
+          "https://pjwwdktyzmpldfjfnehe.functions.supabase.co/functions/v1/text-to-speech",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: "Test audio", provider: "google" }),
+          }
+        );
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        if (data.audioContent) setDebugResult("text-to-speech: Success ✅ (base64 audio returned)");
+        else setDebugResult("text-to-speech: No audioContent ❌");
+        return;
+      }
+      if (name === "elevenlabs-agent") {
+        const res = await fetch(
+          "https://pjwwdktyzmpldfjfnehe.functions.supabase.co/functions/v1/elevenlabs-agent",
+          { method: "POST", body: JSON.stringify({ message: "Hello" }) }
+        );
+        if (res.ok) setDebugResult("elevenlabs-agent: Success ✅");
+        else setDebugResult("elevenlabs-agent: Failed ❌: " + res.status);
+        return;
+      }
+    } catch (err: any) {
+      setDebugResult(name + ": Failed ❌: " + (err?.message || err));
+    }
+  }
+
+  // --- RENDER ---
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="mb-4">
@@ -233,6 +303,11 @@ const AIVoiceCall: React.FC = () => {
           Press “Start Voice Call”, speak to the AI, and it will reply to you in a natural voice—with <b>real-time streaming</b>.
         </p>
       </div>
+      {errorMsg && (
+        <div className="bg-red-200 text-red-800 px-4 py-2 mb-2 rounded text-center">
+          {errorMsg}
+        </div>
+      )}
       <div className="flex gap-4 mt-6">
         {!connected ? (
           <Button variant="default" className="flex items-center gap-2" onClick={handleStart}>
@@ -247,6 +322,39 @@ const AIVoiceCall: React.FC = () => {
       <div className="mt-8 w-full max-w-lg p-4 rounded border border-gray-200 bg-gray-50 min-h-[140px]">
         <div className="text-gray-800 text-lg font-semibold mb-2">AI Reply:</div>
         <p className="whitespace-pre-wrap">{replyText}</p>
+      </div>
+      {/* Debug Panel */}
+      <div className="mt-10">
+        <button
+          onClick={() => setShowDebug(x => !x)}
+          className="underline text-blue-500 text-xs"
+        >
+          {showDebug ? "Hide" : "Show"} Debug Panel
+        </button>
+        {showDebug && (
+          <div className="bg-gray-200 text-xs rounded p-4 mt-2 w-[320px]">
+            <div className="mb-1 font-semibold text-purple-700">Function Tests</div>
+            <button
+              className="px-2 py-1 bg-gray-50 border rounded mr-2 mb-2 text-black"
+              onClick={() => testFunction("ai-voice-realtime")}
+            >
+              ai-voice-realtime
+            </button>
+            <button
+              className="px-2 py-1 bg-gray-50 border rounded mr-2 mb-2 text-black"
+              onClick={() => testFunction("text-to-speech")}
+            >
+              text-to-speech
+            </button>
+            <button
+              className="px-2 py-1 bg-gray-50 border rounded mb-2 text-black"
+              onClick={() => testFunction("elevenlabs-agent")}
+            >
+              elevenlabs-agent
+            </button>
+            <div className="text-gray-900 mt-2 break-words">{debugResult}</div>
+          </div>
+        )}
       </div>
     </div>
   );
