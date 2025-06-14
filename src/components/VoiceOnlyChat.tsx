@@ -64,6 +64,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [audioLevel, setAudioLevel] = useState(0);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [isVoiceInputListening, setIsVoiceInputListening] = useState(false);
+  const [startErrorMsg, setStartErrorMsg] = useState<string | null>(null);
+  const [statusBanner, setStatusBanner] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
@@ -679,6 +681,68 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       mediaStreamRef.current = null;
     }
   }, []);
+
+  // Add robust permission check and announcement at mount
+  useEffect(() => {
+    setStartErrorMsg(null);
+    setStatusBanner(null);
+
+    (async () => {
+      try {
+        const status = await navigator.permissions.query({ name: "microphone" as PermissionName });
+        if (status.state === "denied") {
+          setMicrophonePermission('denied');
+          setStartErrorMsg("Microphone access is blocked. Please enable your mic and refresh.");
+        }
+        status.onchange = () => {
+          if (status.state === "denied") {
+            setMicrophonePermission('denied');
+            setStartErrorMsg("Microphone access is blocked. Please enable your mic and refresh.");
+          } else if (status.state === "granted") {
+            setMicrophonePermission('granted');
+            setStartErrorMsg(null);
+          }
+        };
+      } catch {
+        // ignore if not supported
+      }
+    })();
+  }, []);
+
+  // Show visible banner for active step (listen/respond)
+  useEffect(() => {
+    if (!conversationStarted) {
+      setStatusBanner(null);
+      return;
+    }
+    if (isAssistantSpeaking) {
+      setStatusBanner("AI is speaking...");
+    } else if (isUserSpeaking) {
+      setStatusBanner("Listening: please speak your thoughts.");
+    } else if (!isProcessingResponse) {
+      setStatusBanner("Say something to get started!");
+    } else {
+      setStatusBanner("Thinking...");
+    }
+  }, [conversationStarted, isAssistantSpeaking, isUserSpeaking, isProcessingResponse]);
+
+  // Key patch: Always attempt to start voice as soon as session starts
+  useEffect(() => {
+    if (conversationStarted && !isUserSpeaking && !isAssistantSpeaking && !isProcessingResponse && microphonePermission === 'granted') {
+      // Only if not already listening
+      setTimeout(() => {
+        if (recognitionRef.current && !isListeningRef.current) {
+          try {
+            recognitionRef.current.start();
+            setStatusBanner("Listening: please speak now.");
+          } catch (err: any) {
+            setStartErrorMsg("Could not start voice recognition. " + (err?.message || err));
+            setStatusBanner("Error: Unable to start mic input.");
+          }
+        }
+      }, 200);
+    }
+  }, [conversationStarted, isUserSpeaking, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
 
   return (
     <div
