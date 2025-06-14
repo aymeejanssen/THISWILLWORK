@@ -571,10 +571,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       }}
     >
       <div
-        className="w-full max-w-xl min-h-[60vh] flex flex-col items-center justify-center rounded-3xl bg-white/65 border-0 shadow-xl backdrop-blur-md ring-2 ring-purple-200 px-0 sm:px-0 animate-fade-in"
+        className="w-full max-w-xl min-h-[60vh] flex flex-col items-center justify-center rounded-3xl border-0 shadow-xl backdrop-blur-md px-0 sm:px-0 animate-fade-in"
         style={{
           background:
-            "linear-gradient(132deg, rgba(167,138,176,0.15) 0%, rgba(245,168,154,0.12) 40%, rgba(59,140,138,0.10) 100%)",
+            "linear-gradient(132deg, rgba(167,138,176,0.21) 0%, rgba(245,168,154,0.18) 40%, rgba(59,140,138,0.14) 100%)",
           boxShadow: "0 8px 32px 0 rgba(31,38,135,0.16)",
         }}
       >
@@ -615,29 +615,36 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 </div>
               )}
               <div className="mb-4 w-full max-w-sm">
-                <label className="block text-sm font-medium text-gray-800 mb-2">
+                <label className="block text-sm font-medium text-gray-800 mb-2 text-center">
                   Choose Your AI Voice
                 </label>
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                  <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900 justify-center text-center">
-                    <SelectValue
-                      placeholder="Select voice"
-                      className="w-full text-center"
-                    />
+                  <SelectTrigger
+                    className="w-full bg-white/70 border-purple-300 border-2 rounded-lg text-gray-900 justify-center text-center font-medium text-lg h-14 shadow-md"
+                    style={{ textAlign: "center" }}
+                  >
+                    <div className="w-full text-center flex justify-center items-center">
+                      <SelectValue
+                        placeholder="Select voice"
+                        className="w-full text-center font-medium"
+                      />
+                    </div>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full">
                     {limitedVoices.map((voice) => (
                       <SelectItem
                         key={voice.id}
                         value={voice.id}
-                        className="text-center flex flex-col items-center"
+                        className="flex flex-col items-center text-center w-full px-0 py-2"
                       >
-                        <span className="font-medium w-full text-center block">
+                        <span className="font-medium w-full text-center text-base">
                           {voice.name}
                         </span>
-                        <span className="text-xs text-gray-500 w-full text-center block">
-                          {voice.description}
-                        </span>
+                        {voice.description && (
+                          <span className="text-xs text-gray-500 w-full text-center block">
+                            {voice.description}
+                          </span>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -646,29 +653,20 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   variant="outline"
                   size="sm"
                   onClick={testVoice}
-                  className="mt-3 w-full"
+                  className="mt-3 w-full flex justify-center items-center font-medium text-base bg-white/60 border-2 border-gray-200 shadow"
                   disabled={isAssistantSpeaking}
                 >
-                  {isAssistantSpeaking ? "Playing..." : "🎵 Test Voice"}
+                  <span className="flex items-center justify-center gap-2">
+                    <span role="img" aria-label="music">🎵</span> Test Voice
+                  </span>
                 </Button>
-                <div className="mt-2 text-xs text-gray-600 text-center">
-                  {limitedVoices.find((v) => v.id === selectedVoice)?.provider ===
-                  "elevenlabs" ? (
-                    <span className="text-purple-600">
-                      ✨ High quality ElevenLabs voice
-                    </span>
-                  ) : (
-                    <span className="text-blue-600">
-                      🤖 Google TTS fallback
-                    </span>
-                  )}
-                </div>
+                {/* Removed ElevenLabs reference here */}
               </div>
               <Button
                 onClick={startConversation}
-                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-28 h-28 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transform transition-all duration-300 text-lg font-bold border-purple-200 border-4"
+                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transform transition-all duration-300 text-2xl font-bold border-purple-200 border-4 mx-auto"
                 disabled={isConnecting || microphonePermission === 'denied'}
-                style={{ fontSize: 20 }}
+                style={{ fontSize: 26 }}
               >
                 {isConnecting ? (
                   <div className="flex flex-col items-center">
@@ -679,11 +677,10 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   "Start"
                 )}
               </Button>
-              <p className="text-gray-700 text-base text-center font-medium">
+              <p className="text-gray-700 text-lg text-center font-medium">
                 {microphonePermission === 'denied'
                   ? "Please allow microphone access to start"
-                  : "Tap to begin your voice conversation"
-                }
+                  : "Tap to begin your voice conversation"}
               </p>
             </div>
           ) : (
@@ -799,29 +796,34 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           <div className="w-full px-8 py-6 border-t border-purple-100 bg-white/70 rounded-b-3xl">
             <h4 className="text-lg font-semibold text-purple-700 mb-4">Settings</h4>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
                 Voice Selection
               </label>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900 justify-center text-center">
-                  <SelectValue
-                    placeholder="Select voice"
-                    className="w-full text-center"
-                  />
+                <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900 justify-center text-center font-medium text-lg h-14 shadow-md"
+                  style={{ textAlign: "center" }}>
+                  <div className="w-full text-center flex justify-center items-center">
+                    <SelectValue
+                      placeholder="Select voice"
+                      className="w-full text-center font-medium"
+                    />
+                  </div>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-full">
                   {limitedVoices.map((voice) => (
                     <SelectItem
                       key={voice.id}
                       value={voice.id}
-                      className="text-center flex flex-col items-center"
+                      className="flex flex-col items-center text-center w-full px-0 py-2"
                     >
-                      <span className="font-medium w-full text-center block">
+                      <span className="font-medium w-full text-center text-base">
                         {voice.name}
                       </span>
-                      <span className="text-xs text-gray-500 w-full text-center block">
-                        {voice.description}
-                      </span>
+                      {voice.description && (
+                        <span className="text-xs text-gray-500 w-full text-center block">
+                          {voice.description}
+                        </span>
+                      )}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -830,11 +832,14 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 variant="outline"
                 size="sm"
                 onClick={testVoice}
-                className="mt-2 w-full"
+                className="mt-2 w-full flex justify-center items-center font-medium text-base bg-white/60 border-2 border-gray-200 shadow"
                 disabled={isAssistantSpeaking}
               >
-                {isAssistantSpeaking ? "Playing..." : "🎵 Test Voice"}
+                <span className="flex items-center justify-center gap-2">
+                  <span role="img" aria-label="music">🎵</span> Test Voice
+                </span>
               </Button>
+              {/* Removed ElevenLabs reference */}
             </div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
