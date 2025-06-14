@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
 import { voiceService, allVoices } from '../services/voiceService';
 import AudioLevelIndicator from './AudioLevelIndicator';
+import VoiceInput from './VoiceInput';
 
 // TypeScript declarations for Speech Recognition API
 declare global {
@@ -61,6 +62,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const [audioLevel, setAudioLevel] = useState(0);
   const [liveTranscript, setLiveTranscript] = useState('');
+  const [isVoiceInputListening, setIsVoiceInputListening] = useState(false);
 
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
@@ -327,6 +329,54 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   }, [isAssistantSpeaking, isProcessingResponse, microphonePermission, conversationStarted, isMicrophoneEnabled, setupSpeechRecognition]);
 
+  // Handle VoiceInput transcript
+  const handleVoiceInputTranscript = async (transcript: string) => {
+    if (!transcript.trim() || isProcessingResponse) return;
+    setTranscript(transcript);
+    setIsProcessingResponse(true);
+
+    try {
+      // Use the same response generation as before (AI/agent response, TTS, conversation history)
+      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
+      if (selectedVoiceOption?.type === 'agent') {
+        const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, transcript);
+        setConversationHistory(prev => [...prev, `User: ${transcript}`, `AI: ${aiResponse}`]);
+      } else {
+        const conversationContext = [
+          ...conversationHistory,
+          `User: ${transcript}`
+        ].join('\n');
+
+        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
+
+        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
+          body: {
+            prompt: transcript,
+            context: conversationContext,
+            systemPrompt: systemPrompt,
+            maxTokens: 150
+          }
+        });
+
+        if (error) {
+          console.error('🤖 AI response error:', error);
+          throw error;
+        }
+
+        const aiResponse = data?.response || "I understand. Could you tell me more about that?";
+        setConversationHistory(prev => [...prev, `User: ${transcript}`, `AI: ${aiResponse}`]);
+        await speak(aiResponse);
+      }
+    } catch (error) {
+      console.error('🤖 AI error:', error);
+      const fallbackResponse = "I'm here to listen. Please continue sharing what's on your mind.";
+      await speak(fallbackResponse);
+    } finally {
+      setIsProcessingResponse(false);
+      setTranscript('');
+    }
+  };
+
   // Generate AI response
   const generateAIResponse = async (userMessage: string) => {
     if (!userMessage.trim() || isProcessingResponse) return;
@@ -582,7 +632,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-2xl font-bold flex items-center gap-3 text-purple-700">
               <Phone className="h-6 w-6" />
-              {/* Ensure correct session naming */}
               Your Therapy Session
             </CardTitle>
             <div className="flex items-center gap-2">
@@ -660,7 +709,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     <span role="img" aria-label="music">🎵</span> Test Voice
                   </span>
                 </Button>
-                {/* No provider/quality reference here */}
               </div>
               <Button
                 onClick={startConversation}
@@ -687,6 +735,26 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             <div className="flex flex-col items-center justify-between h-full w-full">
               <div className="flex-1 overflow-y-auto p-4 w-full">
                 <div className="mb-4 text-center">
+                  {/* Use VoiceInput for speaking */}
+                  <VoiceInput
+                    onTranscript={handleVoiceInputTranscript}
+                    isListening={isVoiceInputListening}
+                    onListeningChange={setIsVoiceInputListening}
+                    className="my-4 mx-auto"
+                  />
+                  <div className="mb-4 text-xs text-gray-500 italic">
+                    {isVoiceInputListening
+                      ? "Listening... Speak your message."
+                      : "Click 'Speak Answer' to start voice input."}
+                  </div>
+                  {/* Show the current transcript just like before */}
+                  <Textarea
+                    value={transcript}
+                    placeholder="Recognized transcript will appear here."
+                    readOnly
+                    className="min-h-[70px] bg-gray-50 border-2 border-gray-200 text-sm mb-2"
+                  />
+                  
                   <p className="text-gray-700 italic min-h-[1.5em]">
                     {transcript || message || (isUserSpeaking ? "Listening..." : "Say something...")}
                   </p>
@@ -838,7 +906,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   <span role="img" aria-label="music">🎵</span> Test Voice
                 </span>
               </Button>
-              {/* No provider/quality label here */}
             </div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
