@@ -622,22 +622,30 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   // Clean up ONLY ONCE at true end of conversation or component unmount!
   const cleanUpAudioResources = useCallback(() => {
     console.log('[Audio] Cleaning up audio resources...');
-    // Close audio context ONLY if it exists
-    if (audioContextRef.current) {
-      // Only close if not already closed
-      if (audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().then(() => {
-          console.log('[Audio] AudioContext closed');
-        }).catch((e) => {
-          console.warn('[Audio] Tried to close AudioContext, error:', e);
-        });
+    // Guard for AudioContext
+    const ctx = audioContextRef.current;
+    if (ctx) {
+      if (ctx.state !== 'closed') {
+        ctx.close()
+          .then(() => {
+            console.log('[Audio] AudioContext closed');
+          })
+          .catch((e) => {
+            // Only log real error if not already closed
+            if (ctx.state !== "closed") {
+              console.warn('[Audio] Tried to close AudioContext, error:', e);
+            }
+          });
       } else {
         console.log('[Audio] AudioContext already closed');
       }
       audioContextRef.current = null;
     }
+    // Clean up analyzer and animation
     if (audioAnalyzerRef.current) {
-      audioAnalyzerRef.current.disconnect();
+      try {
+        audioAnalyzerRef.current.disconnect();
+      } catch {}
       audioAnalyzerRef.current = null;
     }
     if (animationFrameRef.current) {
