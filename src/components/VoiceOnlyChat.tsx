@@ -582,7 +582,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-2xl font-bold flex items-center gap-3 text-purple-700">
               <Phone className="h-6 w-6" />
-              Voice Conversation
+              {/* Title changed here */}
+              Your Therapy Session
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button
@@ -621,9 +622,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                   <SelectTrigger
                     className="w-full bg-white/70 border-purple-300 border-2 rounded-lg text-gray-900 justify-center text-center font-medium text-lg h-14 shadow-md"
-                    style={{ textAlign: "center" }}
                   >
-                    <div className="w-full text-center flex justify-center items-center">
+                    <div className="w-full flex justify-center items-center text-center">
                       <SelectValue
                         placeholder="Select voice"
                         className="w-full text-center font-medium"
@@ -660,7 +660,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     <span role="img" aria-label="music">🎵</span> Test Voice
                   </span>
                 </Button>
-                {/* Removed ElevenLabs reference here */}
+                {/* ElevenLabs reference was here: now fully removed */}
               </div>
               <Button
                 onClick={startConversation}
@@ -680,7 +680,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
               <p className="text-gray-700 text-lg text-center font-medium">
                 {microphonePermission === 'denied'
                   ? "Please allow microphone access to start"
-                  : "Tap to begin your voice conversation"}
+                  : "Tap to begin your session"}
               </p>
             </div>
           ) : (
@@ -800,9 +800,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 Voice Selection
               </label>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900 justify-center text-center font-medium text-lg h-14 shadow-md"
-                  style={{ textAlign: "center" }}>
-                  <div className="w-full text-center flex justify-center items-center">
+                <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900 justify-center text-center font-medium text-lg h-14 shadow-md">
+                  <div className="w-full flex justify-center items-center text-center">
                     <SelectValue
                       placeholder="Select voice"
                       className="w-full text-center font-medium"
@@ -839,7 +838,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   <span role="img" aria-label="music">🎵</span> Test Voice
                 </span>
               </Button>
-              {/* Removed ElevenLabs reference */}
+              {/* ElevenLabs reference was here: now fully removed */}
             </div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
