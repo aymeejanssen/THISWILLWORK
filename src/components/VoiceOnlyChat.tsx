@@ -625,20 +625,20 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     // Guard for AudioContext
     const ctx = audioContextRef.current;
     if (ctx) {
-      // Only close if not already closing or closed
-      if (ctx.state !== 'closed' && ctx.state !== 'closing') {
+      // Only close if not already closed
+      if (ctx.state !== 'closed') {
         ctx.close()
           .then(() => {
             console.log('[Audio] AudioContext closed');
           })
           .catch((e) => {
-            // Log only if not already closed/closing
-            if (ctx.state !== "closed" && ctx.state !== "closing") {
+            // Only log real error if not already closed
+            if (ctx.state !== "closed") {
               console.warn('[Audio] Tried to close AudioContext, error:', e);
             }
           });
       } else {
-        console.log('[Audio] AudioContext already closed or closing');
+        console.log('[Audio] AudioContext already closed');
       }
       audioContextRef.current = null;
     }
