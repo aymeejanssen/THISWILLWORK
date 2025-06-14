@@ -629,7 +629,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       console.log('[Audio] No AudioContext to clean.');
       return;
     }
-    if (ctx.state === 'closed') {
+    if ((ctx.state as any) === 'closed') {
       console.log('[Audio] AudioContext already closed; cleanup only.');
       audioContextRef.current = null;
       return;
@@ -645,7 +645,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           console.log('[Audio] AudioContext closed');
         })
         .catch((e) => {
-          if (e?.name === 'InvalidStateError' || ctx.state === 'closed') {
+          if (e?.name === 'InvalidStateError' || (ctx.state as any) === 'closed') {
             console.log('[Audio] Tried to close AudioContext, but it was already closed.');
           } else {
             console.warn('[Audio] Error closing AudioContext:', e);
@@ -657,7 +657,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         });
     } catch (e) {
       // Synchronous error: this should not happen but let's cover it.
-      if (e?.name === 'InvalidStateError' || ctx.state === 'closed') {
+      if (e?.name === 'InvalidStateError' || (ctx.state as any) === 'closed') {
         console.log('[Audio] (Sync) Already closed, safe to ignore.');
       } else {
         console.warn('[Audio] (Sync) Error closing AudioContext:', e);
