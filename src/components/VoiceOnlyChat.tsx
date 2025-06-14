@@ -75,6 +75,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const animationFrameRef = useRef<number | null>(null);
   const isListeningRef = useRef(false);
   const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Add this ref for cleanup guard
+  const audioContextCleaningRef = useRef(false);
 
   // Audio level monitoring (changed: ensure audioContext is reused and not closed prematurely)
   const startAudioLevelMonitoring = useCallback(async () => {
@@ -625,22 +627,26 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     // Guard for AudioContext
     const ctx = audioContextRef.current;
     if (ctx) {
-      // Only close if not already closed
-      if (ctx.state !== 'closed') {
+      if (ctx.state !== 'closed' && !audioContextCleaningRef.current) {
+        audioContextCleaningRef.current = true;
         ctx.close()
           .then(() => {
             console.log('[Audio] AudioContext closed');
           })
           .catch((e) => {
-            // Only log real error if not already closed
-            if (ctx.state !== "closed") {
-              console.warn('[Audio] Tried to close AudioContext, error:', e);
+            // Ignore InvalidStateError for already closed context
+            if (e?.name !== 'InvalidStateError') {
+              console.warn('[Audio] Error closing AudioContext:', e);
             }
+          })
+          .finally(() => {
+            audioContextRef.current = null;
+            audioContextCleaningRef.current = false;
           });
       } else {
-        console.log('[Audio] AudioContext already closed');
+        console.log('[Audio] AudioContext already closed or cleaning up');
+        audioContextRef.current = null;
       }
-      audioContextRef.current = null;
     }
     // Clean up analyzer and animation
     if (audioAnalyzerRef.current) {
