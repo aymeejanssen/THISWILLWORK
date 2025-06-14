@@ -624,31 +624,48 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   // Clean up ONLY ONCE at true end of conversation or component unmount!
   const cleanUpAudioResources = useCallback(() => {
     console.log('[Audio] Cleaning up audio resources...');
-    // Guard for AudioContext
     const ctx = audioContextRef.current;
-    if (ctx) {
-      if (ctx.state !== 'closed' && !audioContextCleaningRef.current) {
-        audioContextCleaningRef.current = true;
-        ctx.close()
-          .then(() => {
-            console.log('[Audio] AudioContext closed');
-          })
-          .catch((e) => {
-            // Ignore InvalidStateError for already closed context
-            if (e?.name !== 'InvalidStateError') {
-              console.warn('[Audio] Error closing AudioContext:', e);
-            }
-          })
-          .finally(() => {
-            audioContextRef.current = null;
-            audioContextCleaningRef.current = false;
-          });
-      } else {
-        console.log('[Audio] AudioContext already closed or cleaning up');
-        audioContextRef.current = null;
-      }
+    if (!ctx) {
+      console.log('[Audio] No AudioContext to clean.');
+      return;
     }
-    // Clean up analyzer and animation
+    if (ctx.state === 'closed') {
+      console.log('[Audio] AudioContext already closed; cleanup only.');
+      audioContextRef.current = null;
+      return;
+    }
+    if (audioContextCleaningRef.current) {
+      console.log('[Audio] Cleanup already in progress!');
+      return;
+    }
+    audioContextCleaningRef.current = true;
+    try {
+      ctx.close()
+        .then(() => {
+          console.log('[Audio] AudioContext closed');
+        })
+        .catch((e) => {
+          if (e?.name === 'InvalidStateError' || ctx.state === 'closed') {
+            console.log('[Audio] Tried to close AudioContext, but it was already closed.');
+          } else {
+            console.warn('[Audio] Error closing AudioContext:', e);
+          }
+        })
+        .finally(() => {
+          audioContextRef.current = null;
+          audioContextCleaningRef.current = false;
+        });
+    } catch (e) {
+      // Synchronous error: this should not happen but let's cover it.
+      if (e?.name === 'InvalidStateError' || ctx.state === 'closed') {
+        console.log('[Audio] (Sync) Already closed, safe to ignore.');
+      } else {
+        console.warn('[Audio] (Sync) Error closing AudioContext:', e);
+      }
+      audioContextRef.current = null;
+      audioContextCleaningRef.current = false;
+    }
+
     if (audioAnalyzerRef.current) {
       try {
         audioAnalyzerRef.current.disconnect();
