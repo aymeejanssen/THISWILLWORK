@@ -68,60 +68,64 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+
+  // Ref to track AudioContext: we will ONLY close this at the very end
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const isListeningRef = useRef(false);
   const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Audio level monitoring
+  // Audio level monitoring (changed: ensure audioContext is reused and not closed prematurely)
   const startAudioLevelMonitoring = useCallback(async () => {
     console.log('🎤 Starting audio monitoring...');
-    
+    // Do NOT create a new AudioContext if we have one
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext({ sampleRate: 44100 });
+      console.log('[Audio] Created AudioContext for monitoring');
+    } else {
+      console.log('[Audio] AudioContext already exists');
+    }
     if (!mediaStreamRef.current) {
       console.error('❌ No media stream for monitoring');
       return;
     }
-
     try {
-      audioContextRef.current = new AudioContext({ sampleRate: 44100 });
-      
-      if (audioContextRef.current.state === 'suspended') {
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
       }
 
       const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
+
       audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
       audioAnalyzerRef.current.fftSize = 256;
       audioAnalyzerRef.current.smoothingTimeConstant = 0.3;
-      
+
       source.connect(audioAnalyzerRef.current);
-      
+
       const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
 
       const updateLevel = () => {
         if (!audioAnalyzerRef.current || !conversationStarted) return;
-        
+
         audioAnalyzerRef.current.getByteFrequencyData(dataArray);
         const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
         const level = Math.min(100, (average / 128) * 100);
-        
+
         setAudioLevel(level);
-        
+
         if (conversationStarted) {
           animationFrameRef.current = requestAnimationFrame(updateLevel);
         }
       };
-
       updateLevel();
       console.log('✅ Audio monitoring started');
-      
     } catch (error) {
       console.error('❌ Audio monitoring error:', error);
     }
   }, [conversationStarted]);
 
-  // Request microphone permission
+  // Request microphone permission (no changes to AudioContext logic here)
   const requestMicrophonePermission = async () => {
     try {
       console.log('🎤 Requesting microphone...');
@@ -613,6 +617,37 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     return () => {
       voiceService.cleanup();
     };
+  }, []);
+
+  // Clean up ONLY ONCE at true end of conversation or component unmount!
+  const cleanUpAudioResources = useCallback(() => {
+    console.log('[Audio] Cleaning up audio resources...');
+    // Close audio context ONLY if it exists
+    if (audioContextRef.current) {
+      // Only close if not already closed
+      if (audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().then(() => {
+          console.log('[Audio] AudioContext closed');
+        }).catch((e) => {
+          console.warn('[Audio] Tried to close AudioContext, error:', e);
+        });
+      } else {
+        console.log('[Audio] AudioContext already closed');
+      }
+      audioContextRef.current = null;
+    }
+    if (audioAnalyzerRef.current) {
+      audioAnalyzerRef.current.disconnect();
+      audioAnalyzerRef.current = null;
+    }
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current = null;
+    }
   }, []);
 
   return (
