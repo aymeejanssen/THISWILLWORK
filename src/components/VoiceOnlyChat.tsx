@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +37,13 @@ interface VoiceOnlyChatProps {
   };
 }
 
+const limitedVoices = [
+  // Choose top voices: 3 ElevenLabs voices and 1 Google (change as needed)
+  // You can update these to reflect your actual favorite voices!
+  ...allVoices.filter(v => v.provider === 'elevenlabs' && v.type === 'tts').slice(0, 3),
+  ...allVoices.filter(v => v.provider === 'google').slice(0, 1)
+];
+
 const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [isMicrophoneEnabled, setIsMicrophoneEnabled] = useState(true);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
@@ -49,7 +55,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isCallOngoing, setIsCallOngoing] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState<string>('9BWtsMINqrJLrRacOk9x');
+  const [selectedVoice, setSelectedVoice] = useState<string>(limitedVoices[0]?.id || '9BWtsMINqrJLrRacOk9x');
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
@@ -556,11 +562,34 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl h-[80vh] bg-white/95 backdrop-blur-sm shadow-2xl border-0 flex flex-col">
-        <CardHeader className="bg-gradient-to-r from-purple-500 via-pink-400 to-red-400 text-white rounded-t-lg">
+    <div className="fixed inset-0 flex items-center justify-center p-4 z-50"
+      style={{
+        minHeight: "100vh",
+        minWidth: "100vw",
+        background: "linear-gradient(135deg, #f5f3ff 0%, #f9e8fd 50%, #cef2fd 100%)"
+      }}
+    >
+      <div
+        className="
+          w-full max-w-xl min-h-[60vh]
+          flex flex-col items-center justify-center
+          rounded-3xl
+          bg-white/65
+          border-0
+          shadow-xl
+          backdrop-blur-md
+          ring-2 ring-purple-200
+          px-0 sm:px-0
+          animate-fade-in
+        "
+        style={{
+          background: "linear-gradient(132deg, rgba(167,138,176,0.15) 0%, rgba(245,168,154,0.12) 40%, rgba(59,140,138,0.10) 100%)",
+          boxShadow: "0 8px 32px 0 rgba(31,38,135,0.16)"
+        }}
+      >
+        <CardHeader className="bg-transparent px-8 py-7 rounded-t-3xl w-full">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+            <CardTitle className="text-2xl font-bold flex items-center gap-3 text-purple-700">
               <Phone className="h-6 w-6" />
               Voice Conversation
             </CardTitle>
@@ -569,7 +598,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowSettings(!showSettings)}
-                className="text-white hover:bg-white/20"
+                className="text-purple-600 hover:bg-purple-50"
               >
                 <Settings className="h-5 w-5" />
               </Button>
@@ -577,17 +606,16 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-white hover:bg-white/20"
+                className="text-purple-600 hover:bg-purple-50"
               >
                 <Home className="h-5 w-5" />
               </Button>
             </div>
           </div>
         </CardHeader>
-
-        <CardContent className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-purple-50/30 to-teal-50/30">
+        <CardContent className="flex-1 flex flex-col items-center justify-center w-full px-8 pb-6 bg-transparent">
           {!conversationStarted ? (
-            <div className="flex flex-col items-center justify-center h-full space-y-6">
+            <div className="flex flex-col items-center justify-center h-full space-y-6 w-full">
               {microphonePermission === 'denied' && (
                 <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
                   <p className="text-red-700 text-sm text-center">
@@ -595,42 +623,16 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   </p>
                 </div>
               )}
-
-              <div className="mb-6 w-full max-w-sm">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Choose Your AI Experience
+              <div className="mb-4 w-full max-w-sm">
+                <label className="block text-sm font-medium text-gray-800 mb-2">
+                  Choose Your AI Voice
                 </label>
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a voice or agent" />
+                  <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900">
+                    <SelectValue placeholder="Select voice" />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50">
-                      🤖 Your ElevenLabs Conversational Agents
-                    </div>
-                    {allVoices.filter(voice => voice.type === 'agent').map((voice) => (
-                      <SelectItem key={voice.id} value={voice.id}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{voice.name}</span>
-                          <span className="text-xs text-gray-500">{voice.description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                    <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50 mt-2">
-                      🎭 Premium Human-like Voices (ElevenLabs)
-                    </div>
-                    {allVoices.filter(voice => voice.provider === 'elevenlabs' && voice.type === 'tts').map((voice) => (
-                      <SelectItem key={voice.id} value={voice.id}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{voice.name}</span>
-                          <span className="text-xs text-gray-500">{voice.description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                    <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 mt-2">
-                      🤖 Google Text-to-Speech
-                    </div>
-                    {allVoices.filter(voice => voice.provider === 'google').map((voice) => (
+                    {limitedVoices.map((voice) => (
                       <SelectItem key={voice.id} value={voice.id}>
                         <div className="flex flex-col">
                           <span className="font-medium">{voice.name}</span>
@@ -640,50 +642,42 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     ))}
                   </SelectContent>
                 </Select>
-                
-                {allVoices.find(v => v.id === selectedVoice)?.type === 'tts' && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={testVoice}
-                    className="mt-2 w-full"
-                    disabled={isAssistantSpeaking}
-                  >
-                    {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
-                  </Button>
-                )}
-                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={testVoice}
+                  className="mt-3 w-full"
+                  disabled={isAssistantSpeaking}
+                >
+                  {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
+                </Button>
                 <div className="mt-2 text-xs text-gray-600 text-center">
-                  {allVoices.find(v => v.id === selectedVoice)?.type === 'agent' ? (
-                    <span className="text-green-600">🤖 Using your ElevenLabs conversational AI agent</span>
-                  ) : allVoices.find(v => v.id === selectedVoice)?.provider === 'elevenlabs' ? (
-                    <span className="text-purple-600">✨ Using premium ElevenLabs voice for natural speech</span>
+                  {limitedVoices.find(v => v.id === selectedVoice)?.provider === 'elevenlabs' ? (
+                    <span className="text-purple-600">✨ High quality ElevenLabs voice</span>
                   ) : (
-                    <span className="text-blue-600">🤖 Using Google Text-to-Speech</span>
+                    <span className="text-blue-600">🤖 Google TTS fallback</span>
                   )}
                 </div>
               </div>
-
-              <Button 
+              <Button
                 onClick={startConversation}
-                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transform transition-all duration-300 text-xl font-bold"
+                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-28 h-28 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transform transition-all duration-300 text-lg font-bold border-purple-200 border-4"
                 disabled={isConnecting || microphonePermission === 'denied'}
+                style={{ fontSize: 20 }}
               >
                 {isConnecting ? (
                   <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mb-2"></div>
                     <span className="text-sm">Connecting...</span>
                   </div>
                 ) : (
                   "Start"
                 )}
               </Button>
-              <p className="text-gray-600 text-lg text-center">
-                {microphonePermission === 'denied' 
-                  ? "Please allow microphone access to start" 
-                  : allVoices.find(v => v.id === selectedVoice)?.type === 'agent'
-                    ? "Tap to begin conversation with your AI agent"
-                    : "Tap to begin your voice conversation"
+              <p className="text-gray-700 text-base text-center font-medium">
+                {microphonePermission === 'denied'
+                  ? "Please allow microphone access to start"
+                  : "Tap to begin your voice conversation"
                 }
               </p>
             </div>
@@ -797,44 +791,18 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         </CardContent>
 
         {showSettings && (
-          <div className="p-6 border-t border-gray-200">
-            <h4 className="text-lg font-semibold mb-4">Settings</h4>
-            
+          <div className="w-full px-8 py-6 border-t border-purple-100 bg-white/70 rounded-b-3xl">
+            <h4 className="text-lg font-semibold text-purple-700 mb-4">Settings</h4>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                AI Voice Selection
+                Voice Selection
               </label>
               <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a voice or agent" />
+                <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900">
+                  <SelectValue placeholder="Select voice" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50">
-                    🤖 Your ElevenLabs Conversational Agents
-                  </div>
-                  {allVoices.filter(voice => voice.type === 'agent').map((voice) => (
-                    <SelectItem key={voice.id} value={voice.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{voice.name}</span>
-                        <span className="text-xs text-gray-500">{voice.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                  <div className="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50 mt-2">
-                    🎭 Premium Human-like Voices (ElevenLabs)
-                  </div>
-                  {allVoices.filter(voice => voice.provider === 'elevenlabs' && voice.type === 'tts').map((voice) => (
-                    <SelectItem key={voice.id} value={voice.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{voice.name}</span>
-                        <span className="text-xs text-gray-500">{voice.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                  <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50 mt-2">
-                    🤖 Google Text-to-Speech
-                  </div>
-                  {allVoices.filter(voice => voice.provider === 'google').map((voice) => (
+                  {limitedVoices.map((voice) => (
                     <SelectItem key={voice.id} value={voice.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{voice.name}</span>
@@ -844,20 +812,16 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   ))}
                 </SelectContent>
               </Select>
-              
-              {allVoices.find(v => v.id === selectedVoice)?.type === 'tts' && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={testVoice}
-                  className="mt-2"
-                  disabled={isAssistantSpeaking}
-                >
-                  {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={testVoice}
+                className="mt-2 w-full"
+                disabled={isAssistantSpeaking}
+              >
+                {isAssistantSpeaking ? 'Playing...' : '🎵 Test Voice'}
+              </Button>
             </div>
-
             <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
               <Button
@@ -889,7 +853,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
             )}
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 };
