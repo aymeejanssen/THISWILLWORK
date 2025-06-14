@@ -548,19 +548,8 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       clearTimeout(restartTimeoutRef.current);
     }
     
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      mediaStreamRef.current = null;
-    }
-    
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
+    // Replace direct cleanup with context-logged cleanup
+    cleanUpAudioResources('endConversation');
     
     setTranscript('');
     setMessage('');
@@ -614,42 +603,50 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     voiceService.setEnabled(isSpeakerEnabled);
   }, [isSpeakerEnabled]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount (replaces original logic)
   useEffect(() => {
     return () => {
       voiceService.cleanup();
+      cleanUpAudioResources('unmount');
     };
   }, []);
 
   // Clean up ONLY ONCE at true end of conversation or component unmount!
-  const cleanUpAudioResources = useCallback(() => {
-    console.log('[Audio] Cleaning up audio resources...');
+  // Accepts a context string for better logging (caller: 'endConversation' or 'unmount')
+  const cleanUpAudioResources = useCallback((context = 'unknown') => {
+    console.log(`[Audio] Cleaning up audio resources (called from: ${context})...`);
+    // Prevent two cleanups at once!
+    if (audioContextCleaningRef.current) {
+      console.log(`[Audio] Cleanup already running, skipping duplicate (caller: ${context})`);
+      return;
+    }
+    audioContextCleaningRef.current = true;
+
     const ctx = audioContextRef.current;
     if (!ctx) {
-      console.log('[Audio] No AudioContext to clean.');
+      console.log('[Audio] No AudioContext to clean (caller:', context, ')');
+      // Set to null to be safe
+      audioContextRef.current = null;
+      audioContextCleaningRef.current = false;
       return;
     }
     // Cast to string to allow type-safe comparison with 'closed'
     if ((ctx.state as string) === 'closed') {
-      console.log('[Audio] AudioContext already closed; cleanup only.');
+      console.log('[Audio] AudioContext already closed; cleanup only (caller:', context, ')');
       audioContextRef.current = null;
+      audioContextCleaningRef.current = false;
       return;
     }
-    if (audioContextCleaningRef.current) {
-      console.log('[Audio] Cleanup already in progress!');
-      return;
-    }
-    audioContextCleaningRef.current = true;
     try {
       ctx.close()
         .then(() => {
-          console.log('[Audio] AudioContext closed');
+          console.log('[Audio] AudioContext closed (caller:', context, ')');
         })
         .catch((e) => {
           if (e?.name === 'InvalidStateError' || (ctx.state as string) === 'closed') {
-            console.log('[Audio] Tried to close AudioContext, but it was already closed.');
+            console.log('[Audio] Tried to close AudioContext, but it was already closed. (caller:', context, ')');
           } else {
-            console.warn('[Audio] Error closing AudioContext:', e);
+            console.warn('[Audio] Error closing AudioContext:', e, '(caller:', context, ')');
           }
         })
         .finally(() => {
@@ -659,9 +656,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     } catch (e) {
       // Synchronous error: this should not happen but let's cover it.
       if (e?.name === 'InvalidStateError' || (ctx.state as string) === 'closed') {
-        console.log('[Audio] (Sync) Already closed, safe to ignore.');
+        console.log('[Audio] (Sync) Already closed, safe to ignore. (caller:', context, ')');
       } else {
-        console.warn('[Audio] (Sync) Error closing AudioContext:', e);
+        console.warn('[Audio] (Sync) Error closing AudioContext:', e, '(caller:', context, ')');
       }
       audioContextRef.current = null;
       audioContextCleaningRef.current = false;
