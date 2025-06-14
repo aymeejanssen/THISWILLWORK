@@ -115,13 +115,13 @@ const OnboardingFlow = ({
     updateResponses(questionKey, newResponses);
 
     const questions = getQuestions(selectedConcern);
-    
+
     // For "other" category, we only have one open-ended question
     if (selectedConcern === 'other' || newResponses.length >= questions.length) {
-      // Complete the assessment and navigate to completion page
+      // Complete the assessment and navigate to the new summary page with AI insights and trial chat
       completeAssessment();
       onClose(); // Close the modal
-      navigate('/assessment-complete'); // Navigate to completion page
+      navigate('/assessment-summary'); // <-- Go to summary, not complete page
     } else {
       setCurrentStep(currentStep + 1);
     }
