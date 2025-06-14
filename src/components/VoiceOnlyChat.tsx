@@ -399,6 +399,9 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
 
         const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
 
+        // ADDED: log before calling backend
+        console.log('[VoiceOnlyChat] Invoking backend AI for:', userMessage, { conversationContext, systemPrompt });
+
         const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
           body: {
             prompt: userMessage,
@@ -408,20 +411,29 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           }
         });
 
+        // ADDED: log exact error and data
         if (error) {
           console.error('🤖 AI response error:', error);
-          throw error;
+          toast.error(`AI backend error: ${error.message || error}`);
         }
 
-        const aiResponse = data?.response || "I understand. Could you tell me more about that?";
-        console.log('🤖 AI response:', aiResponse);
-
-        setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
-        await speak(aiResponse);
+        if (!error && data?.response) {
+          const aiResponse = data.response;
+          console.log('🤖 AI response:', aiResponse);
+          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
+          await speak(aiResponse);
+        } else {
+          // If backend fails or returns no response, fallback once
+          console.warn('[VoiceOnlyChat] No AI response, using fallback.');
+          const fallbackResponse = "Sorry, I didn't catch that. Could you say it another way?";
+          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${fallbackResponse}`]);
+          await speak(fallbackResponse);
+        }
       }
       
     } catch (error) {
       console.error('🤖 AI error:', error);
+      toast.error("AI error: " + (error?.message || error));
       const fallbackResponse = "I'm here to listen. Please continue sharing what's on your mind.";
       await speak(fallbackResponse);
     } finally {
@@ -484,48 +496,39 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   // Start conversation
   const startConversation = async () => {
     console.log('🚀 Starting conversation...');
-    
     if (microphonePermission !== 'granted') {
       const hasPermission = await requestMicrophonePermission();
       if (!hasPermission) return;
     }
 
     setIsConnecting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Shorten connection delay dramatically
+    await new Promise(resolve => setTimeout(resolve, 250));
     setIsConnecting(false);
     setConversationStarted(true);
     setIsCallOngoing(true);
 
-    // Start speech recognition immediately after conversation starts
-    setTimeout(() => {
-      console.log('🎙️ FORCING speech recognition to start...');
-      if (isMicrophoneEnabled && microphonePermission === 'granted') {
-        // Force start listening
+    // NO artificial delays - immediately start speech
+    if (isMicrophoneEnabled && microphonePermission === 'granted') {
+      setTimeout(() => {
+        console.log('🎙️ First attempt to start listening...');
+        startListening();
         setTimeout(() => {
-          console.log('🎙️ First attempt to start listening...');
-          startListening();
-          
-          // Verify it started and retry if needed
-          setTimeout(() => {
-            if (!isListeningRef.current) {
-              console.log('🎙️ BACKUP attempt to start listening...');
-              startListening();
-            }
-          }, 1000);
-          
-          toast.success("Voice recognition started! Start speaking.");
+          if (!isListeningRef.current) {
+            console.log('🎙️ BACKUP attempt to start listening...');
+            startListening();
+          }
         }, 500);
-      }
-    }, 1000);
+        toast.success("Voice recognition started! Start speaking.");
+      }, 100);
+    }
 
-    // Initial greeting
-    setTimeout(() => {
-      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
-      if (selectedVoiceOption?.type !== 'agent') {
-        const greeting = getPersonalizedGreeting();
-        speak(greeting);
-      }
-    }, 2000);
+    // Immediate initial greeting
+    const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
+    if (selectedVoiceOption?.type !== 'agent') {
+      const greeting = getPersonalizedGreeting();
+      speak(greeting);
+    }
   };
 
   // End conversation
