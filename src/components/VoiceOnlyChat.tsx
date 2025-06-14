@@ -582,7 +582,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-2xl font-bold flex items-center gap-3 text-purple-700">
               <Phone className="h-6 w-6" />
-              {/* Title changed here */}
+              {/* Ensure correct session naming */}
               Your Therapy Session
             </CardTitle>
             <div className="flex items-center gap-2">
@@ -660,7 +660,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     <span role="img" aria-label="music">🎵</span> Test Voice
                   </span>
                 </Button>
-                {/* ElevenLabs reference was here: now fully removed */}
+                {/* No provider/quality reference here */}
               </div>
               <Button
                 onClick={startConversation}
@@ -838,7 +838,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   <span role="img" aria-label="music">🎵</span> Test Voice
                 </span>
               </Button>
-              {/* ElevenLabs reference was here: now fully removed */}
+              {/* No provider/quality label here */}
             </div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-gray-700">Microphone:</label>
@@ -861,7 +861,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                 {isSpeakerEnabled ? "Disable" : "Enable"}
               </Button>
             </div>
-
             {microphonePermission === 'denied' && (
               <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded">
                 <p className="text-yellow-800 text-sm">
