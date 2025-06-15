@@ -786,6 +786,31 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     }
   }, [conversationStarted, isUserSpeaking, isAssistantSpeaking, isProcessingResponse, microphonePermission]);
 
+  // UI: More visible banner for "Listening"
+  // Add a function to show a big, persistent "Listening" badge/banner at the top when listening is active
+  const renderListeningBanner = () => {
+    if (!(isMicrophoneEnabled && microphonePermission === 'granted' && conversationStarted)) return null;
+    if (isAssistantSpeaking || isProcessingResponse) return null;
+    // Only show when listening
+    if (!isUserSpeaking && !isListeningRef.current) return null;
+    return (
+      <div className="fixed top-2 left-1/2 transform -translate-x-1/2 z-50">
+        <div
+          className="bg-green-100 border border-green-400 text-green-800 px-6 py-3 rounded-full shadow-lg shadow-green-300 animate-pulse text-lg font-bold flex gap-2 items-center"
+        >
+          <span
+            className="relative flex h-4 w-4 mr-2"
+            aria-hidden="true"
+          >
+            <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping" />
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-green-600" />
+          </span>
+          Listening...
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center p-4 z-50"
@@ -795,6 +820,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
         background: "linear-gradient(135deg, #f5f3ff 0%, #f9e8fd 50%, #cef2fd 100%)",
       }}
     >
+      {renderListeningBanner()}
       <div
         className="w-full max-w-xl min-h-[60vh] flex flex-col items-center justify-center rounded-3xl border-0 shadow-xl backdrop-blur-md px-0 sm:px-0 animate-fade-in"
         style={{

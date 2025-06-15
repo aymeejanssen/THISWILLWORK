@@ -15,24 +15,28 @@ const AudioLevelIndicator = ({ audioLevel, isActive }: AudioLevelIndicatorProps)
     return (
       <div
         key={index}
-        className={`w-1 rounded-full transition-all duration-75 ${
-          isBarActive 
-            ? 'bg-gradient-to-t from-green-400 to-green-600 shadow-sm' 
-            : 'bg-gray-200'
-        }`}
+        className={`
+          w-1 rounded-full transition-all duration-75
+          ${isBarActive 
+            ? 'bg-gradient-to-t from-green-400 to-green-600 shadow-md animate-pulse'
+            : 'bg-gray-300'
+          }
+        `}
         style={{
-          height: `${8 + index * 3}px`, // Bars get progressively taller
-          opacity: isBarActive ? 1 : 0.3,
+          height: `${12 + index * 5}px`, // Bars are taller for more drama
+          opacity: isActive ? (isBarActive ? 1 : 0.5) : 0.2,
+          transition: 'height 0.14s, opacity 0.14s',
         }}
       />
     );
   });
 
   return (
-    <div className="flex items-end justify-center gap-1 h-12 px-4">
+    <div className="flex items-end justify-center gap-1 h-16 px-4">
       {bars}
     </div>
   );
 };
 
 export default AudioLevelIndicator;
+
