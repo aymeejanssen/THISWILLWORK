@@ -1,10 +1,13 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
+import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star, Mic } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
+import VoiceOnlyChat from '../components/VoiceOnlyChat';
 
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showVoiceChat, setShowVoiceChat] = useState(false);
 
   const handleBeginJourney = () => {
     setShowOnboarding(true);
@@ -12,6 +15,14 @@ const Index = () => {
 
   const handleCloseOnboarding = () => {
     setShowOnboarding(false);
+  };
+
+  const handleStartVoiceChat = () => {
+    setShowVoiceChat(true);
+  };
+
+  const handleCloseVoiceChat = () => {
+    setShowVoiceChat(false);
   };
 
   const reviews = [
@@ -67,16 +78,27 @@ const Index = () => {
             in your language, available 24/7 for judgment-free guidance and emotional healing.
           </p>
 
-          {/* CTA Button - Made Much Larger and More Prominent */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 animate-fade-in">
-            <Button 
-              onClick={handleBeginJourney}
-              size="lg"
-              className="bg-white text-wellness-purple hover:bg-white/90 px-16 py-8 text-2xl font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group transform hover:scale-105 border-4 border-white/30"
-            >
-              Begin My Journey
-              <ArrowRight className="ml-3 h-8 w-8 group-hover:translate-x-2 transition-transform" />
-            </Button>
+          {/* CTA Buttons - Updated Layout */}
+          <div className="flex flex-col items-center gap-6 mb-16 animate-fade-in">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Button 
+                onClick={handleBeginJourney}
+                size="lg"
+                className="bg-white text-wellness-purple hover:bg-white/90 px-12 py-8 text-xl font-bold rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group transform hover:scale-105 border-4 border-white/30"
+              >
+                Begin My Journey
+                <ArrowRight className="ml-3 h-7 w-7 group-hover:translate-x-2 transition-transform" />
+              </Button>
+              <Button 
+                onClick={handleStartVoiceChat}
+                size="lg"
+                variant="outline"
+                className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm px-12 py-8 text-xl font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group transform hover:scale-105 border-2 border-white/50"
+              >
+                <Mic className="mr-3 h-7 w-7" />
+                Live Voice Chat
+              </Button>
+            </div>
             <div className="flex items-center gap-2 text-white/80">
               <Shield className="h-5 w-5" />
               <span className="text-base">Private & Secure</span>
@@ -185,6 +207,11 @@ const Index = () => {
       {/* Onboarding Modal */}
       {showOnboarding && (
         <OnboardingWrapper onClose={handleCloseOnboarding} />
+      )}
+
+      {/* Voice Chat Modal */}
+      {showVoiceChat && (
+        <VoiceOnlyChat onClose={handleCloseVoiceChat} />
       )}
     </div>
   );
