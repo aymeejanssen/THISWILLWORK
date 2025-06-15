@@ -278,14 +278,23 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     console.log('✅ Speech recognition setup complete');
   }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission, stopListening]);
 
-  // Start listening with improved reliability
+  // PATCH 1: Always use default for context/struggles
+  const safeStruggles = userProfile?.currentStruggles && Array.isArray(userProfile.currentStruggles)
+    ? userProfile.currentStruggles
+    : [];
+
+  // FULL DUPLEX PATCH: UseRef for whether AI is speaking, prevent auto-stop on user input
+  const aiSpeakingRef = useRef(false);
+
+  // PATCH: When speech recognition gets results and the user interrupts,
+  // stop any AI playback and ignore "wait for AI to finish" logic
+
+  // Listen always runs if not manually muted or session ended
   const startListening = useCallback(() => {
     console.log("🎙️ startListening called - checking conditions...", {
       hasRecognition: !!recognitionRef.current,
       isListening: isListeningRef.current,
-      isAssistantSpeaking,
-      isProcessingResponse,
-      micPermission: microphonePermission,
+      microphonePermission,
       conversationStarted,
       isMicrophoneEnabled
     });
@@ -302,11 +311,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
       return;
     }
 
-    if (isAssistantSpeaking || isProcessingResponse) {
-      console.log("❌ Assistant speaking or processing, skipping");
-      return;
-    }
-
     if (microphonePermission !== 'granted') {
       console.log("❌ No microphone permission");
       return;
@@ -320,23 +324,153 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     try {
       console.log("🎙️ ACTUALLY starting speech recognition...");
       recognitionRef.current.start();
-      console.log("🎙️ Speech recognition start() called successfully");
+      setIsUserSpeaking(true);
+      setStatusBanner("Listening: please speak now.");
     } catch (error) {
       console.error("🎙️ Start listening error:", error);
-      // If already started, just continue
-      if (error.name === 'InvalidStateError') {
-        console.log("🎙️ Recognition already running");
-        isListeningRef.current = true;
-        setIsUserSpeaking(true);
-      } else {
-        // Retry after a short delay for other errors
-        restartTimeoutRef.current = setTimeout(() => {
-          console.log("🎙️ Retrying start listening after error...");
-          startListening();
-        }, 1000);
+      // Retry after a short delay for other errors
+      restartTimeoutRef.current = setTimeout(() => startListening(), 1000);
+    }
+  }, [conversationStarted, isMicrophoneEnabled, microphonePermission, setupSpeechRecognition]);
+
+  // PATCH: When user starts speaking, force AI to stop talking
+  useEffect(() => {
+    if (isUserSpeaking) {
+      if (isAssistantSpeaking || aiSpeakingRef.current) {
+        // Stop AI audio playback immediately
+        voiceService.stopCurrentAudio();
+        setIsAssistantSpeaking(false);
+        aiSpeakingRef.current = false;
       }
     }
-  }, [isAssistantSpeaking, isProcessingResponse, microphonePermission, conversationStarted, isMicrophoneEnabled, setupSpeechRecognition]);
+  }, [isUserSpeaking, isAssistantSpeaking]);
+
+  // PATCH: When AI starts speaking, set ref (used for above)
+  useEffect(() => {
+    aiSpeakingRef.current = isAssistantSpeaking;
+  }, [isAssistantSpeaking]);
+
+  // PATCH: Always keep listening turned on as long as session is in progress
+  useEffect(() => {
+    if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
+      startListening();
+    }
+    // Also: if user unmutes mid-session, mic resumes
+  }, [conversationStarted, isMicrophoneEnabled, microphonePermission, startListening]);
+
+  // PATCH: Main response generation
+  const generateAIResponse = async (userMessage: string) => {
+    if (!userMessage.trim() || isProcessingResponse) return;
+    setIsProcessingResponse(true);
+    console.log('🤖 Generating response for:', userMessage);
+
+    try {
+      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
+      if (selectedVoiceOption?.type === 'agent') {
+        console.log('🤖 Using ElevenLabs agent:', selectedVoice);
+        const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, userMessage);
+        setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
+      } else {
+        const conversationContext = [
+          ...conversationHistory,
+          `User: ${userMessage}`
+        ].join('\n');
+
+        // PATCH: Always default focus area
+        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${(safeStruggles.length ? safeStruggles.join(', ') : 'general wellness')}. Respond naturally as if speaking aloud.`;
+
+        // ADDED: log before calling backend
+        console.log('[VoiceOnlyChat] Invoking backend AI for:', userMessage, { conversationContext, systemPrompt });
+
+        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
+          body: {
+            prompt: userMessage,
+            context: conversationContext,
+            systemPrompt,
+            maxTokens: 150
+          }
+        });
+
+        // ADDED: log exact error and data
+        if (error) {
+          console.error('🤖 AI response error:', error);
+          toast.error(`AI backend error: ${error.message || error}`);
+        }
+
+        if (!error && data?.response) {
+          const aiResponse = data.response;
+          console.log('🤖 AI response:', aiResponse);
+          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
+          await speak(aiResponse);
+        } else {
+          // If backend fails or returns no response, fallback once
+          console.warn('[VoiceOnlyChat] No AI response, using fallback.');
+          const fallbackResponse = "Sorry, I didn't catch that. Could you say it another way?";
+          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${fallbackResponse}`]);
+          await speak(fallbackResponse);
+        }
+      }
+    } catch (error) {
+      console.error('🤖 AI error:', error);
+      toast.error("AI error: " + (error?.message || error));
+      const fallbackResponse = "I'm here to listen. Please continue sharing what's on your mind.";
+      await speak(fallbackResponse);
+    } finally {
+      setIsProcessingResponse(false);
+      setLiveTranscript('');
+      setTranscript('');
+    }
+  };
+
+  // PATCH: speak always sets flags and triggers listening afterward
+  const speak = async (text: string) => {
+    if (!isSpeakerEnabled || !text.trim()) return;
+    setIsAssistantSpeaking(true);
+    aiSpeakingRef.current = true;
+    try {
+      await voiceService.speak(text, selectedVoice);
+    } catch (error) {
+      toast.error("Could not play response audio.");
+    } finally {
+      setIsAssistantSpeaking(false);
+      aiSpeakingRef.current = false;
+      // Immediately resume listening
+      setTimeout(() => startListening(), 300);
+    }
+  };
+
+  // PATCH: speech results handler always allows interruption
+  useEffect(() => {
+    if (!recognitionRef.current) return;
+    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      setLiveTranscript(interimTranscript + finalTranscript);
+      if (finalTranscript.trim()) {
+        // Immediately process user input, force stop AI if active
+        if (isAssistantSpeaking || aiSpeakingRef.current) {
+          voiceService.stopCurrentAudio();
+          setIsAssistantSpeaking(false);
+          aiSpeakingRef.current = false;
+        }
+        setTranscript(finalTranscript);
+        stopListening();
+        setTimeout(() => {
+          if (finalTranscript.trim() && !isProcessingResponse) {
+            generateAIResponse(finalTranscript.trim());
+          }
+        }, 200);
+      }
+    };
+  }, [isProcessingResponse, generateAIResponse, stopListening, isAssistantSpeaking]);
 
   // Handle VoiceInput transcript
   const handleVoiceInputTranscript = async (transcript: string) => {
@@ -356,7 +490,7 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
           `User: ${transcript}`
         ].join('\n');
 
-        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
+        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${safeStruggles.length ? safeStruggles.join(', ') : 'general wellness'}. Respond naturally as if speaking aloud.`;
 
         const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
           body: {
@@ -383,98 +517,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     } finally {
       setIsProcessingResponse(false);
       setTranscript('');
-    }
-  };
-
-  // Generate AI response
-  const generateAIResponse = async (userMessage: string) => {
-    if (!userMessage.trim() || isProcessingResponse) return;
-    
-    setIsProcessingResponse(true);
-    console.log('🤖 Generating response for:', userMessage);
-
-    try {
-      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
-      
-      if (selectedVoiceOption?.type === 'agent') {
-        console.log('🤖 Using ElevenLabs agent:', selectedVoice);
-        const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, userMessage);
-        setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
-      } else {
-        const conversationContext = [
-          ...conversationHistory,
-          `User: ${userMessage}`
-        ].join('\n');
-
-        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
-
-        // ADDED: log before calling backend
-        console.log('[VoiceOnlyChat] Invoking backend AI for:', userMessage, { conversationContext, systemPrompt });
-
-        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-          body: {
-            prompt: userMessage,
-            context: conversationContext,
-            systemPrompt: systemPrompt,
-            maxTokens: 150
-          }
-        });
-
-        // ADDED: log exact error and data
-        if (error) {
-          console.error('🤖 AI response error:', error);
-          toast.error(`AI backend error: ${error.message || error}`);
-        }
-
-        if (!error && data?.response) {
-          const aiResponse = data.response;
-          console.log('🤖 AI response:', aiResponse);
-          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
-          await speak(aiResponse);
-        } else {
-          // If backend fails or returns no response, fallback once
-          console.warn('[VoiceOnlyChat] No AI response, using fallback.');
-          const fallbackResponse = "Sorry, I didn't catch that. Could you say it another way?";
-          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${fallbackResponse}`]);
-          await speak(fallbackResponse);
-        }
-      }
-      
-    } catch (error) {
-      console.error('🤖 AI error:', error);
-      toast.error("AI error: " + (error?.message || error));
-      const fallbackResponse = "I'm here to listen. Please continue sharing what's on your mind.";
-      await speak(fallbackResponse);
-    } finally {
-      setIsProcessingResponse(false);
-      // Clear transcript after processing
-      setLiveTranscript('');
-      setTranscript('');
-    }
-  };
-
-  // Speak function
-  const speak = async (text: string) => {
-    if (!isSpeakerEnabled || !text.trim()) return;
-    
-    console.log('🔊 Speaking:', text.substring(0, 50) + '...');
-    setIsAssistantSpeaking(true);
-    
-    try {
-      await voiceService.speak(text, selectedVoice);
-      console.log('🔊 Finished speaking');
-    } catch (error) {
-      console.error('🔊 Speech error:', error);
-      toast.error("Could not play response audio.");
-    } finally {
-      setIsAssistantSpeaking(false);
-      
-      // Restart listening after speaking
-      if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
-        setTimeout(() => {
-          startListening();
-        }, 500);
-      }
     }
   };
 
@@ -882,30 +924,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     onListeningChange={setIsVoiceInputListening}
                   />
                 </div>
-                {/* Transcript textarea and live transcript are now hidden */}
-                {/* <Textarea
-                  value={transcript}
-                  placeholder="Recognized transcript will appear here."
-                  readOnly
-                  className="min-h-[70px] bg-gray-50 border-2 border-gray-200 text-sm mb-2"
-                /> */}
-                {/* <div className="mt-4 w-full">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    🎙️ Live Speech Recognition:
-                  </label>
-                  <Textarea
-                    value={liveTranscript}
-                    placeholder="Your speech will appear here in real-time..."
-                    readOnly
-                    className="min-h-[100px] bg-gray-50 border-2 border-gray-200 text-sm"
-                  />
-                </div> */}
-                {/* State descriptions are now hidden or replaced */}
-                {/* <div className="mb-4 text-xs text-gray-500 italic">
-                  {isVoiceInputListening
-                    ? "Listening... Speak your message."
-                    : "Click 'Speak Answer' to start voice input."}
-                </div> */}
               </div>
               {/* Conversation status and controls remain */}
               <div className="mt-6 mb-4">
@@ -913,15 +931,40 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                   audioLevel={audioLevel} 
                   isActive={isMicrophoneEnabled && microphonePermission === 'granted'} 
                 />
-                {/* ... keep existing status and indicators ... */}
                 <div className="mt-2 text-xs text-gray-500">
                   Audio Level: {Math.round(audioLevel)}% | Mic: {isMicrophoneEnabled ? 'On' : 'Off'}
                 </div>
               </div>
               {/* Conversation controls */}
               <div className="flex items-center justify-around w-full p-4 border-t border-gray-200">
-                {/* ... keep existing controls ... */}
-                {/* ... Button row unchanged ... */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleMicrophone}
+                  disabled={microphonePermission === 'denied'}
+                  className="flex items-center gap-2"
+                >
+                  {isMicrophoneEnabled ? <Mic /> : <MicOff />}
+                  {isMicrophoneEnabled ? "Mute Mic" : "Unmute Mic"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleSpeaker}
+                  className="flex items-center gap-2"
+                >
+                  {isSpeakerEnabled ? <Volume2 /> : <VolumeX />}
+                  {isSpeakerEnabled ? "Mute Speaker" : "Unmute Speaker"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={endConversation}
+                  className="flex items-center gap-2"
+                >
+                  <PhoneOff />
+                  End Call
+                </Button>
               </div>
             </div>
           )}
