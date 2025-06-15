@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Shield, Heart, AlertTriangle, Brain, Sparkles } from 'lucide-react';
+import { Shield, Sparkles } from 'lucide-react';
 
 interface ConsentModalProps {
   isOpen: boolean;
@@ -35,119 +35,95 @@ const ConsentModal = ({ isOpen, onConsent, onDecline }: ConsentModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-xl max-h-[80vh] p-0 bg-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Sparkles className="h-6 w-6 text-purple-600" />
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold mt-2">
+            <Sparkles className="h-6 w-6 text-purple-500" />
             Unlock Your Personalized AI Coach
           </DialogTitle>
         </DialogHeader>
-        
-        <ScrollArea className="max-h-96">
+
+        <ScrollArea className="max-h-96 px-6 py-4">
           <div className="space-y-6">
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Brain className="h-5 w-5 text-purple-600 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-purple-800">Why We Need Your Data</h4>
-                  <p className="text-sm text-purple-700 mt-1">
-                    Your AI coach needs to remember your stories, struggles, and progress to provide truly personalized guidance. 
-                    The more your AI understands you, the better support it can offer.
-                  </p>
-                </div>
-              </div>
+            {/* Minimal intro */}
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="h-5 w-5 text-purple-400" />
+              <span className="font-medium text-gray-700 text-base">We care about your privacy and personalized experience.</span>
             </div>
 
+            {/* Consents - organized, minimal card for each */}
             <div className="space-y-4">
-              <div className="flex items-start gap-3 p-4 border border-blue-200 rounded-lg bg-blue-50">
+
+              <div className="flex gap-3 p-4 rounded-lg bg-gray-50 border border-gray-200 items-start">
                 <Checkbox 
                   checked={consents.dataProcessing}
                   onCheckedChange={(checked) => handleConsentChange('dataProcessing', !!checked)}
                   className="mt-1"
                 />
                 <div>
-                  <h4 className="font-semibold text-blue-900">Remember Your Journey (Required)</h4>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Allow your AI coach to store and remember your assessment responses, personal concerns, and emotional patterns. 
-                    This helps build a complete picture of your wellness journey so your coach can provide increasingly personalized support.
-                  </p>
-                  <div className="mt-2 text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                    ✨ <strong>Benefit:</strong> Your AI remembers past conversations and can reference your progress over time
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900 text-base">Remember Your Journey</h4>
+                    <span className="text-xs bg-gray-200 text-gray-600 rounded px-2 py-0.5 ml-1 font-medium">Required</span>
                   </div>
+                  <p className="text-sm text-gray-700 mt-1">Let us save your answers and progress so your AI coach can support you better.</p>
+                  <div className="text-xs text-gray-500 mt-1">AI will remember your journey and offer context over time.</div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 border border-purple-200 rounded-lg bg-purple-50">
+              <div className="flex gap-3 p-4 rounded-lg bg-gray-50 border border-gray-200 items-start">
                 <Checkbox 
                   checked={consents.aiAnalysis}
                   onCheckedChange={(checked) => handleConsentChange('aiAnalysis', !!checked)}
                   className="mt-1"
                 />
                 <div>
-                  <h4 className="font-semibold text-purple-900">Smart Insights & Advice (Required)</h4>
-                  <p className="text-sm text-purple-700 mt-1">
-                    Enable your AI to analyze your responses and generate personalized insights, actionable recommendations, 
-                    and tailored coaching conversations that evolve with your needs.
-                  </p>
-                  <div className="mt-2 text-xs text-purple-600 bg-purple-100 p-2 rounded">
-                    ✨ <strong>Benefit:</strong> Get advice that's specifically crafted for your unique situation and goals
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900 text-base">Smart Insights & Advice</h4>
+                    <span className="text-xs bg-gray-200 text-gray-600 rounded px-2 py-0.5 ml-1 font-medium">Required</span>
                   </div>
+                  <p className="text-sm text-gray-700 mt-1">Allow your AI to analyze your responses and personalize its support.</p>
+                  <div className="text-xs text-gray-500 mt-1">You'll receive advice tailored to your needs.</div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 border border-green-200 rounded-lg bg-green-50">
+              {/* Divide optional section */}
+              <div className="pt-1 pb-1 text-xs text-gray-400 font-medium tracking-wide uppercase">Optional</div>
+              
+              <div className="flex gap-3 p-4 rounded-lg bg-gray-50 border border-gray-200 items-start">
                 <Checkbox 
                   checked={consents.voiceRecording}
                   onCheckedChange={(checked) => handleConsentChange('voiceRecording', !!checked)}
                   className="mt-1"
                 />
                 <div>
-                  <h4 className="font-semibold text-green-900">Natural Voice Conversations (Optional)</h4>
-                  <p className="text-sm text-green-700 mt-1">
-                    Have natural, flowing conversations with your AI coach using your voice. Voice data is processed 
-                    in real-time for speech recognition only - no recordings are permanently stored.
-                  </p>
-                  <div className="mt-2 text-xs text-green-600 bg-green-100 p-2 rounded">
-                    ✨ <strong>Benefit:</strong> More natural, therapy-like conversations that feel personal and engaging
-                  </div>
+                  <h4 className="font-semibold text-gray-900 text-base">Voice Conversations</h4>
+                  <p className="text-sm text-gray-700 mt-1">Talk to your AI coach using voice (audio never saved).</p>
+                  <div className="text-xs text-gray-500 mt-1">Enjoy natural spoken conversations.</div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+              <div className="flex gap-3 p-4 rounded-lg bg-gray-50 border border-gray-200 items-start">
                 <Checkbox 
                   checked={consents.analytics}
                   onCheckedChange={(checked) => handleConsentChange('analytics', !!checked)}
                   className="mt-1"
                 />
                 <div>
-                  <h4 className="font-semibold text-gray-900">Improve Your Experience (Optional)</h4>
-                  <p className="text-sm text-gray-700 mt-1">
-                    Help us understand how you use the app so we can make your AI coach even better at supporting 
-                    people with similar challenges. All data is anonymous.
-                  </p>
-                  <div className="mt-2 text-xs text-gray-600 bg-gray-100 p-2 rounded">
-                    ✨ <strong>Benefit:</strong> Contribute to making AI coaching more effective for everyone
-                  </div>
+                  <h4 className="font-semibold text-gray-900 text-base">Anonymous Analytics</h4>
+                  <p className="text-sm text-gray-700 mt-1">Help us improve the app anonymously.</p>
+                  <div className="text-xs text-gray-500 mt-1">Your use helps AI coaching support others.</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Heart className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-blue-800">You're Always in Control</h4>
-                  <p className="text-sm text-blue-700 mt-1">
-                    You can change your mind anytime. Withdraw consent, delete your data, or download everything you've shared. 
-                    Your privacy and control matter to us. Contact privacy@mynde.ase for any requests.
-                  </p>
-                </div>
-              </div>
+            {/* Control info at the bottom */}
+            <div className="border-t pt-4 mt-4">
+              <span className="block text-xs text-gray-400">You can change your choices or delete your data anytime.</span>
             </div>
           </div>
         </ScrollArea>
 
-        <div className="flex gap-3 pt-4">
+        <div className="flex gap-3 p-6 pt-0">
           <Button 
             onClick={onDecline} 
             variant="outline" 
@@ -158,7 +134,7 @@ const ConsentModal = ({ isOpen, onConsent, onDecline }: ConsentModalProps) => {
           <Button 
             onClick={() => onConsent(consents)}
             disabled={!canProceed}
-            className="flex-1 bg-purple-600 hover:bg-purple-700"
+            className="flex-1 bg-purple-500 hover:bg-purple-600"
           >
             Start My AI Coaching Journey
           </Button>
