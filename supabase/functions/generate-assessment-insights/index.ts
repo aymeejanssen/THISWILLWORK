@@ -10,10 +10,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('--- generate-assessment-insights function started ---');
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request for CORS preflight.');
     return new Response(null, { headers: corsHeaders });
   }
+  console.log('Request received, method:', req.method);
 
   try {
     const { responses, primaryConcern } = await req.json();
@@ -22,7 +25,7 @@ serve(async (req) => {
     
     // Check if API key is available
     if (!openAIApiKey) {
-      console.error('OpenAI API key not found in environment variables');
+      console.error('OpenAI API key not found in environment variables. Please set OPENAI_API_KEY secret in Supabase project settings.');
       throw new Error('OpenAI API key not configured');
     }
 
@@ -100,6 +103,8 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text or markdown for
       }),
     });
 
+    console.log(`OpenAI response status: ${response.status}`);
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`OpenAI API error: ${response.status} ${response.statusText}`, errorText);
@@ -129,11 +134,12 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text or markdown for
     let parsedResponse;
     try {
       parsedResponse = JSON.parse(aiResponse);
-      console.log('Successfully parsed AI response:', parsedResponse);
+      console.log('Successfully parsed AI response.');
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
       console.error('Cleaned AI response that failed to parse:', aiResponse);
       
+      console.log('Using fallback response due to parsing error.');
       // Fallback response if parsing fails
       parsedResponse = {
         insights: [{
@@ -150,12 +156,13 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text or markdown for
       };
     }
 
+    console.log('--- generate-assessment-insights function finished successfully ---');
     return new Response(JSON.stringify(parsedResponse), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in generate-assessment-insights function:', error);
+    console.error('--- Error in generate-assessment-insights function ---:', error);
     return new Response(JSON.stringify({ 
       error: 'Failed to generate insights',
       message: error.message 
