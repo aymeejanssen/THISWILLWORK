@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mic, PhoneOff, Settings, Home, StopCircle, Volume2, VolumeX } from 'lucide-react';
+import { Mic, PhoneOff, Settings, Home, StopCircle, Volume2, VolumeX, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
 import ListeningIndicator from "./ListeningIndicator";
 
