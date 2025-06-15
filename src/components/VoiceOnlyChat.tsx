@@ -61,7 +61,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
-  const [audioLevel, setAudioLevel] = useState(0);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [isVoiceInputListening, setIsVoiceInputListening] = useState(false);
   const [startErrorMsg, setStartErrorMsg] = useState<string | null>(null);
@@ -79,84 +78,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
   const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Add this ref for cleanup guard
   const audioContextCleaningRef = useRef(false);
-
-  // Audio level monitoring (changed: ensure audioContext is reused and not closed prematurely)
-  const startAudioLevelMonitoring = useCallback(async () => {
-    console.log('🎤 Starting audio monitoring...');
-    // Do NOT create a new AudioContext if we have one
-    if (!audioContextRef.current) {
-      audioContextRef.current = new AudioContext({ sampleRate: 44100 });
-      console.log('[Audio] Created AudioContext for monitoring');
-    } else {
-      console.log('[Audio] AudioContext already exists');
-    }
-    if (!mediaStreamRef.current) {
-      console.error('❌ No media stream for monitoring');
-      return;
-    }
-    try {
-      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
-      const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
-
-      audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
-      audioAnalyzerRef.current.fftSize = 256;
-      audioAnalyzerRef.current.smoothingTimeConstant = 0.3;
-
-      source.connect(audioAnalyzerRef.current);
-
-      const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
-
-      const updateLevel = () => {
-        if (!audioAnalyzerRef.current || !conversationStarted) return;
-
-        audioAnalyzerRef.current.getByteFrequencyData(dataArray);
-        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        const level = Math.min(100, (average / 128) * 100);
-
-        setAudioLevel(level);
-
-        if (conversationStarted) {
-          animationFrameRef.current = requestAnimationFrame(updateLevel);
-        }
-      };
-      updateLevel();
-      console.log('✅ Audio monitoring started');
-    } catch (error) {
-      console.error('❌ Audio monitoring error:', error);
-    }
-  }, [conversationStarted]);
-
-  // Request microphone permission (no changes to AudioContext logic here)
-  const requestMicrophonePermission = async () => {
-    try {
-      console.log('🎤 Requesting microphone...');
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          sampleRate: 44100,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        }
-      });
-      
-      mediaStreamRef.current = stream;
-      setMicrophonePermission('granted');
-      console.log('✅ Microphone granted');
-      
-      await startAudioLevelMonitoring();
-      toast.success("Microphone access granted!");
-      return true;
-    } catch (error) {
-      console.error('❌ Microphone denied:', error);
-      setMicrophonePermission('denied');
-      toast.error("Microphone access required for voice conversation.");
-      return false;
-    }
-  };
 
   // Stop listening function
   const stopListening = useCallback(() => {
@@ -600,7 +521,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     setLiveTranscript('');
     setConversationHistory([]);
     setIsProcessingResponse(false);
-    setAudioLevel(0);
     toast.message("Conversation ended.");
   };
 
@@ -811,6 +731,34 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
     );
   };
 
+  // Request microphone permission (no changes to AudioContext logic here)
+  const requestMicrophonePermission = async () => {
+    try {
+      console.log('🎤 Requesting microphone...');
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          sampleRate: 44100,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      
+      mediaStreamRef.current = stream;
+      setMicrophonePermission('granted');
+      console.log('✅ Microphone granted');
+      
+      toast.success("Microphone access granted!");
+      return true;
+    } catch (error) {
+      console.error('❌ Microphone denied:', error);
+      setMicrophonePermission('denied');
+      toast.error("Microphone access required for voice conversation.");
+      return false;
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center p-4 z-50"
@@ -949,16 +897,6 @@ const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
                     isListening={isVoiceInputListening}
                     onListeningChange={setIsVoiceInputListening}
                   />
-                </div>
-              </div>
-              {/* Conversation status and controls remain */}
-              <div className="mt-6 mb-4">
-                <AudioLevelIndicator 
-                  audioLevel={audioLevel} 
-                  isActive={isMicrophoneEnabled && microphonePermission === 'granted'} 
-                />
-                <div className="mt-2 text-xs text-gray-500">
-                  Audio Level: {Math.round(audioLevel)}% | Mic: {isMicrophoneEnabled ? 'On' : 'Off'}
                 </div>
               </div>
               {/* Conversation controls */}
