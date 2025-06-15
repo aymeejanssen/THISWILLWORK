@@ -19,7 +19,20 @@ serve(async (req) => {
   console.log('Request received, method:', req.method);
 
   try {
-    const { responses, primaryConcern } = await req.json();
+    const payload = await req.json();
+    console.log('Received payload:', payload);
+
+    if (!payload) {
+      throw new Error("Request payload is missing.");
+    }
+
+    const { responses, primaryConcern } = payload;
+    
+    // Defensive check
+    if (typeof responses !== 'object' || responses === null) {
+      console.error('Invalid "responses" data received:', responses);
+      throw new Error('Received invalid or missing "responses" data.');
+    }
 
     console.log('Generating insights for:', { primaryConcern, responseCount: Object.keys(responses).length });
     
