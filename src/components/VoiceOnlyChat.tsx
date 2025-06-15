@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -170,6 +169,7 @@ const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
 
   const connectWS = useCallback(() => {
     if (wsRef.current) return;
+    console.log('Attempting to connect to WebSocket at:', wsUrl);
     setErrorMsg(null);
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
