@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,8 @@ interface MessageEventData {
   [key: string]: any;
 }
 
-const wsUrl = "wss://pjwwdktyzmpldfjfnehe.functions.supabase.co/functions/v1/ai-voice-realtime";
+// Update WebSocket URL to use the correct project ID
+const wsUrl = "wss://pjwwdktyzmpldfjfnehe.functions.supabase.co/ai-voice-realtime";
 
 interface VoiceOnlyChatProps {
   onClose: () => void;
@@ -141,6 +143,8 @@ const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
       const processor = audioContext.createScriptProcessor(4096, 1, 1);
 
       processor.onaudioprocess = (event) => {
+        if (!isMicrophoneEnabled) return;
+        
         const inbuf = event.inputBuffer.getChannelData(0);
         const pcm16 = new Int16Array(inbuf.length);
         for (let i = 0; i < inbuf.length; i++) {
@@ -165,56 +169,75 @@ const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
       toast.error("Microphone access failed: " + (e?.message || e));
       endConversation();
     }
-  }, []);
+  }, [isMicrophoneEnabled]);
 
   const connectWS = useCallback(() => {
     if (wsRef.current) return;
     console.log('Attempting to connect to WebSocket at:', wsUrl);
     setErrorMsg(null);
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    
+    try {
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-    ws.onopen = () => {
-      setConnected(true);
-      if (isMicrophoneEnabled) {
+      ws.onopen = () => {
+        console.log('WebSocket connected successfully');
+        setConnected(true);
+        setErrorMsg(null);
+        if (isMicrophoneEnabled) {
           startMicStream();
-      }
-    };
+        }
+      };
 
-    ws.onmessage = (event) => {
-      try {
-        const data: MessageEventData = JSON.parse(event.data);
-        if (data.type === "error" && data.message) {
-          setErrorMsg("AI Service error: " + data.message);
-          return;
+      ws.onmessage = (event) => {
+        try {
+          const data: MessageEventData = JSON.parse(event.data);
+          console.log('Received WebSocket message:', data.type);
+          
+          if (data.type === "error" && data.message) {
+            setErrorMsg("AI Service error: " + data.message);
+            return;
+          }
+          if (data.type === "proxy.connected") {
+            console.log("Proxy connection established");
+            return;
+          }
+          if (data.type === 'response.audio.delta' && data.delta) {
+            audioQueue.current.push(base64ToUint8(data.delta));
+            playAudioQueue();
+          }
+          if (data.type === 'response.audio_transcript.delta' && data.delta) {
+            setReplyText((prev) => prev + data.delta);
+          }
+          if (data.type === 'response.audio_transcript.done' && data.transcript) {
+            setReplyText((_) => data.transcript);
+          }
+        } catch (e) {
+          console.error('Error parsing WebSocket message:', e);
         }
-        if (data.type === 'response.audio.delta' && data.delta) {
-          audioQueue.current.push(base64ToUint8(data.delta));
-          playAudioQueue();
-        }
-        if (data.type === 'response.audio_transcript.delta' && data.delta) {
-          setReplyText((prev) => prev + data.delta);
-        }
-        if (data.type === 'response.audio_transcript.done' && data.transcript) {
-          setReplyText((_) => data.transcript);
-        }
-      } catch (e) {
-        // non-JSON data
-      }
-    };
+      };
 
-    ws.onclose = () => {
-      setConnected(false);
-      stopMicStream();
-      wsRef.current = null;
-    };
+      ws.onclose = (event) => {
+        console.log('WebSocket closed:', event.code, event.reason);
+        setConnected(false);
+        stopMicStream();
+        wsRef.current = null;
+        if (event.code !== 1000) {
+          setErrorMsg("Connection lost. Please try again.");
+        }
+      };
 
-    ws.onerror = (ev) => {
-      setErrorMsg("Connection to AI service failed.");
-      setConnected(false);
-      stopMicStream();
-      wsRef.current = null;
-    };
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setErrorMsg("Connection to AI service failed. Please check your internet connection and try again.");
+        setConnected(false);
+        stopMicStream();
+        wsRef.current = null;
+      };
+    } catch (error) {
+      console.error('Failed to create WebSocket:', error);
+      setErrorMsg("Failed to establish connection. Please try again.");
+    }
   }, [isMicrophoneEnabled, playAudioQueue, startMicStream, stopMicStream]);
 
   const startConversation = async () => {
@@ -222,22 +245,31 @@ const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
     setErrorMsg(null);
     setReplyText('');
     
-    // Check for mic permission
+    // Check for mic permission first
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop()); // We only wanted to check permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // We only wanted to check permission
     } catch (e) {
-        toast.error("Microphone access is required to start the call.");
-        setErrorMsg("Please grant microphone access and try again.");
-        setIsConnecting(false);
-        return;
+      toast.error("Microphone access is required to start the call.");
+      setErrorMsg("Please grant microphone access and try again.");
+      setIsConnecting(false);
+      return;
     }
 
+    // Connect to WebSocket
     connectWS();
-    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Wait a bit for connection to establish
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     setIsConnecting(false);
-    setReplyText("Hello! I'm your AI wellness companion. I'm listening.");
-    setIsCallOngoing(true);
+    
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      setReplyText("Hello! I'm your AI wellness companion. I'm listening.");
+      setIsCallOngoing(true);
+    } else {
+      setErrorMsg("Failed to connect to AI service. Please try again.");
+    }
   };
 
   const endConversation = useCallback(() => {
@@ -247,6 +279,7 @@ const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
     setIsCallOngoing(false);
     setConnected(false);
     setReplyText('');
+    setErrorMsg(null);
     toast.message("Conversation ended.");
   }, [stopMicStream, safeCloseAudioContext]);
 
