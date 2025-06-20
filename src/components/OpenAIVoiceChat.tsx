@@ -19,7 +19,7 @@ const OpenAIVoiceChat = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const sourceRef = useRef<MediaStreamSourceNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const silenceStartRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
