@@ -163,7 +163,7 @@ const VoiceOnlyChat = () => {
       console.log('🔄 Step 1: OpenAI Whisper transcription...');
       setCurrentStatus('Transcribing your speech...');
 
-      // Step 1: OpenAI Whisper STT
+      // Step 1: OpenAI Whisper STT - Official API endpoint
       const sttForm = new FormData();
       sttForm.append("file", audioFile);
       sttForm.append("model", "whisper-1");
@@ -187,7 +187,7 @@ const VoiceOnlyChat = () => {
       console.log('🔄 Step 2: OpenAI GPT-4o response...');
       setCurrentStatus('Getting AI response...');
 
-      // Step 2: OpenAI GPT-4o
+      // Step 2: OpenAI GPT-4o - Official API endpoint
       const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -229,7 +229,7 @@ const VoiceOnlyChat = () => {
       console.log('🔄 Step 3: OpenAI TTS conversion...');
       setCurrentStatus('Converting to speech...');
 
-      // Step 3: OpenAI TTS
+      // Step 3: OpenAI TTS - Official API endpoint
       const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
         headers: {
@@ -328,10 +328,10 @@ const VoiceOnlyChat = () => {
             </Button>
             <div className="flex items-center space-x-2">
               <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
-                <span className="text-white text-xs">📞</span>
+                <span className="text-white text-xs">🤖</span>
               </div>
               <CardTitle className="text-xl font-bold text-purple-700">
-                Your Therapy Session
+                OpenAI Voice Chat
               </CardTitle>
             </div>
             <Button
@@ -350,7 +350,7 @@ const VoiceOnlyChat = () => {
               {/* Voice Selection */}
               <div className="space-y-3">
                 <h3 className="text-center text-lg font-medium text-gray-800">
-                  Choose Your AI Voice
+                  Choose Your OpenAI Voice
                 </h3>
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                   <SelectTrigger className="w-full">
@@ -375,7 +375,7 @@ const VoiceOnlyChat = () => {
                   onClick={startSession}
                   className="w-full py-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-lg font-semibold rounded-xl"
                 >
-                  Tap to begin your session
+                  Start OpenAI Chat
                 </Button>
                 <p className="text-sm text-gray-600">
                   Powered by OpenAI • Whisper + GPT-4o + TTS
@@ -422,7 +422,7 @@ const VoiceOnlyChat = () => {
               
               {lastResponse && (
                 <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-green-600 font-medium">AI responded:</p>
+                  <p className="text-xs text-green-600 font-medium">OpenAI responded:</p>
                   <p className="text-sm text-green-800">{lastResponse}</p>
                 </div>
               )}
@@ -454,7 +454,7 @@ const VoiceOnlyChat = () => {
                     setSessionStarted(false);
                     setLastTranscript('');
                     setLastResponse('');
-                    setCurrentStatus('Choose your AI voice and tap to begin');
+                    setCurrentStatus('Choose your OpenAI voice and tap to begin');
                   }}
                   className="text-red-600"
                 >
