@@ -1,881 +1,473 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+
+import React, { useState, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff, Settings, Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Mic, MicOff, Volume2, VolumeX, Settings, Home } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '../integrations/supabase/client';
-import { voiceService, allVoices } from '../services/voiceService';
-import AudioLevelIndicator from './AudioLevelIndicator';
-import VoiceInput from './VoiceInput';
-import ListeningIndicator from "./ListeningIndicator";
+import { useNavigate } from 'react-router-dom';
 
-// TypeScript declarations for Speech Recognition API
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
-
-interface SpeechRecognitionEvent extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionErrorEvent extends Event {
-  error: string;
-}
-
-interface VoiceOnlyChatProps {
-  onClose: () => void;
-  userProfile?: {
-    name?: string;
-    preferredLanguage?: string;
-    currentStruggles?: string[];
-    culturalBackground?: string;
-  };
-}
-
-const limitedVoices = [
-  // Choose top voices: 3 ElevenLabs voices and 1 Google (change as needed)
-  // You can update these to reflect your actual favorite voices!
-  ...allVoices.filter(v => v.provider === 'elevenlabs' && v.type === 'tts').slice(0, 3),
-  ...allVoices.filter(v => v.provider === 'google').slice(0, 1)
+// OpenAI TTS voices only
+const openAIVoices = [
+  { id: 'alloy', name: 'Alloy', description: 'Balanced, natural voice' },
+  { id: 'echo', name: 'Echo', description: 'Clear, articulate voice' },
+  { id: 'fable', name: 'Fable', description: 'Warm, engaging voice' },
+  { id: 'onyx', name: 'Onyx', description: 'Deep, confident voice' },
+  { id: 'nova', name: 'Nova', description: 'Bright, energetic voice' },
+  { id: 'shimmer', name: 'Shimmer', description: 'Gentle, soothing voice' }
 ];
 
-const VoiceOnlyChat = ({ onClose, userProfile }: VoiceOnlyChatProps) => {
-  const [isMicrophoneEnabled, setIsMicrophoneEnabled] = useState(true);
-  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [conversationStarted, setConversationStarted] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [message, setMessage] = useState('');
-  const [transcript, setTranscript] = useState('');
-  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
-  const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
-  const [isCallOngoing, setIsCallOngoing] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState<string>(limitedVoices[0]?.id || '9BWtsMINqrJLrRacOk9x');
-  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
-  const [isProcessingResponse, setIsProcessingResponse] = useState(false);
-  const [microphonePermission, setMicrophonePermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
-  const [audioLevel, setAudioLevel] = useState(0);
-  const [liveTranscript, setLiveTranscript] = useState('');
-  const [isVoiceInputListening, setIsVoiceInputListening] = useState(false);
-
+const VoiceOnlyChat = () => {
   const navigate = useNavigate();
-  const recognitionRef = useRef<any>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const [selectedVoice, setSelectedVoice] = useState('nova');
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState('Choose your AI voice and tap to begin');
+  const [lastTranscript, setLastTranscript] = useState('');
+  const [lastResponse, setLastResponse] = useState('');
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const isListeningRef = useRef(false);
-  const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const silenceStartRef = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  // Audio level monitoring
-  const startAudioLevelMonitoring = useCallback(async () => {
-    console.log('🎤 Starting audio monitoring...');
-    
-    if (!mediaStreamRef.current) {
-      console.error('❌ No media stream for monitoring');
-      return;
-    }
+  const SILENCE_THRESHOLD = 0.01;
+  const SILENCE_DURATION = 1200; // 1.2 seconds
+  const API_KEY = "sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA"; // Your API key ending in XDAA
+
+  // Start recording with natural speech detection
+  const startRecording = useCallback(async () => {
+    if (!isMicEnabled) return;
 
     try {
-      audioContextRef.current = new AudioContext({ sampleRate: 44100 });
+      console.log('🎤 Starting OpenAI voice recording...');
+      setCurrentStatus('Listening... speak naturally');
+      setIsRecording(true);
       
-      if (audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
-      const source = audioContextRef.current.createMediaStreamSource(mediaStreamRef.current);
-      audioAnalyzerRef.current = audioContextRef.current.createAnalyser();
-      audioAnalyzerRef.current.fftSize = 256;
-      audioAnalyzerRef.current.smoothingTimeConstant = 0.3;
-      
-      source.connect(audioAnalyzerRef.current);
-      
-      const dataArray = new Uint8Array(audioAnalyzerRef.current.frequencyBinCount);
-
-      const updateLevel = () => {
-        if (!audioAnalyzerRef.current || !conversationStarted) return;
-        
-        audioAnalyzerRef.current.getByteFrequencyData(dataArray);
-        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        const level = Math.min(100, (average / 128) * 100);
-        
-        setAudioLevel(level);
-        
-        if (conversationStarted) {
-          animationFrameRef.current = requestAnimationFrame(updateLevel);
-        }
-      };
-
-      updateLevel();
-      console.log('✅ Audio monitoring started');
-      
-    } catch (error) {
-      console.error('❌ Audio monitoring error:', error);
-    }
-  }, [conversationStarted]);
-
-  // Request microphone permission
-  const requestMicrophonePermission = async () => {
-    try {
-      console.log('🎤 Requesting microphone...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           sampleRate: 44100,
           channelCount: 1,
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
         }
       });
-      
-      mediaStreamRef.current = stream;
-      setMicrophonePermission('granted');
-      console.log('✅ Microphone granted');
-      
-      await startAudioLevelMonitoring();
-      toast.success("Microphone access granted!");
-      return true;
-    } catch (error) {
-      console.error('❌ Microphone denied:', error);
-      setMicrophonePermission('denied');
-      toast.error("Microphone access required for voice conversation.");
-      return false;
-    }
-  };
 
-  // Stop listening function
-  const stopListening = useCallback(() => {
-    console.log("🎙️ stopListening called");
-    
-    if (restartTimeoutRef.current) {
-      clearTimeout(restartTimeoutRef.current);
-      restartTimeoutRef.current = null;
-    }
-    
-    if (recognitionRef.current && isListeningRef.current) {
-      console.log("🎙️ Actually stopping speech recognition...");
-      try {
-        recognitionRef.current.stop();
-        console.log("🎙️ Speech recognition stopped");
-      } catch (error) {
-        console.error("🎙️ Error stopping recognition:", error);
+      streamRef.current = stream;
+      audioContextRef.current = new AudioContext();
+
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
       }
-      isListeningRef.current = false;
-      setIsUserSpeaking(false);
-    }
-  }, []);
 
-  // Setup speech recognition with improved error handling
-  const setupSpeechRecognition = useCallback(() => {
-    console.log('🎙️ Setting up speech recognition...');
-    
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error("Speech Recognition not supported. Please use Chrome.");
-      return;
-    }
+      sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
+      processorRef.current = audioContextRef.current.createScriptProcessor(2048, 1, 1);
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
-    
-    // Optimized settings for continuous listening
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true;
-    recognitionRef.current.lang = 'en-US';
-    recognitionRef.current.maxAlternatives = 1;
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
 
-    recognitionRef.current.onstart = () => {
-      console.log("🎙️ ✅ Speech recognition STARTED");
-      setIsUserSpeaking(true);
-      isListeningRef.current = true;
-      setLiveTranscript('');
-    };
+      audioChunksRef.current = [];
+      silenceStartRef.current = null;
 
-    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-      console.log("🎙️ Speech result received");
-      let interimTranscript = '';
-      let finalTranscript = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const transcript = event.results[i][0].transcript;
-        console.log("🎙️ Result:", transcript, "Final:", event.results[i].isFinal);
-        
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
+      // Set up silence detection
+      processorRef.current.onaudioprocess = (e) => {
+        const input = e.inputBuffer.getChannelData(0);
+        const isSilent = input.every(sample => Math.abs(sample) < SILENCE_THRESHOLD);
+        const now = Date.now();
+
+        if (!isSilent) {
+          silenceStartRef.current = null;
         } else {
-          interimTranscript += transcript;
-        }
-      }
-      
-      // Update live transcript
-      setLiveTranscript(interimTranscript + finalTranscript);
-      
-      if (finalTranscript.trim()) {
-        console.log("🔄 Processing final transcript:", finalTranscript);
-        setTranscript(finalTranscript);
-        
-        // Stop listening and process the message
-        stopListening();
-        
-        // Process the message after a short delay
-        setTimeout(() => {
-          if (finalTranscript.trim() && !isProcessingResponse) {
-            generateAIResponse(finalTranscript.trim());
+          if (!silenceStartRef.current) {
+            silenceStartRef.current = now;
+          } else if (now - silenceStartRef.current > SILENCE_DURATION) {
+            console.log('🤫 Silence detected, stopping recording...');
+            stopRecording();
           }
-        }, 300);
-      }
-    };
-
-    recognitionRef.current.onend = () => {
-      console.log("🎙️ Speech recognition ended");
-      setIsUserSpeaking(false);
-      isListeningRef.current = false;
-      
-      // Auto restart if conversation is ongoing and not processing
-      if (conversationStarted && isMicrophoneEnabled && !isAssistantSpeaking && 
-          !isProcessingResponse && microphonePermission === 'granted') {
-        console.log("🔄 Auto restarting speech recognition...");
-        restartTimeoutRef.current = setTimeout(() => {
-          startListening();
-        }, 1000);
-      }
-    };
-
-    recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error("🎙️ Speech error:", event.error);
-      setIsUserSpeaking(false);
-      isListeningRef.current = false;
-      
-      if (event.error === 'not-allowed') {
-        setMicrophonePermission('denied');
-        toast.error("Microphone access denied.");
-      } else if (event.error !== 'aborted') {
-        console.error("Speech recognition error:", event.error);
-        // Auto restart on recoverable errors
-        if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
-          restartTimeoutRef.current = setTimeout(() => {
-            console.log("🔄 Restarting after error:", event.error);
-            startListening();
-          }, 2000);
         }
-      }
-    };
+      };
 
-    console.log('✅ Speech recognition setup complete');
-  }, [conversationStarted, isMicrophoneEnabled, isAssistantSpeaking, isProcessingResponse, microphonePermission, stopListening]);
+      sourceRef.current.connect(processorRef.current);
+      processorRef.current.connect(audioContextRef.current.destination);
 
-  // Start listening with improved reliability
-  const startListening = useCallback(() => {
-    console.log("🎙️ startListening called - checking conditions...", {
-      hasRecognition: !!recognitionRef.current,
-      isListening: isListeningRef.current,
-      isAssistantSpeaking,
-      isProcessingResponse,
-      micPermission: microphonePermission,
-      conversationStarted,
-      isMicrophoneEnabled
-    });
-
-    if (!recognitionRef.current) {
-      console.log("❌ No recognition object - setting up...");
-      setupSpeechRecognition();
-      setTimeout(() => startListening(), 500);
-      return;
-    }
-
-    if (isListeningRef.current) {
-      console.log("❌ Already listening, skipping");
-      return;
-    }
-
-    if (isAssistantSpeaking || isProcessingResponse) {
-      console.log("❌ Assistant speaking or processing, skipping");
-      return;
-    }
-
-    if (microphonePermission !== 'granted') {
-      console.log("❌ No microphone permission");
-      return;
-    }
-
-    if (!conversationStarted || !isMicrophoneEnabled) {
-      console.log("❌ Conversation not started or mic disabled");
-      return;
-    }
-
-    try {
-      console.log("🎙️ ACTUALLY starting speech recognition...");
-      recognitionRef.current.start();
-      console.log("🎙️ Speech recognition start() called successfully");
-    } catch (error) {
-      console.error("🎙️ Start listening error:", error);
-      // If already started, just continue
-      if (error.name === 'InvalidStateError') {
-        console.log("🎙️ Recognition already running");
-        isListeningRef.current = true;
-        setIsUserSpeaking(true);
-      } else {
-        // Retry after a short delay for other errors
-        restartTimeoutRef.current = setTimeout(() => {
-          console.log("🎙️ Retrying start listening after error...");
-          startListening();
-        }, 1000);
-      }
-    }
-  }, [isAssistantSpeaking, isProcessingResponse, microphonePermission, conversationStarted, isMicrophoneEnabled, setupSpeechRecognition]);
-
-  // Handle VoiceInput transcript
-  const handleVoiceInputTranscript = async (transcript: string) => {
-    if (!transcript.trim() || isProcessingResponse) return;
-    setTranscript(transcript);
-    setIsProcessingResponse(true);
-
-    try {
-      // Use the same response generation as before (AI/agent response, TTS, conversation history)
-      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
-      if (selectedVoiceOption?.type === 'agent') {
-        const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, transcript);
-        setConversationHistory(prev => [...prev, `User: ${transcript}`, `AI: ${aiResponse}`]);
-      } else {
-        const conversationContext = [
-          ...conversationHistory,
-          `User: ${transcript}`
-        ].join('\n');
-
-        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
-
-        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-          body: {
-            prompt: transcript,
-            context: conversationContext,
-            systemPrompt: systemPrompt,
-            maxTokens: 150
-          }
-        });
-
-        if (error) {
-          console.error('🤖 AI response error:', error);
-          throw error;
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
         }
+      };
 
-        const aiResponse = data?.response || "I understand. Could you tell me more about that?";
-        setConversationHistory(prev => [...prev, `User: ${transcript}`, `AI: ${aiResponse}`]);
-        await speak(aiResponse);
-      }
+      mediaRecorderRef.current.onstop = async () => {
+        console.log('🎤 Recording stopped, processing with OpenAI...');
+        await processWithOpenAI();
+      };
+
+      mediaRecorderRef.current.start();
+
     } catch (error) {
-      console.error('🤖 AI error:', error);
-      const fallbackResponse = "I'm here to listen. Please continue sharing what's on your mind.";
-      await speak(fallbackResponse);
-    } finally {
-      setIsProcessingResponse(false);
-      setTranscript('');
+      console.error('Error starting recording:', error);
+      toast.error('Failed to start recording. Please check microphone permissions.');
+      setCurrentStatus('Error: Microphone access denied');
+      setIsRecording(false);
     }
-  };
+  }, [isMicEnabled, selectedVoice]);
 
-  // Generate AI response
-  const generateAIResponse = async (userMessage: string) => {
-    if (!userMessage.trim() || isProcessingResponse) return;
-    
-    setIsProcessingResponse(true);
-    console.log('🤖 Generating response for:', userMessage);
-
-    try {
-      const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
+  // Stop recording
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      console.log('🛑 Stopping recording...');
+      mediaRecorderRef.current.stop();
       
-      if (selectedVoiceOption?.type === 'agent') {
-        console.log('🤖 Using ElevenLabs agent:', selectedVoice);
-        const aiResponse = await voiceService.sendMessageToAgent(selectedVoice, userMessage);
-        setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
-      } else {
-        const conversationContext = [
-          ...conversationHistory,
-          `User: ${userMessage}`
-        ].join('\n');
-
-        const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 100 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
-
-        // ADDED: log before calling backend
-        console.log('[VoiceOnlyChat] Invoking backend AI for:', userMessage, { conversationContext, systemPrompt });
-
-        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-          body: {
-            prompt: userMessage,
-            context: conversationContext,
-            systemPrompt: systemPrompt,
-            maxTokens: 150
-          }
-        });
-
-        // ADDED: log exact error and data
-        if (error) {
-          console.error('🤖 AI response error:', error);
-          toast.error(`AI backend error: ${error.message || error}`);
-        }
-
-        if (!error && data?.response) {
-          const aiResponse = data.response;
-          console.log('🤖 AI response:', aiResponse);
-          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${aiResponse}`]);
-          await speak(aiResponse);
-        } else {
-          // If backend fails or returns no response, fallback once
-          console.warn('[VoiceOnlyChat] No AI response, using fallback.');
-          const fallbackResponse = "Sorry, I didn't catch that. Could you say it another way?";
-          setConversationHistory(prev => [...prev, `User: ${userMessage}`, `AI: ${fallbackResponse}`]);
-          await speak(fallbackResponse);
-        }
+      // Clean up audio processing
+      if (processorRef.current) {
+        processorRef.current.disconnect();
+        processorRef.current = null;
       }
-      
-    } catch (error) {
-      console.error('🤖 AI error:', error);
-      toast.error("AI error: " + (error?.message || error));
-      const fallbackResponse = "I'm here to listen. Please continue sharing what's on your mind.";
-      await speak(fallbackResponse);
-    } finally {
-      setIsProcessingResponse(false);
-      // Clear transcript after processing
-      setLiveTranscript('');
-      setTranscript('');
-    }
-  };
-
-  // Speak function
-  const speak = async (text: string) => {
-    if (!isSpeakerEnabled || !text.trim()) return;
-    
-    console.log('🔊 Speaking:', text.substring(0, 50) + '...');
-    setIsAssistantSpeaking(true);
-    
-    try {
-      await voiceService.speak(text, selectedVoice);
-      console.log('🔊 Finished speaking');
-    } catch (error) {
-      console.error('🔊 Speech error:', error);
-      toast.error("Could not play response audio.");
-    } finally {
-      setIsAssistantSpeaking(false);
-      
-      // Restart listening after speaking
-      if (conversationStarted && isMicrophoneEnabled && microphonePermission === 'granted') {
-        setTimeout(() => {
-          startListening();
-        }, 500);
-      }
-    }
-  };
-
-  // Initialize speech recognition
-  useEffect(() => {
-    console.log('🔧 Initializing speech recognition...');
-    setupSpeechRecognition();
-    
-    return () => {
-      if (restartTimeoutRef.current) {
-        clearTimeout(restartTimeoutRef.current);
-      }
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (sourceRef.current) {
+        sourceRef.current.disconnect();
+        sourceRef.current = null;
       }
       if (audioContextRef.current) {
         audioContextRef.current.close();
+        audioContextRef.current = null;
       }
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
-    };
-  }, [setupSpeechRecognition]);
-
-  // Start conversation
-  const startConversation = async () => {
-    console.log('🚀 Starting conversation...');
-    if (microphonePermission !== 'granted') {
-      const hasPermission = await requestMicrophonePermission();
-      if (!hasPermission) return;
+      
+      setIsRecording(false);
     }
+  }, [isRecording]);
 
-    setIsConnecting(true);
-    // Shorten connection delay dramatically
-    await new Promise(resolve => setTimeout(resolve, 250));
-    setIsConnecting(false);
-    setConversationStarted(true);
-    setIsCallOngoing(true);
+  // Process the complete OpenAI flow: Whisper → GPT-4o → TTS
+  const processWithOpenAI = useCallback(async () => {
+    if (audioChunksRef.current.length === 0) return;
 
-    // NO artificial delays - immediately start speech
-    if (isMicrophoneEnabled && microphonePermission === 'granted') {
-      setTimeout(() => {
-        console.log('🎙️ First attempt to start listening...');
-        startListening();
-        setTimeout(() => {
-          if (!isListeningRef.current) {
-            console.log('🎙️ BACKUP attempt to start listening...');
-            startListening();
-          }
-        }, 500);
-        toast.success("Voice recognition started! Start speaking.");
-      }, 100);
+    setIsProcessing(true);
+    setCurrentStatus('Processing with OpenAI...');
+
+    try {
+      // Create audio blob and file
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const audioFile = new File([audioBlob], "input.webm", { type: 'audio/webm' });
+
+      console.log('🔄 Step 1: OpenAI Whisper transcription...');
+      setCurrentStatus('Transcribing your speech...');
+
+      // Step 1: OpenAI Whisper STT
+      const sttForm = new FormData();
+      sttForm.append("file", audioFile);
+      sttForm.append("model", "whisper-1");
+
+      const sttResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${API_KEY}` 
+        },
+        body: sttForm
+      });
+
+      if (!sttResponse.ok) {
+        throw new Error(`Whisper API error: ${await sttResponse.text()}`);
+      }
+
+      const { text } = await sttResponse.json();
+      setLastTranscript(text);
+      console.log('✅ Whisper transcription:', text);
+
+      console.log('🔄 Step 2: OpenAI GPT-4o response...');
+      setCurrentStatus('Getting AI response...');
+
+      // Step 2: OpenAI GPT-4o
+      const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a helpful, warm AI assistant. Keep your responses conversational and under 100 words since they will be spoken aloud."
+            },
+            {
+              role: "user", 
+              content: text
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.7
+        })
+      });
+
+      if (!gptResponse.ok) {
+        throw new Error(`GPT-4o API error: ${await gptResponse.text()}`);
+      }
+
+      const gptData = await gptResponse.json();
+      const aiResponse = gptData.choices[0]?.message?.content || "I understand. Could you tell me more?";
+      setLastResponse(aiResponse);
+      console.log('✅ GPT-4o response:', aiResponse);
+
+      if (!isSpeakerEnabled) {
+        setCurrentStatus('Response ready (speaker disabled)');
+        setIsProcessing(false);
+        return;
+      }
+
+      console.log('🔄 Step 3: OpenAI TTS conversion...');
+      setCurrentStatus('Converting to speech...');
+
+      // Step 3: OpenAI TTS
+      const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "tts-1-hd",
+          voice: selectedVoice,
+          input: aiResponse
+        })
+      });
+
+      if (!ttsResponse.ok) {
+        throw new Error(`TTS API error: ${await ttsResponse.text()}`);
+      }
+
+      const audioBlob2 = await ttsResponse.blob();
+      const audioUrl = URL.createObjectURL(audioBlob2);
+
+      console.log('🔄 Step 4: Playing OpenAI audio...');
+      setCurrentStatus('Playing response...');
+
+      // Step 4: Play the audio
+      await playAudio(audioUrl);
+
+    } catch (error) {
+      console.error('OpenAI processing error:', error);
+      toast.error(`Error: ${error.message}`);
+      setCurrentStatus('Error occurred');
+    } finally {
+      setIsProcessing(false);
     }
+  }, [selectedVoice, isSpeakerEnabled]);
 
-    // Immediate initial greeting
-    const selectedVoiceOption = allVoices.find(v => v.id === selectedVoice);
-    if (selectedVoiceOption?.type !== 'agent') {
-      const greeting = getPersonalizedGreeting();
-      speak(greeting);
-    }
-  };
-
-  // End conversation
-  const endConversation = () => {
-    setConversationStarted(false);
-    setIsCallOngoing(false);
-    stopListening();
-    
-    if (restartTimeoutRef.current) {
-      clearTimeout(restartTimeoutRef.current);
-    }
-    
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      mediaStreamRef.current = null;
-    }
-    
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-    
-    setTranscript('');
-    setMessage('');
-    setLiveTranscript('');
-    setConversationHistory([]);
-    setIsProcessingResponse(false);
-    setAudioLevel(0);
-    toast.message("Conversation ended.");
-  };
-
-  // Toggle microphone
-  const toggleMicrophone = () => {
-    const newState = !isMicrophoneEnabled;
-    setIsMicrophoneEnabled(newState);
-    
-    if (newState && conversationStarted && microphonePermission === 'granted') {
-      setTimeout(() => startListening(), 500);
-    } else if (!newState) {
-      stopListening();
-    }
-  };
-
-  // Toggle speaker
-  const toggleSpeaker = () => {
-    if (isSpeakerEnabled) {
-      voiceService.stopCurrentAudio();
-    }
-    setIsSpeakerEnabled(!isSpeakerEnabled);
-  };
-
-  // Test voice
-  const testVoice = () => {
-    const testText = "Hi there! This is how I sound. I'm here to support you with warmth and understanding.";
-    speak(testText);
-  };
-
-  // Get personalized greeting
-  const getPersonalizedGreeting = () => {
-    if (!userProfile) {
-      return "Hi there! I'm your AI wellness companion. I'm here to listen and support you. What's on your mind today?";
-    }
-
-    const name = userProfile.name || 'dear';
-    const struggles = userProfile.currentStruggles?.join(', ') || 'what you\'re going through';
-    
-    return `Hi ${name}! I'm really glad you're here. I know it takes courage to reach out, especially when dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
-  };
-
-  // Set voice service enabled state
-  useEffect(() => {
-    voiceService.setEnabled(isSpeakerEnabled);
-  }, [isSpeakerEnabled]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      voiceService.cleanup();
-    };
+  // Play audio
+  const playAudio = useCallback(async (audioUrl: string) => {
+    return new Promise<void>((resolve) => {
+      try {
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
+          audioRef.current.onended = () => {
+            console.log('🔊 OpenAI audio playback finished');
+            setIsPlaying(false);
+            setCurrentStatus('Ready - Tap mic to speak again');
+            URL.revokeObjectURL(audioUrl);
+            resolve();
+          };
+          audioRef.current.onerror = () => {
+            console.error('Audio playback error');
+            setIsPlaying(false);
+            setCurrentStatus('Audio playback failed');
+            resolve();
+          };
+          
+          setIsPlaying(true);
+          audioRef.current.play();
+        }
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+        setCurrentStatus('Audio playback failed');
+        resolve();
+      }
+    });
   }, []);
 
+  const startSession = () => {
+    setSessionStarted(true);
+    setCurrentStatus('Ready - Tap the microphone to speak');
+    toast.success('OpenAI voice session started! Tap the microphone to begin speaking.');
+  };
+
+  const handleMicClick = () => {
+    if (isProcessing || isPlaying) return;
+    
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center p-4 z-50"
-      style={{
-        minHeight: "100vh",
-        minWidth: "100vw",
-        background: "linear-gradient(135deg, #f5f3ff 0%, #f9e8fd 50%, #cef2fd 100%)",
-      }}
-    >
-      <div
-        className="w-full max-w-xl min-h-[60vh] flex flex-col items-center justify-center rounded-3xl border-0 shadow-xl backdrop-blur-md px-0 sm:px-0 animate-fade-in"
-        style={{
-          background:
-            "linear-gradient(132deg, rgba(167,138,176,0.21) 0%, rgba(245,168,154,0.18) 40%, rgba(59,140,138,0.14) 100%)",
-          boxShadow: "0 8px 32px 0 rgba(31,38,135,0.16)",
-        }}
-      >
-        <CardHeader className="bg-transparent px-8 py-7 rounded-t-3xl w-full">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold flex items-center gap-3 text-purple-700">
-              <Phone className="h-6 w-6" />
-              Your Therapy Session
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowSettings(!showSettings)}
-                className="text-purple-600 hover:bg-purple-50"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="text-purple-600 hover:bg-purple-50"
-              >
-                <Home className="h-5 w-5" />
-              </Button>
+    <div className="fixed inset-0 flex items-center justify-center p-4 z-50 bg-gradient-to-br from-purple-50 to-pink-50">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-between mb-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              className="text-purple-600"
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+                <span className="text-white text-xs">📞</span>
+              </div>
+              <CardTitle className="text-xl font-bold text-purple-700">
+                Your Therapy Session
+              </CardTitle>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-purple-600"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col items-center justify-center w-full px-8 pb-6 bg-transparent">
-          {!conversationStarted ? (
-            <div className="flex flex-col items-center justify-center h-full space-y-6 w-full">
-              {microphonePermission === "denied" && (
-                <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
-                  <p className="text-red-700 text-sm text-center">
-                    Microphone access is required. Please enable microphone access and refresh the page.
-                  </p>
-                </div>
-              )}
-              <div className="mb-4 w-full max-w-sm">
-                <label className="block text-sm font-medium text-gray-800 mb-2 text-center">
+        
+        <CardContent className="space-y-6">
+          {!sessionStarted ? (
+            <div className="space-y-6">
+              {/* Voice Selection */}
+              <div className="space-y-3">
+                <h3 className="text-center text-lg font-medium text-gray-800">
                   Choose Your AI Voice
-                </label>
+                </h3>
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                  <SelectTrigger
-                    className="w-full bg-white/70 border-purple-300 border-2 rounded-lg text-gray-900 justify-center text-center font-medium text-lg h-14 shadow-md"
-                  >
-                    <div className="w-full flex justify-center items-center text-center">
-                      <SelectValue
-                        placeholder="Select voice"
-                        className="w-full text-center font-medium"
-                      />
-                    </div>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="w-full">
-                    {limitedVoices.map((voice) => (
-                      <SelectItem
-                        key={voice.id}
-                        value={voice.id}
-                        className="flex flex-col items-center text-center w-full px-0 py-2"
-                      >
-                        <span className="font-medium w-full text-center text-base">
-                          {voice.name}
-                        </span>
-                        {voice.description && (
-                          <span className="text-xs text-gray-500 w-full text-center block">
-                            {voice.description}
-                          </span>
-                        )}
+                  <SelectContent>
+                    {openAIVoices.map((voice) => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{voice.name}</span>
+                          <span className="text-sm text-gray-500">{voice.description}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Start Session Button */}
+              <div className="text-center space-y-4">
+                <Button
+                  onClick={startSession}
+                  className="w-full py-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-lg font-semibold rounded-xl"
+                >
+                  Tap to begin your session
+                </Button>
+                <p className="text-sm text-gray-600">
+                  Powered by OpenAI • Whisper + GPT-4o + TTS
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Status */}
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-700 font-medium">{currentStatus}</p>
+              </div>
+
+              {/* Main microphone button */}
+              <div className="text-center">
+                <Button
+                  onClick={handleMicClick}
+                  disabled={isProcessing || isPlaying}
+                  className={`w-20 h-20 rounded-full ${
+                    isRecording 
+                      ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
+                      : 'bg-blue-500 hover:bg-blue-600'
+                  } text-white`}
+                >
+                  <Mic className="h-8 w-8" />
+                </Button>
+                <p className="text-xs text-gray-500 mt-2">
+                  {isRecording ? 'Recording... Speak naturally' : 'Tap to speak'}
+                </p>
+                {isRecording && (
+                  <p className="text-xs text-orange-600 mt-1">
+                    Will auto-stop after 1.2s of silence
+                  </p>
+                )}
+              </div>
+
+              {/* Last transcript and response */}
+              {lastTranscript && (
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-blue-600 font-medium">You said:</p>
+                  <p className="text-sm text-blue-800">{lastTranscript}</p>
+                </div>
+              )}
+              
+              {lastResponse && (
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs text-green-600 font-medium">AI responded:</p>
+                  <p className="text-sm text-green-800">{lastResponse}</p>
+                </div>
+              )}
+
+              {/* Controls */}
+              <div className="flex justify-around pt-4 border-t">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={testVoice}
-                  className="mt-3 w-full flex justify-center items-center font-medium text-base bg-white/60 border-2 border-gray-200 shadow"
-                  disabled={isAssistantSpeaking}
+                  onClick={() => setIsMicEnabled(!isMicEnabled)}
+                  className={isMicEnabled ? 'text-green-600' : 'text-red-600'}
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    <span role="img" aria-label="music">🎵</span> Test Voice
-                  </span>
+                  {isMicEnabled ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
                 </Button>
-              </div>
-              <Button
-                onClick={startConversation}
-                className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transform transition-all duration-300 text-2xl font-bold border-purple-200 border-4 mx-auto"
-                disabled={isConnecting || microphonePermission === 'denied'}
-                style={{ fontSize: 26 }}
-              >
-                {isConnecting ? (
-                  <div className="flex flex-col items-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mb-2"></div>
-                    <span className="text-sm">Connecting...</span>
-                  </div>
-                ) : (
-                  "Start"
-                )}
-              </Button>
-              <p className="text-gray-700 text-lg text-center font-medium">
-                {microphonePermission === 'denied'
-                  ? "Please allow microphone access to start"
-                  : "Tap to begin your session"}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-between h-full w-full">
-              <div className="flex-1 flex flex-col items-center justify-center p-4 w-full">
-                <div className="mb-2 flex flex-col items-center justify-center">
-                  {/* Show cloud animation when listening */}
-                  <ListeningIndicator
-                    isListening={isListeningRef.current}
-                    size={120}
-                  />
-                </div>
-                {/* VoiceInput stays for handling transcript but UI is now cloud only */}
-                <div className="sr-only">
-                  <VoiceInput
-                    onTranscript={handleVoiceInputTranscript}
-                    isListening={isVoiceInputListening}
-                    onListeningChange={setIsVoiceInputListening}
-                  />
-                </div>
-                {/* Transcript textarea and live transcript are now hidden */}
-                {/* <Textarea
-                  value={transcript}
-                  placeholder="Recognized transcript will appear here."
-                  readOnly
-                  className="min-h-[70px] bg-gray-50 border-2 border-gray-200 text-sm mb-2"
-                /> */}
-                {/* <div className="mt-4 w-full">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    🎙️ Live Speech Recognition:
-                  </label>
-                  <Textarea
-                    value={liveTranscript}
-                    placeholder="Your speech will appear here in real-time..."
-                    readOnly
-                    className="min-h-[100px] bg-gray-50 border-2 border-gray-200 text-sm"
-                  />
-                </div> */}
-                {/* State descriptions are now hidden or replaced */}
-                {/* <div className="mb-4 text-xs text-gray-500 italic">
-                  {isVoiceInputListening
-                    ? "Listening... Speak your message."
-                    : "Click 'Speak Answer' to start voice input."}
-                </div> */}
-              </div>
-              {/* Conversation status and controls remain */}
-              <div className="mt-6 mb-4">
-                <AudioLevelIndicator 
-                  audioLevel={audioLevel} 
-                  isActive={isMicrophoneEnabled && microphonePermission === 'granted'} 
-                />
-                {/* ... keep existing status and indicators ... */}
-                <div className="mt-2 text-xs text-gray-500">
-                  Audio Level: {Math.round(audioLevel)}% | Mic: {isMicrophoneEnabled ? 'On' : 'Off'}
-                </div>
-              </div>
-              {/* Conversation controls */}
-              <div className="flex items-center justify-around w-full p-4 border-t border-gray-200">
-                {/* ... keep existing controls ... */}
-                {/* ... Button row unchanged ... */}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsSpeakerEnabled(!isSpeakerEnabled)}
+                  className={isSpeakerEnabled ? 'text-green-600' : 'text-red-600'}
+                >
+                  {isSpeakerEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSessionStarted(false);
+                    setLastTranscript('');
+                    setLastResponse('');
+                    setCurrentStatus('Choose your AI voice and tap to begin');
+                  }}
+                  className="text-red-600"
+                >
+                  End
+                </Button>
               </div>
             </div>
           )}
         </CardContent>
-
-        {showSettings && (
-          <div className="w-full px-8 py-6 border-t border-purple-100 bg-white/70 rounded-b-3xl">
-            <h4 className="text-lg font-semibold text-purple-700 mb-4">Settings</h4>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-                Voice Selection
-              </label>
-              <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                <SelectTrigger className="w-full bg-white/70 border-purple-200 border-2 rounded-lg text-gray-900 justify-center text-center font-medium text-lg h-14 shadow-md">
-                  <div className="w-full flex justify-center items-center text-center">
-                    <SelectValue
-                      placeholder="Select voice"
-                      className="w-full text-center font-medium"
-                    />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="w-full">
-                  {limitedVoices.map((voice) => (
-                    <SelectItem
-                      key={voice.id}
-                      value={voice.id}
-                      className="flex flex-col items-center text-center w-full px-0 py-2"
-                    >
-                      <span className="font-medium w-full text-center text-base">
-                        {voice.name}
-                      </span>
-                      {voice.description && (
-                        <span className="text-xs text-gray-500 w-full text-center block">
-                          {voice.description}
-                        </span>
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={testVoice}
-                className="mt-2 w-full flex justify-center items-center font-medium text-base bg-white/60 border-2 border-gray-200 shadow"
-                disabled={isAssistantSpeaking}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <span role="img" aria-label="music">🎵</span> Test Voice
-                </span>
-              </Button>
-            </div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-gray-700">Microphone:</label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleMicrophone}
-                disabled={microphonePermission === 'denied'}
-              >
-                {isMicrophoneEnabled ? "Disable" : "Enable"}
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="text-gray-700">Speaker:</label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleSpeaker}
-              >
-                {isSpeakerEnabled ? "Disable" : "Enable"}
-              </Button>
-            </div>
-            {microphonePermission === 'denied' && (
-              <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded">
-                <p className="text-yellow-800 text-sm">
-                  Microphone access was denied. Please refresh the page and allow microphone access when prompted.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      </Card>
+      
+      {/* Hidden audio element for playback */}
+      <audio ref={audioRef} style={{ display: 'none' }} />
     </div>
   );
 };
