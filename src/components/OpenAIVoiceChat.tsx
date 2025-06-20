@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '../integrations/supabase/client';
 
 const OpenAIVoiceChat = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -18,31 +17,73 @@ const OpenAIVoiceChat = () => {
   const [lastResponse, setLastResponse] = useState('');
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const sourceRef = useRef<MediaStreamSourceNode | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const silenceStartRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  // Step 1: Start recording audio
+  const SILENCE_THRESHOLD = 0.01;
+  const SILENCE_DURATION = 1200; // 1.2 seconds
+  const API_KEY = "sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA"; // Your API key ending in XDAA
+
+  // Start recording with natural speech detection
   const startRecording = useCallback(async () => {
     if (!isMicEnabled) return;
 
     try {
-      console.log('🎤 Starting audio recording...');
-      setCurrentStatus('Listening...');
+      console.log('🎤 Starting natural speech recording...');
+      setCurrentStatus('Listening... speak naturally');
+      setIsRecording(true);
       
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
-          sampleRate: 16000,
+          sampleRate: 44100,
           channelCount: 1,
           echoCancellation: true,
           noiseSuppression: true,
         }
       });
 
+      streamRef.current = stream;
+      audioContextRef.current = new AudioContext();
+
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
+      processorRef.current = audioContextRef.current.createScriptProcessor(2048, 1, 1);
+
       mediaRecorderRef.current = new MediaRecorder(stream, {
         mimeType: 'audio/webm;codecs=opus'
       });
 
       audioChunksRef.current = [];
+      silenceStartRef.current = null;
+
+      // Set up silence detection
+      processorRef.current.onaudioprocess = (e) => {
+        const input = e.inputBuffer.getChannelData(0);
+        const isSilent = input.every(sample => Math.abs(sample) < SILENCE_THRESHOLD);
+        const now = Date.now();
+
+        if (!isSilent) {
+          silenceStartRef.current = null;
+        } else {
+          if (!silenceStartRef.current) {
+            silenceStartRef.current = now;
+          } else if (now - silenceStartRef.current > SILENCE_DURATION) {
+            console.log('🤫 Silence detected, stopping recording...');
+            stopRecording();
+          }
+        }
+      };
+
+      sourceRef.current.connect(processorRef.current);
+      processorRef.current.connect(audioContextRef.current.destination);
 
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -56,26 +97,44 @@ const OpenAIVoiceChat = () => {
       };
 
       mediaRecorderRef.current.start();
-      setIsRecording(true);
 
     } catch (error) {
       console.error('Error starting recording:', error);
       toast.error('Failed to start recording. Please check microphone permissions.');
       setCurrentStatus('Error: Microphone access denied');
+      setIsRecording(false);
     }
   }, [isMicEnabled]);
 
-  // Step 2: Stop recording and process the audio
+  // Stop recording
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       console.log('🛑 Stopping recording...');
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      
+      // Clean up audio processing
+      if (processorRef.current) {
+        processorRef.current.disconnect();
+        processorRef.current = null;
+      }
+      if (sourceRef.current) {
+        sourceRef.current.disconnect();
+        sourceRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      
       setIsRecording(false);
     }
   }, [isRecording]);
 
-  // Steps 3-6: Process the complete flow
+  // Process the complete OpenAI flow
   const processRecording = useCallback(async () => {
     if (audioChunksRef.current.length === 0) return;
 
@@ -83,48 +142,67 @@ const OpenAIVoiceChat = () => {
     setCurrentStatus('Processing your message...');
 
     try {
-      // Create audio blob
+      // Create audio blob and file
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      
-      // Convert to base64
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const audioFile = new File([audioBlob], "input.webm", { type: 'audio/webm' });
 
       console.log('🔄 Step 1: Transcribing with Whisper...');
       setCurrentStatus('Transcribing your speech...');
 
-      // Step 1: Transcribe with Whisper
-      const { data: transcribeData, error: transcribeError } = await supabase.functions.invoke('openai-voice-chat', {
-        body: { 
-          action: 'transcribe',
-          audio: base64Audio 
-        }
+      // Step 1: Whisper STT
+      const sttForm = new FormData();
+      sttForm.append("file", audioFile);
+      sttForm.append("model", "whisper-1");
+
+      const sttResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${API_KEY}` 
+        },
+        body: sttForm
       });
 
-      if (transcribeError || !transcribeData?.text) {
-        throw new Error('Failed to transcribe audio');
+      if (!sttResponse.ok) {
+        throw new Error(`Whisper API error: ${await sttResponse.text()}`);
       }
 
-      const transcript = transcribeData.text;
-      setLastTranscript(transcript);
-      console.log('✅ Transcription:', transcript);
+      const { text } = await sttResponse.json();
+      setLastTranscript(text);
+      console.log('✅ Transcription:', text);
 
       console.log('🔄 Step 2: Getting GPT-4o response...');
       setCurrentStatus('Thinking...');
 
-      // Step 2: Get GPT-4o response
-      const { data: chatData, error: chatError } = await supabase.functions.invoke('openai-voice-chat', {
-        body: { 
-          action: 'chat',
-          text: transcript 
-        }
+      // Step 2: GPT-4o
+      const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a helpful, warm AI assistant. Keep your responses conversational and under 100 words since they will be spoken aloud."
+            },
+            {
+              role: "user", 
+              content: text
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.7
+        })
       });
 
-      if (chatError || !chatData?.response) {
-        throw new Error('Failed to get AI response');
+      if (!gptResponse.ok) {
+        throw new Error(`GPT-4o API error: ${await gptResponse.text()}`);
       }
 
-      const aiResponse = chatData.response;
+      const gptData = await gptResponse.json();
+      const aiResponse = gptData.choices[0]?.message?.content || "I understand. Could you tell me more?";
       setLastResponse(aiResponse);
       console.log('✅ AI Response:', aiResponse);
 
@@ -137,23 +215,32 @@ const OpenAIVoiceChat = () => {
       console.log('🔄 Step 3: Converting to speech...');
       setCurrentStatus('Converting to speech...');
 
-      // Step 3: Convert to speech
-      const { data: ttsData, error: ttsError } = await supabase.functions.invoke('openai-voice-chat', {
-        body: { 
-          action: 'speak',
-          text: aiResponse 
-        }
+      // Step 3: TTS
+      const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "tts-1-hd",
+          voice: "nova",
+          input: aiResponse
+        })
       });
 
-      if (ttsError || !ttsData?.audioContent) {
-        throw new Error('Failed to generate speech');
+      if (!ttsResponse.ok) {
+        throw new Error(`TTS API error: ${await ttsResponse.text()}`);
       }
+
+      const audioBlob2 = await ttsResponse.blob();
+      const audioUrl = URL.createObjectURL(audioBlob2);
 
       console.log('🔄 Step 4: Playing audio...');
       setCurrentStatus('Speaking...');
 
       // Step 4: Play the audio
-      await playAudio(ttsData.audioContent);
+      await playAudio(audioUrl);
 
     } catch (error) {
       console.error('Processing error:', error);
@@ -164,19 +251,10 @@ const OpenAIVoiceChat = () => {
     }
   }, [isSpeakerEnabled]);
 
-  // Play audio from base64
-  const playAudio = useCallback(async (base64Audio: string) => {
+  // Play audio
+  const playAudio = useCallback(async (audioUrl: string) => {
     return new Promise<void>((resolve) => {
       try {
-        const binaryString = atob(base64Audio);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-
-        const audioBlob = new Blob([bytes], { type: 'audio/mp3' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-
         if (audioRef.current) {
           audioRef.current.src = audioUrl;
           audioRef.current.onended = () => {
@@ -240,10 +318,10 @@ const OpenAIVoiceChat = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-purple-700">
-            OpenAI Voice Chat
+            Natural Voice Chat
           </CardTitle>
           <p className="text-sm text-gray-600">
-            Speak naturally with AI using only OpenAI APIs
+            Speak naturally - AI detects when you're done talking
           </p>
         </CardHeader>
         
@@ -256,7 +334,7 @@ const OpenAIVoiceChat = () => {
               >
                 Start Chat
               </Button>
-              <p className="text-gray-600">Click to begin voice conversation</p>
+              <p className="text-gray-600">Click to begin natural voice conversation</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -279,8 +357,13 @@ const OpenAIVoiceChat = () => {
                   <Mic className="h-8 w-8" />
                 </Button>
                 <p className="text-xs text-gray-500 mt-2">
-                  {isRecording ? 'Recording... Click to stop' : 'Click to speak'}
+                  {isRecording ? 'Recording... Speak naturally' : 'Click to speak'}
                 </p>
+                {isRecording && (
+                  <p className="text-xs text-orange-600 mt-1">
+                    Will auto-stop after 1.2s of silence
+                  </p>
+                )}
               </div>
 
               {/* Last transcript and response */}
