@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
+import OpenAIVoiceChat from "../components/OpenAIVoiceChat";
 
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showVoiceChat, setShowVoiceChat] = useState(false);
 
   const handleBeginJourney = () => {
     setShowOnboarding(true);
@@ -43,7 +45,11 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-wellness-purple via-wellness-pink to-wellness-yellow">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      {showVoiceChat && (
+        <OpenAIVoiceChat />
+      )}
+      
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="text-center max-w-4xl mx-auto">
