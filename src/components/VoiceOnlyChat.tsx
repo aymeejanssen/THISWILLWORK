@@ -2,308 +2,194 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mic, PhoneOff, Settings, Home, StopCircle, Volume2, VolumeX, MicOff } from 'lucide-react';
+import { Mic, PhoneOff, Settings, Home, Volume2, VolumeX, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { openaiVoiceService } from '../services/openaiVoiceService';
 import ListeningIndicator from "./ListeningIndicator";
-
-interface MessageEventData {
-  type: string;
-  [key: string]: any;
-}
-
-// Update WebSocket URL to use the correct project ID
-const wsUrl = "wss://pjwwdktyzmpldfjfnehe.functions.supabase.co/ai-voice-realtime";
 
 interface VoiceOnlyChatProps {
   onClose: () => void;
 }
 
 const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isCallOngoing, setIsCallOngoing] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState('');
   const [showSettings, setShowSettings] = useState(false);
-  
-  // Realtime audio states
-  const [connected, setConnected] = useState(false);
-  const [replyText, setReplyText] = useState<string>('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  
-  // Audio playback
-  const audioQueue = useRef<Uint8Array[]>([]);
-  const [playing, setPlaying] = useState(false);
   
   // Mute states
   const [isMicrophoneEnabled, setIsMicrophoneEnabled] = useState(true);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
 
-  // Refs for audio processing
-  const wsRef = useRef<WebSocket | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  // Conversation history for context
+  const conversationHistory = useRef<Array<{role: string, content: string}>>([]);
 
-  // Util: base64 -> Uint8Array
-  const base64ToUint8 = (base64: string): Uint8Array => {
-    const bin = atob(base64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) {
-      bytes[i] = bin.charCodeAt(i);
-    }
-    return bytes;
-  }
-
-  // Util: PCM -> WAV for playback
-  const pcmToWav = (pcm: Uint8Array, sampleRate = 24000) => {
-    const buffer = new ArrayBuffer(44 + pcm.length);
-    const view = new DataView(buffer);
-
-    const writeString = (offset: number, str: string) => {
-      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-    };
-
-    writeString(0, "RIFF");
-    view.setUint32(4, 36 + pcm.length, true);
-    writeString(8, "WAVE");
-    writeString(12, "fmt ");
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    writeString(36, "data");
-    view.setUint32(40, pcm.length, true);
-
-    new Uint8Array(buffer, 44).set(pcm);
-    return buffer;
-  }
-
-  const safeCloseAudioContext = useCallback(async () => {
-    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-      try {
-        await audioContextRef.current.close();
-        console.log("AudioContext closed!");
-      } catch (e) {
-        console.warn("Error closing AudioContext: ", e);
-      }
-      audioContextRef.current = null;
-    }
-  }, []);
-
-  const stopMicStream = useCallback(() => {
-    if (processorRef.current) {
-      processorRef.current.disconnect();
-      processorRef.current = null;
-    }
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
-  }, []);
-
-  const playAudioQueue = useCallback(async () => {
-    if (playing || audioQueue.current.length === 0 || !isSpeakerEnabled) return;
-
-    setPlaying(true);
-    while (audioQueue.current.length > 0) {
-      const next = audioQueue.current.shift();
-      if (next && audioContextRef.current) {
-        try {
-          const wav = pcmToWav(next);
-          const buf = await audioContextRef.current.decodeAudioData(wav.slice(0));
-          const src = audioContextRef.current.createBufferSource();
-          src.buffer = buf;
-          src.connect(audioContextRef.current.destination);
-          await new Promise<void>((res) => {
-            src.onended = () => res();
-            src.start();
-          });
-        } catch (e) {
-          console.error("Audio playback error:", e);
-          continue;
-        }
-      }
-    }
-    setPlaying(false);
-  }, [playing, isSpeakerEnabled]);
-
-  const startMicStream = useCallback(async () => {
-    if (!navigator.mediaDevices) return;
-    try {
-      if (!audioContextRef.current || audioContextRef.current.state === "closed") {
-        audioContextRef.current = new window.AudioContext({ sampleRate: 24000 });
-      }
-      mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        audio: { sampleRate: 24000, channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-      });
-      
-      const audioContext = audioContextRef.current;
-      const input = audioContext.createMediaStreamSource(mediaStreamRef.current);
-      const processor = audioContext.createScriptProcessor(4096, 1, 1);
-
-      processor.onaudioprocess = (event) => {
-        if (!isMicrophoneEnabled) return;
-        
-        const inbuf = event.inputBuffer.getChannelData(0);
-        const pcm16 = new Int16Array(inbuf.length);
-        for (let i = 0; i < inbuf.length; i++) {
-          const s = Math.max(-1, Math.min(1, inbuf[i]));
-          pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-        }
-        const pcmU8 = new Uint8Array(pcm16.buffer);
-        const chunkBin = String.fromCharCode(...pcmU8);
-        const b64 = btoa(chunkBin);
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(JSON.stringify({
-            type: "input_audio_buffer.append",
-            audio: b64
-          }));
-        }
-      };
-      input.connect(processor);
-      processor.connect(audioContext.destination);
-      processorRef.current = processor;
-    } catch (e: any) {
-      setErrorMsg("Microphone access failed. Please enable it in your browser settings.");
-      toast.error("Microphone access failed: " + (e?.message || e));
-      endConversation();
-    }
-  }, [isMicrophoneEnabled]);
-
-  const connectWS = useCallback(() => {
-    if (wsRef.current) return;
-    console.log('Attempting to connect to WebSocket at:', wsUrl);
-    setErrorMsg(null);
+  useEffect(() => {
+    // Initialize audio context
+    openaiVoiceService.initializeAudioContext();
     
-    try {
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        console.log('WebSocket connected successfully');
-        setConnected(true);
-        setErrorMsg(null);
-        if (isMicrophoneEnabled) {
-          startMicStream();
-        }
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data: MessageEventData = JSON.parse(event.data);
-          console.log('Received WebSocket message:', data.type);
-          
-          if (data.type === "error" && data.message) {
-            setErrorMsg("AI Service error: " + data.message);
-            return;
-          }
-          if (data.type === "proxy.connected") {
-            console.log("Proxy connection established");
-            return;
-          }
-          if (data.type === 'response.audio.delta' && data.delta) {
-            audioQueue.current.push(base64ToUint8(data.delta));
-            playAudioQueue();
-          }
-          if (data.type === 'response.audio_transcript.delta' && data.delta) {
-            setReplyText((prev) => prev + data.delta);
-          }
-          if (data.type === 'response.audio_transcript.done' && data.transcript) {
-            setReplyText((_) => data.transcript);
-          }
-        } catch (e) {
-          console.error('Error parsing WebSocket message:', e);
-        }
-      };
-
-      ws.onclose = (event) => {
-        console.log('WebSocket closed:', event.code, event.reason);
-        setConnected(false);
-        stopMicStream();
-        wsRef.current = null;
-        if (event.code !== 1000) {
-          setErrorMsg("Connection lost. Please try again.");
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setErrorMsg("Connection to AI service failed. Please check your internet connection and try again.");
-        setConnected(false);
-        stopMicStream();
-        wsRef.current = null;
-      };
-    } catch (error) {
-      console.error('Failed to create WebSocket:', error);
-      setErrorMsg("Failed to establish connection. Please try again.");
-    }
-  }, [isMicrophoneEnabled, playAudioQueue, startMicStream, stopMicStream]);
+    // Cleanup on unmount
+    return () => {
+      stopConversation();
+      openaiVoiceService.cleanup();
+    };
+  }, []);
 
   const startConversation = async () => {
-    setIsConnecting(true);
-    setErrorMsg(null);
-    setReplyText('');
-    
-    // Check for mic permission first
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop()); // We only wanted to check permission
-    } catch (e) {
-      toast.error("Microphone access is required to start the call.");
-      setErrorMsg("Please grant microphone access and try again.");
-      setIsConnecting(false);
+    if (!isMicrophoneEnabled) {
+      toast.error('Microfoon is uitgeschakeld');
       return;
     }
 
-    // Connect to WebSocket
-    connectWS();
-    
-    // Wait a bit for connection to establish
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsConnecting(false);
-    
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      setReplyText("Hello! I'm your AI wellness companion. I'm listening.");
-      setIsCallOngoing(true);
-    } else {
-      setErrorMsg("Failed to connect to AI service. Please try again.");
+    setIsActive(true);
+    setCurrentStatus('Gesprek gestart');
+    await startVoiceLoop();
+  };
+
+  const stopConversation = () => {
+    setIsActive(false);
+    setIsRecording(false);
+    setIsProcessing(false);
+    setIsPlayingAudio(false);
+    setCurrentStatus('Gesprek gestopt');
+    openaiVoiceService.stopCurrentAudio();
+    conversationHistory.current = [];
+  };
+
+  const startVoiceLoop = async () => {
+    if (!isActive) return;
+
+    try {
+      // Step 1: Start recording
+      setIsRecording(true);
+      setCurrentStatus('Luisteren... (spreek nu)');
+      
+      await openaiVoiceService.startRecording();
+      
+      // Record for 5 seconds or until manually stopped
+      setTimeout(async () => {
+        if (isRecording && isActive) {
+          await processVoiceInput();
+        }
+      }, 5000);
+
+    } catch (error) {
+      console.error('Error in voice loop:', error);
+      toast.error('Er ging iets mis met de microfoon');
+      setIsRecording(false);
+      setCurrentStatus('Fout opgetreden');
     }
   };
 
-  const endConversation = useCallback(() => {
-    wsRef.current?.close();
-    stopMicStream();
-    safeCloseAudioContext();
-    setIsCallOngoing(false);
-    setConnected(false);
-    setReplyText('');
-    setErrorMsg(null);
-    toast.message("Conversation ended.");
-  }, [stopMicStream, safeCloseAudioContext]);
+  const processVoiceInput = async () => {
+    if (!isActive) return;
+
+    try {
+      setIsRecording(false);
+      setIsProcessing(true);
+
+      // Step 2: Stop recording and get audio
+      setCurrentStatus('Audio verwerken...');
+      const audioBlob = await openaiVoiceService.stopRecording();
+
+      // Check if audio is too small (likely silence)
+      if (audioBlob.size < 1000) {
+        setCurrentStatus('Geen spraak gedetecteerd, opnieuw luisteren...');
+        setIsProcessing(false);
+        setTimeout(() => startVoiceLoop(), 1000);
+        return;
+      }
+
+      // Step 3: Transcribe with Whisper
+      setCurrentStatus('Transcriberen...');
+      const transcript = await openaiVoiceService.transcribeAudio(audioBlob);
+
+      if (!transcript.trim()) {
+        setCurrentStatus('Geen tekst gedetecteerd, opnieuw luisteren...');
+        setIsProcessing(false);
+        setTimeout(() => startVoiceLoop(), 1000);
+        return;
+      }
+
+      // Step 4: Generate AI response with GPT-4o
+      setCurrentStatus('AI denkt...');
+      const aiResponse = await openaiVoiceService.generateChatResponse(transcript, conversationHistory.current);
+
+      // Update conversation history
+      conversationHistory.current.push(
+        { role: 'user', content: transcript },
+        { role: 'assistant', content: aiResponse }
+      );
+
+      // Step 5: Generate and play speech
+      if (isSpeakerEnabled && isActive) {
+        setCurrentStatus('Audio genereren...');
+        const audioDataUrl = await openaiVoiceService.textToSpeech(aiResponse, 'nova');
+
+        setCurrentStatus('AI spreekt...');
+        setIsPlayingAudio(true);
+        setIsProcessing(false);
+
+        // Play audio and wait for it to finish
+        await openaiVoiceService.playAudio(audioDataUrl);
+        
+        setIsPlayingAudio(false);
+
+        // Step 6: Restart the loop automatically
+        if (isActive) {
+          setCurrentStatus('Klaar om opnieuw te luisteren...');
+          setTimeout(() => startVoiceLoop(), 1000);
+        }
+      } else {
+        setIsProcessing(false);
+        if (isActive) {
+          setTimeout(() => startVoiceLoop(), 1000);
+        }
+      }
+
+    } catch (error) {
+      console.error('Error processing voice input:', error);
+      toast.error('Er ging iets mis tijdens het verwerken');
+      setIsProcessing(false);
+      setIsPlayingAudio(false);
+      
+      if (isActive) {
+        setTimeout(() => startVoiceLoop(), 2000);
+      }
+    }
+  };
+
+  const handleBargeIn = () => {
+    if (isPlayingAudio) {
+      console.log('Barge-in detected - interrupting AI speech');
+      openaiVoiceService.stopCurrentAudio();
+      setIsPlayingAudio(false);
+      setIsProcessing(false);
+      setCurrentStatus('Onderbroken - opnieuw luisteren...');
+      setTimeout(() => startVoiceLoop(), 500);
+    }
+  };
 
   const toggleMicrophone = () => {
     const nextState = !isMicrophoneEnabled;
     setIsMicrophoneEnabled(nextState);
-    if (connected) {
-      if (nextState) {
-        startMicStream();
-      } else {
-        stopMicStream();
-      }
+    if (nextState === false && isActive) {
+      stopConversation();
     }
   };
 
   const toggleSpeaker = () => {
     setIsSpeakerEnabled(!isSpeakerEnabled);
+    if (isSpeakerEnabled && isPlayingAudio) {
+      openaiVoiceService.stopCurrentAudio();
+      setIsPlayingAudio(false);
+      if (isActive) {
+        setTimeout(() => startVoiceLoop(), 500);
+      }
+    }
   };
-
-  useEffect(() => {
-    return () => {
-      endConversation();
-    };
-  }, [endConversation]);
 
   return (
     <div
@@ -337,37 +223,26 @@ const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
         </CardHeader>
 
         <CardContent className="flex-1 flex flex-col items-center justify-center w-full px-8 pb-6 bg-transparent">
-          {errorMsg && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg w-full">
-              <p className="text-red-700 text-sm text-center font-bold">Error</p>
-              <p className="text-red-600 text-sm text-center">{errorMsg}</p>
-            </div>
-          )}
-
-          {!isCallOngoing ? (
+          {!isActive ? (
             <div className="flex flex-col items-center justify-center h-full space-y-6 w-full">
               <Button
                 onClick={startConversation}
                 className="relative bg-gradient-to-br from-purple-500 via-pink-400 to-red-400 hover:from-purple-600 hover:via-pink-500 hover:to-red-500 text-white w-32 h-32 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transform transition-all duration-300 text-2xl font-bold border-purple-200 border-4 mx-auto"
-                disabled={isConnecting}
+                disabled={!isMicrophoneEnabled}
                 style={{ fontSize: 26 }}
               >
-                {isConnecting ? (
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                ) : (
-                  "Start"
-                )}
+                Start
               </Button>
               <p className="text-gray-700 text-lg text-center font-medium">
-                {isConnecting ? "Connecting..." : "Tap to begin your session"}
+                Tap to begin your session
               </p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-between h-full w-full">
               <div className="flex-1 flex flex-col items-center justify-center p-4 w-full text-center">
-                <ListeningIndicator isListening={connected && isMicrophoneEnabled} size={120} />
-                <div className="mt-4 text-gray-800 text-lg font-semibold mb-2">AI Reply:</div>
-                <p className="whitespace-pre-wrap text-gray-600 min-h-[50px]">{replyText}</p>
+                <ListeningIndicator isListening={isRecording && isMicrophoneEnabled} size={120} />
+                <div className="mt-4 text-gray-800 text-lg font-semibold mb-2">Status:</div>
+                <p className="whitespace-pre-wrap text-gray-600 min-h-[50px]">{currentStatus}</p>
               </div>
 
               <div className="flex items-center justify-around w-full p-4 border-t border-gray-200">
@@ -379,10 +254,20 @@ const VoiceOnlyChat = ({ onClose }: VoiceOnlyChatProps) => {
                   {isSpeakerEnabled ? <Volume2 /> : <VolumeX />}
                   {isSpeakerEnabled ? "Mute" : "Unmute"}
                 </Button>
-                <Button variant="destructive" size="sm" onClick={endConversation} className="flex items-center gap-2">
+                <Button variant="destructive" size="sm" onClick={stopConversation} className="flex items-center gap-2">
                   <PhoneOff />
                   End Call
                 </Button>
+                
+                {/* Barge-in button */}
+                {isPlayingAudio && (
+                  <Button
+                    onClick={handleBargeIn}
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg animate-pulse"
+                  >
+                    Onderbreek AI
+                  </Button>
+                )}
               </div>
             </div>
           )}
