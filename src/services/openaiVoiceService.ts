@@ -1,0 +1,176 @@
+
+import { supabase } from '../integrations/supabase/client';
+
+class OpenAIVoiceService {
+  private audioContext: AudioContext | null = null;
+  private mediaRecorder: MediaRecorder | null = null;
+  private audioChunks: Blob[] = [];
+  private currentAudio: HTMLAudioElement | null = null;
+
+  async initializeAudioContext(): Promise<void> {
+    if (!this.audioContext) {
+      this.audioContext = new AudioContext();
+    }
+    
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+  }
+
+  async startRecording(): Promise<void> {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+
+      this.mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+
+      this.audioChunks = [];
+
+      this.mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          this.audioChunks.push(event.data);
+        }
+      };
+
+      this.mediaRecorder.start();
+      console.log('Recording started');
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      throw error;
+    }
+  }
+
+  async stopRecording(): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      if (!this.mediaRecorder) {
+        reject(new Error('No active recording'));
+        return;
+      }
+
+      this.mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+        
+        // Stop all tracks
+        if (this.mediaRecorder?.stream) {
+          this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+        
+        resolve(audioBlob);
+      };
+
+      this.mediaRecorder.stop();
+    });
+  }
+
+  async transcribeAudio(audioBlob: Blob): Promise<string> {
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+
+      const { data, error } = await supabase.functions.invoke('openai-speech-to-text', {
+        body: formData
+      });
+
+      if (error) {
+        console.error('Transcription error:', error);
+        throw error;
+      }
+
+      return data.text || '';
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+      throw error;
+    }
+  }
+
+  async generateChatResponse(userMessage: string, conversationHistory: Array<{role: string, content: string}> = []): Promise<string> {
+    try {
+      const messages = [
+        {
+          role: 'system',
+          content: 'Je bent een behulpzame AI-assistent die natuurlijke gesprekken voert. Houd je antwoorden kort en conversationeel, alsof je een normaal gesprek voert.'
+        },
+        ...conversationHistory,
+        {
+          role: 'user',
+          content: userMessage
+        }
+      ];
+
+      const { data, error } = await supabase.functions.invoke('openai-chat', {
+        body: {
+          messages,
+          maxTokens: 150
+        }
+      });
+
+      if (error) {
+        console.error('Chat error:', error);
+        throw error;
+      }
+
+      return data.response || 'Sorry, ik kon geen antwoord genereren.';
+    } catch (error) {
+      console.error('Error generating chat response:', error);
+      throw error;
+    }
+  }
+
+  async textToSpeech(text: string, voice: string = 'nova'): Promise<void> {
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-text-to-speech', {
+        body: {
+          text,
+          voice
+        }
+      });
+
+      if (error) {
+        console.error('Text-to-speech error:', error);
+        throw error;
+      }
+
+      // Stop current audio if playing
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+        this.currentAudio = null;
+      }
+
+      // Convert base64 to audio and play
+      const audioData = `data:audio/mp3;base64,${data.audioContent}`;
+      this.currentAudio = new Audio(audioData);
+      
+      await this.currentAudio.play();
+      console.log('Audio playing');
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      throw error;
+    }
+  }
+
+  stopCurrentAudio(): void {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
+  }
+
+  cleanup(): void {
+    this.stopCurrentAudio();
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
+  }
+}
+
+export const openaiVoiceService = new OpenAIVoiceService();
