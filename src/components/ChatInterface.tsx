@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -94,7 +95,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
       const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 150 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
 
-      const { data, error } = await supabase.functions.invoke('ai-chat', {
+      const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
         body: {
           prompt: inputMessage,
           context: conversationContext,

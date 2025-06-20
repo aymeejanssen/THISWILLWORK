@@ -189,6 +189,10 @@ const AssessmentSummary = () => {
         <VoiceOnlyChat onClose={() => {
         setShowFreeTrialChat(false);
         setShowPricing(true);
+      }} userProfile={{
+        name: 'Trial User',
+        currentStruggles: [primaryConcern],
+        preferredLanguage: 'English'
       }} />
       </>;
   }
