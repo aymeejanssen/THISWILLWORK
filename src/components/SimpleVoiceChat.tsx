@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mic, MicOff, Home, Volume2, VolumeX } from 'lucide-react';
@@ -17,21 +17,16 @@ interface Message {
 }
 
 const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
-  const [isListening, setIsListening] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentStatus, setCurrentStatus] = useState('');
-  const [isActive, setIsActive] = useState(false);
   
-  // Audio state
+  // Audio controls
   const [isMicEnabled, setIsMicEnabled] = useState(true);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  
-  // Refs for audio management
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isInterruptedRef = useRef(false);
 
   useEffect(() => {
     // Initialize audio context
@@ -59,92 +54,71 @@ const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
     }
 
     setIsActive(true);
-    setCurrentStatus('Gesprek gestart - begin te praten...');
-    await startListening();
+    setCurrentStatus('Gesprek gestart');
+    await startVoiceLoop();
   };
 
   const stopConversation = () => {
     setIsActive(false);
-    setIsListening(false);
+    setIsRecording(false);
     setIsProcessing(false);
     setIsPlayingAudio(false);
     setCurrentStatus('Gesprek gestopt');
-    
-    // Clean up audio and timeouts
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
-    
-    if (silenceTimeoutRef.current) {
-      clearTimeout(silenceTimeoutRef.current);
-      silenceTimeoutRef.current = null;
-    }
-    
     openaiVoiceService.stopCurrentAudio();
   };
 
-  const startListening = async () => {
-    if (!isActive || isListening) return;
+  const startVoiceLoop = async () => {
+    if (!isActive) return;
 
     try {
-      setIsListening(true);
-      setCurrentStatus('Luisteren...');
-      isInterruptedRef.current = false;
+      // Step 1: Start recording
+      setIsRecording(true);
+      setCurrentStatus('Luisteren... (spreek nu)');
       
       await openaiVoiceService.startRecording();
       
-      // Set silence timeout - if no speech detected, process what we have
-      silenceTimeoutRef.current = setTimeout(() => {
-        if (isListening && !isInterruptedRef.current) {
-          stopListeningAndProcess();
+      // Record for 5 seconds or until manually stopped
+      setTimeout(async () => {
+        if (isRecording && isActive) {
+          await processVoiceInput();
         }
-      }, 3000); // 3 seconds of silence
-      
+      }, 5000);
+
     } catch (error) {
-      console.error('Failed to start listening:', error);
-      toast.error('Kon niet beginnen met luisteren');
-      setIsListening(false);
-      setCurrentStatus('Fout bij luisteren');
+      console.error('Error in voice loop:', error);
+      toast.error('Er ging iets mis met de microfoon');
+      setIsRecording(false);
+      setCurrentStatus('Fout opgetreden');
     }
   };
 
-  const stopListeningAndProcess = async () => {
-    if (!isListening) return;
+  const processVoiceInput = async () => {
+    if (!isActive) return;
 
     try {
-      setIsListening(false);
+      setIsRecording(false);
       setIsProcessing(true);
-      setCurrentStatus('Verwerken...');
 
-      // Clear silence timeout
-      if (silenceTimeoutRef.current) {
-        clearTimeout(silenceTimeoutRef.current);
-        silenceTimeoutRef.current = null;
-      }
-
-      // Stop recording and get audio
+      // Step 2: Stop recording and get audio
+      setCurrentStatus('Audio verwerken...');
       const audioBlob = await openaiVoiceService.stopRecording();
-      
-      if (audioBlob.size < 1000) { // Very small audio file, probably silence
-        if (isActive) {
-          setCurrentStatus('Geen spraak gedetecteerd, opnieuw luisteren...');
-          setIsProcessing(false);
-          setTimeout(() => startListening(), 500);
-        }
+
+      // Check if audio is too small (likely silence)
+      if (audioBlob.size < 1000) {
+        setCurrentStatus('Geen spraak gedetecteerd, opnieuw luisteren...');
+        setIsProcessing(false);
+        setTimeout(() => startVoiceLoop(), 1000);
         return;
       }
 
-      // Step 1: Transcribe with Whisper
+      // Step 3: Transcribe with Whisper
       setCurrentStatus('Transcriberen...');
       const transcript = await openaiVoiceService.transcribeAudio(audioBlob);
 
       if (!transcript.trim()) {
-        if (isActive) {
-          setCurrentStatus('Geen tekst gedetecteerd, opnieuw luisteren...');
-          setIsProcessing(false);
-          setTimeout(() => startListening(), 500);
-        }
+        setCurrentStatus('Geen tekst gedetecteerd, opnieuw luisteren...');
+        setIsProcessing(false);
+        setTimeout(() => startVoiceLoop(), 1000);
         return;
       }
 
@@ -156,7 +130,7 @@ const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
       };
       setMessages(prev => [...prev, userMessage]);
 
-      // Step 2: Send to GPT-4o
+      // Step 4: Generate AI response with GPT-4o
       setCurrentStatus('AI denkt...');
       const conversationHistory = messages.map(msg => ({
         role: msg.role,
@@ -173,113 +147,69 @@ const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
       };
       setMessages(prev => [...prev, aiMessage]);
 
-      // Step 3: Convert to speech and play
+      // Step 5: Generate and play speech
       if (isSpeakerEnabled && isActive) {
         setCurrentStatus('Audio genereren...');
-        setIsPlayingAudio(true);
-        
-        // Generate audio
-        const { data, error } = await openaiVoiceService.supabase.functions.invoke('openai-text-to-speech', {
-          body: {
-            text: aiResponse,
-            voice: 'nova'
-          }
-        });
+        const audioDataUrl = await openaiVoiceService.textToSpeech(aiResponse, 'nova');
 
-        if (error) {
-          console.error('TTS error:', error);
-          toast.error('Fout bij audio generatie');
-          setIsPlayingAudio(false);
-          setIsProcessing(false);
-          if (isActive) {
-            setTimeout(() => startListening(), 500);
-          }
-          return;
-        }
-
-        // Play audio
-        const audioData = `data:audio/mp3;base64,${data.audioContent}`;
-        const audio = new Audio(audioData);
-        currentAudioRef.current = audio;
-        
         setCurrentStatus('AI spreekt...');
+        setIsPlayingAudio(true);
+        setIsProcessing(false);
+
+        // Play audio and wait for it to finish
+        await openaiVoiceService.playAudio(audioDataUrl);
         
-        audio.onended = () => {
-          setIsPlayingAudio(false);
-          setIsProcessing(false);
-          currentAudioRef.current = null;
-          
-          // Automatically start listening again for next input
-          if (isActive && !isInterruptedRef.current) {
-            setCurrentStatus('Klaar om te luisteren...');
-            setTimeout(() => startListening(), 1000);
-          }
-        };
+        setIsPlayingAudio(false);
 
-        audio.onerror = () => {
-          console.error('Audio playback error');
-          setIsPlayingAudio(false);
-          setIsProcessing(false);
-          currentAudioRef.current = null;
-          
-          if (isActive) {
-            setTimeout(() => startListening(), 500);
-          }
-        };
-
-        await audio.play();
+        // Step 6: Restart the loop automatically
+        if (isActive) {
+          setCurrentStatus('Klaar om opnieuw te luisteren...');
+          setTimeout(() => startVoiceLoop(), 1000);
+        }
       } else {
         setIsProcessing(false);
         if (isActive) {
-          setTimeout(() => startListening(), 500);
+          setTimeout(() => startVoiceLoop(), 1000);
         }
       }
 
     } catch (error) {
-      console.error('Error in voice processing:', error);
-      toast.error('Er ging iets mis in het gesprek');
+      console.error('Error processing voice input:', error);
+      toast.error('Er ging iets mis tijdens het verwerken');
       setIsProcessing(false);
       setIsPlayingAudio(false);
       
       if (isActive) {
-        setTimeout(() => startListening(), 1000);
+        setTimeout(() => startVoiceLoop(), 2000);
       }
     }
   };
 
-  // Barge-in: interrupt when user starts speaking during AI playback
-  const handleBargein = () => {
-    if (isPlayingAudio && currentAudioRef.current) {
+  const handleBargeIn = () => {
+    if (isPlayingAudio) {
       console.log('Barge-in detected - interrupting AI speech');
-      isInterruptedRef.current = true;
-      
-      // Stop current audio
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
+      openaiVoiceService.stopCurrentAudio();
       setIsPlayingAudio(false);
       setIsProcessing(false);
-      
-      // Start listening immediately
-      setCurrentStatus('Onderbroken - luisteren...');
-      setTimeout(() => startListening(), 100);
+      setCurrentStatus('Onderbroken - opnieuw luisteren...');
+      setTimeout(() => startVoiceLoop(), 500);
     }
   };
 
   const toggleMicrophone = () => {
     setIsMicEnabled(!isMicEnabled);
-    if (!isMicEnabled && isActive) {
+    if (isMicEnabled && isActive) {
       stopConversation();
     }
   };
 
   const toggleSpeaker = () => {
     setIsSpeakerEnabled(!isSpeakerEnabled);
-    if (!isSpeakerEnabled && currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
+    if (isSpeakerEnabled && isPlayingAudio) {
+      openaiVoiceService.stopCurrentAudio();
       setIsPlayingAudio(false);
       if (isActive) {
-        setTimeout(() => startListening(), 500);
+        setTimeout(() => startVoiceLoop(), 500);
       }
     }
   };
@@ -343,7 +273,7 @@ const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
             {currentStatus && (
               <div className="flex justify-center">
                 <div className={`px-4 py-2 rounded-lg text-sm ${
-                  isListening ? 'bg-green-100 text-green-800' :
+                  isRecording ? 'bg-red-100 text-red-800' :
                   isProcessing ? 'bg-blue-100 text-blue-800' :
                   isPlayingAudio ? 'bg-purple-100 text-purple-800' :
                   'bg-gray-100 text-gray-800'
@@ -354,7 +284,7 @@ const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
             )}
           </div>
 
-          {/* Conversation Controls */}
+          {/* Controls */}
           <div className="flex justify-center gap-4">
             {!isActive ? (
               <Button
@@ -373,10 +303,20 @@ const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
                   Stop Gesprek
                 </Button>
                 
-                {/* Barge-in button - only show during AI speech */}
+                {/* Manual stop recording button */}
+                {isRecording && (
+                  <Button
+                    onClick={processVoiceInput}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+                  >
+                    Stop Opname
+                  </Button>
+                )}
+                
+                {/* Barge-in button */}
                 {isPlayingAudio && (
                   <Button
-                    onClick={handleBargein}
+                    onClick={handleBargeIn}
                     className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg animate-pulse"
                   >
                     Onderbreek AI
@@ -389,13 +329,13 @@ const SimpleVoiceChat = ({ onClose }: SimpleVoiceChatProps) => {
           <p className="text-center text-gray-600 mt-4 text-sm">
             {!isActive 
               ? 'Klik "Start Gesprek" om te beginnen'
-              : isListening 
-              ? 'Spreek nu... (automatisch verwerkt na stilte)'
+              : isRecording 
+              ? 'Spreek nu... (automatisch gestopt na 5 seconden)'
               : isProcessing 
               ? 'Verwerken van je bericht...'
               : isPlayingAudio
               ? 'AI spreekt... (je kunt onderbreken)'
-              : 'Klaar om te luisteren...'
+              : 'Wachten op volgende input...'
             }
           </p>
         </CardContent>

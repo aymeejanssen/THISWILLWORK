@@ -131,7 +131,7 @@ class OpenAIVoiceService {
     }
   }
 
-  async textToSpeech(text: string, voice: string = 'nova'): Promise<void> {
+  async textToSpeech(text: string, voice: string = 'nova'): Promise<string> {
     try {
       const { data, error } = await supabase.functions.invoke('openai-text-to-speech', {
         body: {
@@ -145,22 +145,37 @@ class OpenAIVoiceService {
         throw error;
       }
 
+      // Return base64 audio data
+      return `data:audio/mp3;base64,${data.audioContent}`;
+    } catch (error) {
+      console.error('Error generating speech:', error);
+      throw error;
+    }
+  }
+
+  async playAudio(audioDataUrl: string): Promise<void> {
+    return new Promise((resolve, reject) => {
       // Stop current audio if playing
       if (this.currentAudio) {
         this.currentAudio.pause();
         this.currentAudio = null;
       }
 
-      // Convert base64 to audio and play
-      const audioData = `data:audio/mp3;base64,${data.audioContent}`;
-      this.currentAudio = new Audio(audioData);
+      this.currentAudio = new Audio(audioDataUrl);
       
-      await this.currentAudio.play();
-      console.log('Audio playing');
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      throw error;
-    }
+      this.currentAudio.onended = () => {
+        this.currentAudio = null;
+        resolve();
+      };
+
+      this.currentAudio.onerror = (error) => {
+        console.error('Audio playback error:', error);
+        this.currentAudio = null;
+        reject(error);
+      };
+
+      this.currentAudio.play().catch(reject);
+    });
   }
 
   stopCurrentAudio(): void {
