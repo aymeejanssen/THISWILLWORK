@@ -6,6 +6,9 @@ class OpenAIVoiceService {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private currentAudio: HTMLAudioElement | null = null;
+  
+  // Make supabase accessible for the component
+  public supabase = supabase;
 
   async initializeAudioContext(): Promise<void> {
     if (!this.audioContext) {
@@ -94,11 +97,14 @@ class OpenAIVoiceService {
 
   async generateChatResponse(userMessage: string, conversationHistory: Array<{role: string, content: string}> = []): Promise<string> {
     try {
+      // Create system message for natural conversation
+      const systemMessage = {
+        role: 'system',
+        content: 'Je bent een behulpzame AI-assistent die natuurlijke gesprekken voert. Houd je antwoorden kort en conversationeel (maximaal 2-3 zinnen), alsof je een normaal gesprek voert. Spreek Nederlands en wees vriendelijk en persoonlijk.'
+      };
+
       const messages = [
-        {
-          role: 'system',
-          content: 'Je bent een behulpzame AI-assistent die natuurlijke gesprekken voert. Houd je antwoorden kort en conversationeel, alsof je een normaal gesprek voert.'
-        },
+        systemMessage,
         ...conversationHistory,
         {
           role: 'user',
@@ -109,7 +115,7 @@ class OpenAIVoiceService {
       const { data, error } = await supabase.functions.invoke('openai-chat', {
         body: {
           messages,
-          maxTokens: 150
+          maxTokens: 100 // Keep responses short for natural conversation
         }
       });
 
