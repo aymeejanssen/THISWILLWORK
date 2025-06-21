@@ -6,17 +6,27 @@ import { MessageCircle, Brain, Heart, Users } from "lucide-react";
 import FeatureCard from "@/components/FeatureCard";
 import TherapistSection from "@/components/TherapistSection";
 import OnboardingWrapper from "@/components/OnboardingWrapper";
+import { useState } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const handleCloseOnboarding = () => {
-    // Handle onboarding close - could navigate somewhere or just close modal
+    setShowOnboarding(false);
     console.log('Onboarding closed');
   };
 
+  const handleStartAssessment = () => {
+    setShowOnboarding(true);
+  };
+
   return (
-    <OnboardingWrapper onClose={handleCloseOnboarding}>
+    <>
+      {showOnboarding && (
+        <OnboardingWrapper onClose={handleCloseOnboarding} />
+      )}
+      
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         {/* Hero Section */}
         <div className="container mx-auto px-4 py-16">
@@ -31,7 +41,7 @@ const Index = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={() => navigate("/assessment")}
+                onClick={handleStartAssessment}
                 size="lg"
                 className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
               >
@@ -103,7 +113,7 @@ const Index = () => {
                   <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl font-bold text-teal-600">3</span>
                   </div>
-                  <h3 className="text-xml font-semibold mb-2">Take Action</h3>
+                  <h3 className="text-xl font-semibold mb-2">Take Action</h3>
                   <p className="text-gray-600">
                     Connect with professionals and start your wellness journey
                   </p>
@@ -115,7 +125,7 @@ const Index = () => {
           <TherapistSection />
         </div>
       </div>
-    </OnboardingWrapper>
+    </>
   );
 };
 
