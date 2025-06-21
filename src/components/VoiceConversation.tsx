@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,16 +9,22 @@ interface VoiceConversationProps {
   onTimeUp: () => void;
   onClose: () => void;
   timeLimit: number; // in milliseconds
+  assessmentResponses?: any; // Assessment responses to personalize the conversation
 }
 
-const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose, timeLimit }) => {
+const VoiceConversation: React.FC<VoiceConversationProps> = ({ 
+  onTimeUp, 
+  onClose, 
+  timeLimit,
+  assessmentResponses 
+}) => {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const [isActive, setIsActive] = useState(true);
   const [conversationStarted, setConversationStarted] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState("Ready to start your voice conversation");
+  const [currentStatus, setCurrentStatus] = useState("Ready to start your intake session");
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -66,28 +71,37 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
     if (!isActive) return;
     
     setConversationStarted(true);
-    
-    // Welcome message
-    setCurrentStatus("Starting conversation...");
+    setCurrentStatus("AI is reviewing your assessment...");
     setIsSpeaking(true);
     
     try {
-      const welcomeMessage = "Hi! I'm here to listen and help you process your thoughts and feelings. You have 5 minutes to talk with me. What would you like to explore today?";
-      
+      // Get personalized welcome message based on assessment
       const { data, error } = await supabase.functions.invoke('openai-voice-chat', {
-        body: { action: 'speak', text: welcomeMessage }
+        body: { 
+          action: 'start_session', 
+          assessmentResponses: assessmentResponses 
+        }
       });
 
       if (error) throw error;
 
-      if (data?.audioContent) {
-        await playAudio(data.audioContent);
+      if (data?.response) {
+        // Convert the personalized response to speech
+        const ttsResponse = await supabase.functions.invoke('openai-voice-chat', {
+          body: { action: 'speak', text: data.response }
+        });
+
+        if (ttsResponse.error) throw ttsResponse.error;
+
+        if (ttsResponse.data?.audioContent) {
+          await playAudio(ttsResponse.data.audioContent);
+        }
       }
     } catch (error) {
-      console.error('Error with welcome message:', error);
+      console.error('Error starting session:', error);
       toast({
         title: "Error",
-        description: "Could not start conversation",
+        description: "Could not start intake session",
         variant: "destructive",
       });
     } finally {
@@ -338,7 +352,7 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
             <CardTitle className="text-xl font-bold text-purple-700">
-              Voice Therapy Session
+              Intake Session
             </CardTitle>
             <div className="flex items-center gap-2 mt-2">
               <Clock className="h-4 w-4 text-gray-500" />
@@ -363,8 +377,7 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
                     Natural Voice Conversation
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Speak naturally - I'll listen and respond automatically. 
-                    No need to click anything once we start!
+                    I'll start by discussing your assessment responses, then we can explore your thoughts and feelings together.
                   </p>
                 </div>
               </div>
@@ -376,7 +389,7 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
                 className="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4"
               >
                 <Mic className="w-5 h-5 mr-2" />
-                Start Voice Conversation
+                Start Intake Session
               </Button>
             </div>
           ) : (
@@ -442,7 +455,7 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
                 size="sm"
                 className="text-red-600 border-red-200 hover:bg-red-50"
               >
-                End Conversation
+                End Session
               </Button>
             </div>
           )}

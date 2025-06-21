@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -170,10 +169,10 @@ const AssessmentSummary = () => {
               <CardContent className="p-8 text-center">
                 <MessageCircle className="h-12 w-12 text-purple-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-purple-700 mb-3">
-                  Talk It Through with AI
+                  Personalized Intake Session
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Ready to dive deeper? Have a natural voice conversation with our AI therapist for 5 minutes - completely free.
+                  Ready to dive deeper? Have a voice conversation with our AI therapist who will discuss your specific assessment responses - completely free for 5 minutes.
                 </p>
                 <Button 
                   onClick={handleStartVoiceChat}
@@ -181,7 +180,7 @@ const AssessmentSummary = () => {
                   className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
                   disabled={conversationTimeUp}
                 >
-                  {conversationTimeUp ? "Free Session Complete" : "Start Free 5-Minute Conversation"}
+                  {conversationTimeUp ? "Free Session Complete" : "Start Free Intake Session"}
                 </Button>
                 {conversationTimeUp && (
                   <p className="text-sm text-gray-500 mt-2">
@@ -200,6 +199,7 @@ const AssessmentSummary = () => {
           onTimeUp={handleTimeUp}
           onClose={() => setShowVoiceChat(false)}
           timeLimit={5 * 60 * 1000} // 5 minutes in milliseconds
+          assessmentResponses={responses}
         />
       )}
 

@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -13,11 +12,61 @@ serve(async (req) => {
   }
 
   try {
-    const { action, audio, text } = await req.json();
+    const { action, audio, text, assessmentResponses } = await req.json();
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
+    }
+
+    // New action: Start personalized session based on assessment
+    if (action === 'start_session') {
+      console.log('Starting personalized session with assessment data:', assessmentResponses);
+
+      // Create a personalized opening based on assessment responses
+      let personalizedPrompt = `You are a warm, empathetic AI therapist starting an intake session. Based on the user's assessment responses, provide a personalized opening that:
+
+1. Briefly acknowledges 1-2 key themes from their responses 
+2. Shows understanding and validation
+3. Asks one thoughtful follow-up question to explore their experience further
+4. Keep it conversational and under 100 words since it will be spoken aloud
+
+Assessment responses: ${JSON.stringify(assessmentResponses)}
+
+Create a warm, personalized opening that makes them feel heard and understood.`;
+
+      const chatResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: personalizedPrompt
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.8,
+        }),
+      });
+
+      if (!chatResponse.ok) {
+        throw new Error(`GPT-4 API error: ${await chatResponse.text()}`);
+      }
+
+      const chatResult = await chatResponse.json();
+      const personalizedOpening = chatResult.choices[0]?.message?.content || 'Hello! I\'ve reviewed your assessment and I\'m here to support you. What would you like to explore together today?';
+      
+      console.log('Personalized opening:', personalizedOpening);
+
+      return new Response(
+        JSON.stringify({ response: personalizedOpening }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Step 1: Speech-to-Text (Whisper)
