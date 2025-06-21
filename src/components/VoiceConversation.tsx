@@ -321,9 +321,7 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({
       <Card className="w-full max-w-md max-h-[90vh] overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
-            <CardTitle className="text-xl font-bold text-purple-700">
-              Intake Session
-            </CardTitle>
+            <CardTitle className="text-xl font-bold text-purple-700">Free Intake Session</CardTitle>
             <div className="flex items-center gap-2 mt-2">
               <Clock className="h-4 w-4 text-gray-500" />
               <span className={`font-mono text-lg ${timeRemaining < 60000 ? 'text-red-600' : 'text-gray-700'}`}>
