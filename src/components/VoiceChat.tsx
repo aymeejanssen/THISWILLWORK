@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mic, MicOff, Volume2 } from 'lucide-react';
@@ -52,15 +52,15 @@ const VoiceChat: React.FC = () => {
       };
 
       mediaRecorderRef.current.onstop = () => {
-        processAudioRecording();
+        processSpeechToSpeech();
       };
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
       
       toast({
-        title: "Recording started",
-        description: "Speak now...",
+        title: "Listening...",
+        description: "Speak now, I'm listening",
       });
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -80,7 +80,7 @@ const VoiceChat: React.FC = () => {
     }
   };
 
-  const processAudioRecording = async () => {
+  const processSpeechToSpeech = async () => {
     if (audioChunksRef.current.length === 0) return;
 
     setIsProcessing(true);
@@ -91,9 +91,9 @@ const VoiceChat: React.FC = () => {
       const arrayBuffer = await audioBlob.arrayBuffer();
       const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-      console.log('Processing audio chain...');
+      console.log('Starting speech-to-speech chain...');
 
-      // Step 1: Transcribe audio
+      // Step 1: Transcribe speech to text
       const transcribeResponse = await supabase.functions.invoke('ai-voice-conversation', {
         body: { action: 'transcribe', audio: base64Audio }
       });
@@ -102,38 +102,38 @@ const VoiceChat: React.FC = () => {
         throw new Error(transcribeResponse.error.message);
       }
 
-      const transcribedText = transcribeResponse.data.text;
-      console.log('Transcribed text:', transcribedText);
+      const userText = transcribeResponse.data.text;
+      console.log('User said:', userText);
       
-      if (!transcribedText || transcribedText.trim().length === 0) {
+      if (!userText || userText.trim().length === 0) {
         throw new Error('No speech detected');
       }
 
-      addMessage(transcribedText, true);
+      addMessage(userText, true);
 
       // Step 2: Get AI response
       const chatResponse = await supabase.functions.invoke('ai-voice-conversation', {
-        body: { action: 'chat', text: transcribedText }
+        body: { action: 'chat', text: userText }
       });
 
       if (chatResponse.error) {
         throw new Error(chatResponse.error.message);
       }
 
-      const aiResponseText = chatResponse.data.response;
-      console.log('AI response:', aiResponseText);
-      addMessage(aiResponseText, false);
+      const aiText = chatResponse.data.response;
+      console.log('AI responded:', aiText);
+      addMessage(aiText, false);
 
-      // Step 3: Convert to speech
+      // Step 3: Convert AI response to speech and play it
       const ttsResponse = await supabase.functions.invoke('ai-voice-conversation', {
-        body: { action: 'speak', text: aiResponseText }
+        body: { action: 'speak', text: aiText }
       });
 
       if (ttsResponse.error) {
         throw new Error(ttsResponse.error.message);
       }
 
-      // Play the audio
+      // Play the AI's voice response
       const audioContent = ttsResponse.data.audioContent;
       const audioData = atob(audioContent);
       const audioArray = new Uint8Array(audioData.length);
@@ -147,20 +147,21 @@ const VoiceChat: React.FC = () => {
       
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
+        console.log('AI speech completed');
       };
       
       await audio.play();
 
       toast({
-        title: "Response generated",
-        description: "AI has responded to your message",
+        title: "Complete!",
+        description: "Speech-to-speech conversation complete",
       });
 
     } catch (error) {
-      console.error('Error processing audio:', error);
+      console.error('Speech-to-speech error:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process audio",
+        description: error instanceof Error ? error.message : "Speech processing failed",
         variant: "destructive",
       });
     } finally {
@@ -173,9 +174,9 @@ const VoiceChat: React.FC = () => {
       <Card>
         <CardContent className="p-6">
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800">Voice Conversation</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Speech-to-Speech AI</h2>
             <p className="text-gray-600">
-              Click the button below to start talking with the AI
+              Have a natural voice conversation with AI. Click to speak, release to get an instant voice response.
             </p>
             
             <div className="flex justify-center">
@@ -189,23 +190,22 @@ const VoiceChat: React.FC = () => {
                     ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
                     : 'bg-blue-500 hover:bg-blue-600'
                   }
-                  ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
                 {isProcessing ? (
                   <>
                     <Volume2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processing...
+                    Processing Speech...
                   </>
                 ) : isRecording ? (
                   <>
                     <MicOff className="w-5 h-5 mr-2" />
-                    Stop Recording
+                    Stop & Process
                   </>
                 ) : (
                   <>
                     <Mic className="w-5 h-5 mr-2" />
-                    Start Conversation
+                    Start Speaking
                   </>
                 )}
               </Button>
@@ -213,13 +213,13 @@ const VoiceChat: React.FC = () => {
 
             {isRecording && (
               <div className="text-red-500 font-medium animate-pulse">
-                🔴 Recording... Click to stop
+                🔴 Recording... Click to stop and get AI response
               </div>
             )}
 
             {isProcessing && (
               <div className="text-blue-500 font-medium">
-                Processing your message through AI chain...
+                🧠 Processing your speech through AI...
               </div>
             )}
           </div>
@@ -229,7 +229,7 @@ const VoiceChat: React.FC = () => {
       {messages.length > 0 && (
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Conversation History</h3>
+            <h3 className="text-xl font-semibold mb-4">Conversation</h3>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {messages.map((message) => (
                 <div
@@ -252,8 +252,8 @@ const VoiceChat: React.FC = () => {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
       )}
     </div>
   );
