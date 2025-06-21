@@ -46,7 +46,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-300 via-pink-200 to-yellow-200">
       {showVoiceChat && (
         <OpenAIVoiceChat />
       )}
@@ -55,21 +55,21 @@ const Index = () => {
       <div className="container mx-auto px-4 py-24">
         <div className="text-center max-w-4xl mx-auto">
           {/* Floating Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-6 py-3 mb-12 border border-white/20">
-            <Sparkles className="h-4 w-4 text-white/80" />
-            <span className="text-white/80 text-sm font-medium">AI-Powered Mental Wellness</span>
+          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-6 py-3 mb-12 border border-white/30">
+            <Sparkles className="h-4 w-4 text-gray-800" />
+            <span className="text-gray-800 text-sm font-medium">AI-Powered Mental Wellness</span>
           </div>
 
           {/* Main Heading */}
           <h1 className="text-6xl md:text-8xl font-light text-white mb-8 tracking-tight">
             Welcome to{" "}
-            <span className="font-medium bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <span className="font-medium bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-500 bg-clip-text text-transparent">
               Mynd Ease
             </span>
           </h1>
           
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-white/70 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-xl md:text-2xl text-gray-800 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
             Your personal AI companion for mental wellness. Get culturally-aware support 
             in your language, available 24/7 for judgment-free guidance.
           </p>
@@ -79,12 +79,12 @@ const Index = () => {
             <Button 
               onClick={handleBeginJourney}
               size="lg"
-              className="bg-white hover:bg-gray-100 text-gray-900 px-12 py-6 text-lg font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+              className="bg-gray-900 hover:bg-gray-800 text-white px-12 py-6 text-lg font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border-0"
             >
               Get Started
               <ArrowRight className="ml-3 h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-2 text-white/60">
+            <div className="flex items-center gap-2 text-gray-700">
               <Shield className="h-4 w-4" />
               <span className="text-sm font-medium">Private & Secure</span>
             </div>
@@ -93,50 +93,50 @@ const Index = () => {
           {/* Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-2xl mx-auto mb-32">
             <div className="text-center">
-              <div className="text-4xl font-light text-white mb-2">24/7</div>
-              <div className="text-white/60 font-medium">AI Support</div>
+              <div className="text-4xl font-light text-gray-900 mb-2">24/7</div>
+              <div className="text-gray-700 font-medium">AI Support</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-light text-white mb-2">50+</div>
-              <div className="text-white/60 font-medium">Languages</div>
+              <div className="text-4xl font-light text-gray-900 mb-2">50+</div>
+              <div className="text-gray-700 font-medium">Languages</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-light text-white mb-2">100%</div>
-              <div className="text-white/60 font-medium">Private</div>
+              <div className="text-4xl font-light text-gray-900 mb-2">100%</div>
+              <div className="text-gray-700 font-medium">Private</div>
             </div>
           </div>
         </div>
 
         {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-32">
-          <div className="group bg-white/10 backdrop-blur-md rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-300 hover:bg-white/15">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20 transition-colors">
-              <Heart className="h-6 w-6 text-white" />
+          <div className="group bg-white/30 backdrop-blur-md rounded-3xl p-10 border border-white/40 hover:border-white/60 transition-all duration-300 hover:bg-white/40">
+            <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-purple-200 transition-colors">
+              <Heart className="h-6 w-6 text-purple-600" />
             </div>
-            <h3 className="text-2xl font-medium text-white mb-4">Emotional Support</h3>
-            <p className="text-white/70 leading-relaxed font-light">
+            <h3 className="text-2xl font-medium text-gray-900 mb-4">Emotional Support</h3>
+            <p className="text-gray-700 leading-relaxed font-light">
               Chat with our culturally-aware AI companion that understands your background, 
               language, and emotional needs. Available 24/7 for judgment-free support.
             </p>
           </div>
 
-          <div className="group bg-white/10 backdrop-blur-md rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-300 hover:bg-white/15">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20 transition-colors">
-              <Brain className="h-6 w-6 text-white" />
+          <div className="group bg-white/30 backdrop-blur-md rounded-3xl p-10 border border-white/40 hover:border-white/60 transition-all duration-300 hover:bg-white/40">
+            <div className="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-pink-200 transition-colors">
+              <Brain className="h-6 w-6 text-pink-600" />
             </div>
-            <h3 className="text-2xl font-medium text-white mb-4">Intelligent Coaching</h3>
-            <p className="text-white/70 leading-relaxed font-light">
+            <h3 className="text-2xl font-medium text-gray-900 mb-4">Intelligent Coaching</h3>
+            <p className="text-gray-700 leading-relaxed font-light">
               Receive personalized guidance and coping strategies powered by advanced AI. 
               Get practical exercises and insights tailored to your unique situation.
             </p>
           </div>
 
-          <div className="group bg-white/10 backdrop-blur-md rounded-3xl p-10 border border-white/20 hover:border-white/30 transition-all duration-300 hover:bg-white/15">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20 transition-colors">
-              <MessageCircle className="h-6 w-6 text-white" />
+          <div className="group bg-white/30 backdrop-blur-md rounded-3xl p-10 border border-white/40 hover:border-white/60 transition-all duration-300 hover:bg-white/40">
+            <div className="w-12 h-12 bg-yellow-100 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-yellow-200 transition-colors">
+              <MessageCircle className="h-6 w-6 text-yellow-600" />
             </div>
-            <h3 className="text-2xl font-medium text-white mb-4">Instant Conversations</h3>
-            <p className="text-white/70 leading-relaxed font-light">
+            <h3 className="text-2xl font-medium text-gray-900 mb-4">Instant Conversations</h3>
+            <p className="text-gray-700 leading-relaxed font-light">
               Start meaningful conversations anytime you need support. No appointments, 
               no waiting - your AI wellness companion is always ready to listen and help.
             </p>
@@ -146,20 +146,20 @@ const Index = () => {
         {/* Reviews Section */}
         <div className="mb-32">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-light text-white mb-6 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-6 tracking-tight">
               Stories of Hope & Healing
             </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto font-light">
+            <p className="text-xl text-gray-700 max-w-2xl mx-auto font-light">
               Real people sharing how MindEase helped them through their darkest moments
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {reviews.map((review, index) => (
-              <div key={index} className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 hover:border-gray-300/50 transition-all duration-300 hover:bg-white/80">
+              <div key={index} className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-white/50 hover:border-white/70 transition-all duration-300 hover:bg-white/80">
                 <div className="flex items-center mb-6">
                   {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-gray-400 fill-current" />
+                    <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
                   ))}
                 </div>
                 <p className="text-gray-700 leading-relaxed mb-8 font-light italic">
@@ -176,13 +176,13 @@ const Index = () => {
 
         {/* Trust Indicators */}
         <div className="text-center">
-          <p className="text-white/60 mb-8 font-light">Trusted by people from over 50 countries</p>
+          <p className="text-gray-700 mb-8 font-light">Trusted by people from over 50 countries</p>
           <div className="flex justify-center items-center gap-12">
             {countryStats.map((stat, index) => (
-              <div key={index} className="flex flex-col items-center gap-3 bg-white/40 backdrop-blur-sm rounded-2xl p-6 min-w-[90px] border border-gray-200/30">
+              <div key={index} className="flex flex-col items-center gap-3 bg-white/40 backdrop-blur-sm rounded-2xl p-6 min-w-[90px] border border-white/50">
                 <div className="text-2xl">{stat.flag}</div>
                 <div className="text-gray-900 font-medium text-sm">{stat.users}</div>
-                <div className="text-gray-500 text-xs font-light">{stat.country}</div>
+                <div className="text-gray-600 text-xs font-light">{stat.country}</div>
               </div>
             ))}
           </div>
