@@ -2,8 +2,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -21,6 +19,7 @@ serve(async (req) => {
     console.log('Generating insights for:', { primaryConcern, responseCount: Object.keys(responses).length });
     
     // Check if API key is available
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       console.error('OpenAI API key not found in environment variables');
       throw new Error('OpenAI API key not configured');
@@ -83,10 +82,13 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text or markdown for
 
     console.log('Making OpenAI API call...');
 
+    // Clean the API key to ensure it's a valid string
+    const cleanApiKey = openAIApiKey.trim();
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${cleanApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
