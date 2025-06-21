@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Mic, MicOff, Volume2, VolumeX, Settings, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 // OpenAI TTS voices only
 const openAIVoices = [
@@ -41,7 +42,6 @@ const VoiceOnlyChat = () => {
 
   const SILENCE_THRESHOLD = 0.01;
   const SILENCE_DURATION = 1200; // 1.2 seconds
-  const API_KEY = "sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA";
 
   // Start recording with natural speech detection
   const startRecording = useCallback(async () => {
@@ -158,69 +158,50 @@ const VoiceOnlyChat = () => {
     try {
       // Create audio blob and file
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      const audioFile = new File([audioBlob], "input.webm", { type: 'audio/webm' });
+      
+      console.log('🔄 Using Supabase Edge Function for OpenAI processing...');
+      setCurrentStatus('Processing your voice...');
 
-      console.log('🔄 Step 1: OpenAI Whisper transcription...');
-      setCurrentStatus('Transcribing your speech...');
-
-      // Step 1: OpenAI Whisper STT - DIRECT API CALL
-      const sttForm = new FormData();
-      sttForm.append("file", audioFile);
-      sttForm.append("model", "whisper-1");
-
-      const sttResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-        method: "POST",
-        headers: { 
-          "Authorization": `Bearer ${API_KEY}` 
-        },
-        body: sttForm
+      // Convert audio to base64 for the edge function
+      const reader = new FileReader();
+      const audioBase64 = await new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.readAsDataURL(audioBlob);
       });
 
-      if (!sttResponse.ok) {
-        const errorText = await sttResponse.text();
-        console.error('Whisper API error:', errorText);
-        throw new Error(`Whisper API error: ${errorText}`);
+      // Step 1: Transcribe with Whisper
+      const transcribeResponse = await supabase.functions.invoke('openai-voice-chat', {
+        body: { 
+          action: 'transcribe',
+          audio: audioBase64
+        }
+      });
+
+      if (transcribeResponse.error) {
+        throw new Error(`Transcription error: ${transcribeResponse.error.message}`);
       }
 
-      const { text } = await sttResponse.json();
-      setLastTranscript(text);
-      console.log('✅ Whisper transcription:', text);
+      const transcript = transcribeResponse.data.text;
+      setLastTranscript(transcript);
+      console.log('✅ Whisper transcription:', transcript);
 
-      console.log('🔄 Step 2: OpenAI GPT-4o response...');
+      // Step 2: Get GPT-4o response
       setCurrentStatus('Getting AI response...');
-
-      // Step 2: OpenAI GPT-4o - DIRECT API CALL
-      const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful, warm AI assistant. Keep your responses conversational and under 100 words since they will be spoken aloud."
-            },
-            {
-              role: "user", 
-              content: text
-            }
-          ],
-          max_tokens: 150,
-          temperature: 0.7
-        })
+      const chatResponse = await supabase.functions.invoke('openai-voice-chat', {
+        body: { 
+          action: 'chat',
+          text: transcript
+        }
       });
 
-      if (!gptResponse.ok) {
-        const errorText = await gptResponse.text();
-        console.error('GPT-4o API error:', errorText);
-        throw new Error(`GPT-4o API error: ${errorText}`);
+      if (chatResponse.error) {
+        throw new Error(`Chat error: ${chatResponse.error.message}`);
       }
 
-      const gptData = await gptResponse.json();
-      const aiResponse = gptData.choices[0]?.message?.content || "I understand. Could you tell me more?";
+      const aiResponse = chatResponse.data.response;
       setLastResponse(aiResponse);
       console.log('✅ GPT-4o response:', aiResponse);
 
@@ -230,36 +211,27 @@ const VoiceOnlyChat = () => {
         return;
       }
 
-      console.log('🔄 Step 3: OpenAI TTS conversion...');
+      // Step 3: Convert to speech
       setCurrentStatus('Converting to speech...');
-
-      // Step 3: OpenAI TTS - DIRECT API CALL
-      const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "tts-1-hd",
-          voice: selectedVoice,
-          input: aiResponse
-        })
+      const speechResponse = await supabase.functions.invoke('openai-voice-chat', {
+        body: { 
+          action: 'speak',
+          text: aiResponse
+        }
       });
 
-      if (!ttsResponse.ok) {
-        const errorText = await ttsResponse.text();
-        console.error('TTS API error:', errorText);
-        throw new Error(`TTS API error: ${errorText}`);
+      if (speechResponse.error) {
+        throw new Error(`Speech error: ${speechResponse.error.message}`);
       }
 
-      const audioBlob2 = await ttsResponse.blob();
+      // Convert base64 audio to blob and play
+      const audioContent = speechResponse.data.audioContent;
+      const audioBytes = Uint8Array.from(atob(audioContent), c => c.charCodeAt(0));
+      const audioBlob2 = new Blob([audioBytes], { type: 'audio/mp3' });
       const audioUrl = URL.createObjectURL(audioBlob2);
 
-      console.log('🔄 Step 4: Playing OpenAI audio...');
+      console.log('🔊 Playing OpenAI audio...');
       setCurrentStatus('Playing response...');
-
-      // Step 4: Play the audio
       await playAudio(audioUrl);
 
     } catch (error) {
