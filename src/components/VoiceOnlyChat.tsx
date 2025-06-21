@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,7 +147,7 @@ const VoiceOnlyChat = () => {
     }
   }, [isRecording]);
 
-  // Process the complete OpenAI flow: Whisper → GPT-4o → TTS
+  // Process the complete OpenAI flow: Whisper → GPT-4o → Direct TTS
   const processWithOpenAI = useCallback(async () => {
     if (audioChunksRef.current.length === 0) return;
 
@@ -159,7 +158,7 @@ const VoiceOnlyChat = () => {
       // Create audio blob and file
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
       
-      console.log('🔄 Using Supabase Edge Function for OpenAI processing...');
+      console.log('🔄 Using Supabase Edge Function for transcription and chat...');
       setCurrentStatus('Processing your voice...');
 
       // Convert audio to base64 for the edge function
@@ -211,26 +210,46 @@ const VoiceOnlyChat = () => {
         return;
       }
 
-      // Step 3: Convert to speech
+      // Step 3: Convert to speech with direct OpenAI TTS call
       setCurrentStatus('Converting to speech...');
-      const speechResponse = await supabase.functions.invoke('openai-voice-chat', {
-        body: { 
-          action: 'speak',
-          text: aiResponse
-        }
+      console.log('🔊 Calling OpenAI TTS directly...');
+
+      // Get OpenAI API key from Supabase secrets
+      const { data: { session } } = await supabase.auth.getSession();
+      const openaiKey = process.env.OPENAI_API_KEY || Deno.env?.get('OPENAI_API_KEY');
+      
+      // Since we can't access server env from client, we'll get it through a minimal edge function call
+      const keyResponse = await supabase.functions.invoke('openai-voice-chat', {
+        body: { action: 'get-key' }
       });
 
-      if (speechResponse.error) {
-        throw new Error(`Speech error: ${speechResponse.error.message}`);
+      if (keyResponse.error) {
+        throw new Error('Could not get OpenAI API key');
       }
 
-      // Convert base64 audio to blob and play
-      const audioContent = speechResponse.data.audioContent;
-      const audioBytes = Uint8Array.from(atob(audioContent), c => c.charCodeAt(0));
-      const audioBlob2 = new Blob([audioBytes], { type: 'audio/mp3' });
+      const apiKey = keyResponse.data.key;
+
+      const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'tts-1-hd',
+          voice: selectedVoice,
+          input: aiResponse
+        })
+      });
+
+      if (!ttsResponse.ok) {
+        throw new Error(`TTS API error: ${await ttsResponse.text()}`);
+      }
+
+      const audioBlob2 = await ttsResponse.blob();
       const audioUrl = URL.createObjectURL(audioBlob2);
 
-      console.log('🔊 Playing OpenAI audio...');
+      console.log('🔊 Playing OpenAI audio directly...');
       setCurrentStatus('Playing response...');
       await playAudio(audioUrl);
 
@@ -243,31 +262,38 @@ const VoiceOnlyChat = () => {
     }
   }, [selectedVoice, isSpeakerEnabled]);
 
-  // Play audio
+  // Play audio using JavaScript Audio object
   const playAudio = useCallback(async (audioUrl: string) => {
     return new Promise<void>((resolve) => {
       try {
-        if (audioRef.current) {
-          audioRef.current.src = audioUrl;
-          audioRef.current.onended = () => {
-            console.log('🔊 OpenAI audio playback finished');
-            setIsPlaying(false);
-            setCurrentStatus('Ready - Tap mic to speak again');
-            URL.revokeObjectURL(audioUrl);
-            resolve();
-          };
-          audioRef.current.onerror = () => {
-            console.error('Audio playback error');
-            setIsPlaying(false);
-            setCurrentStatus('Audio playback failed');
-            resolve();
-          };
-          
-          setIsPlaying(true);
-          audioRef.current.play();
-        }
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          console.log('🔊 OpenAI audio playback finished');
+          setIsPlaying(false);
+          setCurrentStatus('Ready - Tap mic to speak again');
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        
+        audio.onerror = () => {
+          console.error('Audio playback error');
+          setIsPlaying(false);
+          setCurrentStatus('Audio playback failed');
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        
+        setIsPlaying(true);
+        audio.play().catch(error => {
+          console.error('Error playing audio:', error);
+          setIsPlaying(false);
+          setCurrentStatus('Audio playback failed');
+          resolve();
+        });
+        
       } catch (error) {
-        console.error('Error playing audio:', error);
+        console.error('Error creating audio:', error);
         setIsPlaying(false);
         setCurrentStatus('Audio playback failed');
         resolve();
@@ -356,7 +382,7 @@ const VoiceOnlyChat = () => {
                   Start OpenAI Chat
                 </Button>
                 <p className="text-sm text-gray-600">
-                  Powered by OpenAI • Whisper + GPT-4o + TTS
+                  Powered by OpenAI • Whisper + GPT-4o + TTS (Direct)
                 </p>
               </div>
             </div>
