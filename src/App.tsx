@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AssessmentProvider } from "./contexts/AssessmentContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AssessmentSummary from "./pages/AssessmentSummary";
 import EmailCapture from "./pages/EmailCapture";
 import AnswerSummary from "./pages/AnswerSummary";
 import CompetitionSignup from "./pages/CompetitionSignup";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/assessment-complete" element={<AssessmentComplete />} />
             <Route path="/answer-summary/:questionNumber" element={<AnswerSummary />} />
+            <Route path="/assessment-summary" element={<AssessmentSummary />} />
             <Route path="/email-capture" element={<EmailCapture />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
