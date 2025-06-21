@@ -46,7 +46,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-orange-100 to-yellow-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-300 via-orange-300 to-yellow-300">
       {showVoiceChat && (
         <OpenAIVoiceChat />
       )}
@@ -56,20 +56,20 @@ const Index = () => {
         <div className="text-center max-w-4xl mx-auto">
           {/* Floating Badge */}
           <div className="inline-flex items-center gap-2 bg-white/30 backdrop-blur-sm rounded-full px-4 py-2 mb-8 animate-fade-in">
-            <Sparkles className="h-4 w-4 text-purple-600" />
-            <span className="text-purple-700 text-sm font-medium">The New Generation of Mental Wellness</span>
+            <Sparkles className="h-4 w-4 text-purple-700" />
+            <span className="text-purple-800 text-sm font-medium">The New Generation of Mental Wellness</span>
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-6xl md:text-7xl font-bold text-gray-800 mb-6 animate-fade-in">
+          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
             Welcome to{" "}
-            <span className="bg-gradient-to-r from-purple-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
               Mynd Ease
             </span>
           </h1>
           
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in">
+          <p className="text-xl md:text-2xl text-gray-800 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in">
             Your personal AI companion for mental wellness. Get culturally-aware support 
             in your language, available 24/7 for judgment-free guidance and emotional healing.
           </p>
@@ -84,7 +84,7 @@ const Index = () => {
               Begin My Journey
               <ArrowRight className="ml-3 h-8 w-8 group-hover:translate-x-2 transition-transform" />
             </Button>
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-700">
               <Shield className="h-5 w-5" />
               <span className="text-base">Private & Secure</span>
             </div>
@@ -94,15 +94,15 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto mb-20">
             <div className="text-center">
               <div className="text-3xl font-bold text-gray-800 mb-2">24/7</div>
-              <div className="text-gray-600">AI Support</div>
+              <div className="text-gray-700">AI Support</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-gray-800 mb-2">50+</div>
-              <div className="text-gray-600">Languages</div>
+              <div className="text-gray-700">Languages</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-gray-800 mb-2">100%</div>
-              <div className="text-gray-600">Private</div>
+              <div className="text-gray-700">Private</div>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ const Index = () => {
         {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <div className="group bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-orange-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <Heart className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">AI Emotional Support</h3>
@@ -121,7 +121,7 @@ const Index = () => {
           </div>
 
           <div className="group bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <Brain className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Intelligent Coaching</h3>
@@ -132,7 +132,7 @@ const Index = () => {
           </div>
 
           <div className="group bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <MessageCircle className="h-8 w-8 text-white" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Instant Conversations</h3>
@@ -149,7 +149,7 @@ const Index = () => {
             <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
               Stories of Hope & Healing
             </h2>
-            <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-800 max-w-2xl mx-auto">
               Real people sharing how MindEase helped them through their darkest moments
             </p>
           </div>
@@ -176,13 +176,13 @@ const Index = () => {
 
         {/* Trust Indicators */}
         <div className="mt-20 text-center">
-          <p className="text-gray-600 mb-8">Trusted by people from over 50 countries</p>
+          <p className="text-gray-700 mb-8">Trusted by people from over 50 countries</p>
           <div className="flex justify-center items-center gap-8">
             {countryStats.map((stat, index) => (
               <div key={index} className="flex flex-col items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-4 min-w-[80px]">
                 <div className="text-2xl">{stat.flag}</div>
                 <div className="text-gray-800 font-semibold text-sm">{stat.users}</div>
-                <div className="text-gray-600 text-xs">{stat.country}</div>
+                <div className="text-gray-700 text-xs">{stat.country}</div>
               </div>
             ))}
           </div>
