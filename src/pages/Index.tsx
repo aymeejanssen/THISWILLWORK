@@ -10,8 +10,13 @@ import OnboardingWrapper from "@/components/OnboardingWrapper";
 const Index = () => {
   const navigate = useNavigate();
 
+  const handleCloseOnboarding = () => {
+    // Handle onboarding close - could navigate somewhere or just close modal
+    console.log('Onboarding closed');
+  };
+
   return (
-    <OnboardingWrapper>
+    <OnboardingWrapper onClose={handleCloseOnboarding}>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
         {/* Hero Section */}
         <div className="container mx-auto px-4 py-16">
@@ -48,17 +53,17 @@ const Index = () => {
           {/* Feature Cards */}
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             <FeatureCard
-              icon={<Brain className="h-8 w-8 text-purple-600" />}
+              icon={Brain}
               title="AI-Powered Insights"
               description="Get personalized recommendations based on your unique mental health profile."
             />
             <FeatureCard
-              icon={<Heart className="h-8 w-8 text-pink-600" />}
+              icon={Heart}
               title="Holistic Wellness"
               description="Address all aspects of your mental health with comprehensive assessments."
             />
             <FeatureCard
-              icon={<Users className="h-8 w-8 text-teal-600" />}
+              icon={Users}
               title="Professional Support"
               description="Connect with qualified therapists and mental health professionals."
             />
