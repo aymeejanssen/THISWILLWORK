@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -212,13 +213,9 @@ const VoiceOnlyChat = () => {
 
       // Step 3: Convert to speech with direct OpenAI TTS call
       setCurrentStatus('Converting to speech...');
-      console.log('🔊 Calling OpenAI TTS directly...');
+      console.log('🔊 Getting OpenAI API key for TTS...');
 
-      // Get OpenAI API key from Supabase secrets
-      const { data: { session } } = await supabase.auth.getSession();
-      const openaiKey = process.env.OPENAI_API_KEY || Deno.env?.get('OPENAI_API_KEY');
-      
-      // Since we can't access server env from client, we'll get it through a minimal edge function call
+      // Get OpenAI API key through edge function
       const keyResponse = await supabase.functions.invoke('openai-voice-chat', {
         body: { action: 'get-key' }
       });
@@ -229,6 +226,7 @@ const VoiceOnlyChat = () => {
 
       const apiKey = keyResponse.data.key;
 
+      // Direct OpenAI TTS call
       const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
         headers: {
