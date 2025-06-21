@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -18,6 +19,8 @@ serve(async (req) => {
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
     }
+
+    console.log('Processing action:', action);
 
     // New action: Start personalized session based on assessment
     if (action === 'start_session') {
@@ -42,7 +45,7 @@ Create a warm, personalized opening that makes them feel heard and understood.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'gpt-4o-mini',
           messages: [
             {
               role: 'system',
@@ -55,7 +58,9 @@ Create a warm, personalized opening that makes them feel heard and understood.`;
       });
 
       if (!chatResponse.ok) {
-        throw new Error(`GPT-4 API error: ${await chatResponse.text()}`);
+        const errorText = await chatResponse.text();
+        console.error('GPT API error:', errorText);
+        throw new Error(`GPT API error: ${errorText}`);
       }
 
       const chatResult = await chatResponse.json();
@@ -94,7 +99,9 @@ Create a warm, personalized opening that makes them feel heard and understood.`;
       });
 
       if (!transcribeResponse.ok) {
-        throw new Error(`Whisper API error: ${await transcribeResponse.text()}`);
+        const errorText = await transcribeResponse.text();
+        console.error('Whisper API error:', errorText);
+        throw new Error(`Whisper API error: ${errorText}`);
       }
 
       const transcribeResult = await transcribeResponse.json();
@@ -106,9 +113,9 @@ Create a warm, personalized opening that makes them feel heard and understood.`;
       );
     }
 
-    // Step 2: Generate GPT-4 response (upgraded from GPT-4o)
+    // Step 2: Generate GPT response
     if (action === 'chat') {
-      console.log('Generating GPT-4 response for:', text);
+      console.log('Generating GPT response for:', text);
 
       const chatResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -117,7 +124,7 @@ Create a warm, personalized opening that makes them feel heard and understood.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'gpt-4o-mini',
           messages: [
             {
               role: 'system',
@@ -134,12 +141,14 @@ Create a warm, personalized opening that makes them feel heard and understood.`;
       });
 
       if (!chatResponse.ok) {
-        throw new Error(`GPT-4 API error: ${await chatResponse.text()}`);
+        const errorText = await chatResponse.text();
+        console.error('GPT API error:', errorText);
+        throw new Error(`GPT API error: ${errorText}`);
       }
 
       const chatResult = await chatResponse.json();
       const aiResponse = chatResult.choices[0]?.message?.content || 'I hear you. Tell me more about what you\'re feeling.';
-      console.log('GPT-4 response:', aiResponse);
+      console.log('GPT response:', aiResponse);
 
       return new Response(
         JSON.stringify({ response: aiResponse }),
@@ -167,7 +176,9 @@ Create a warm, personalized opening that makes them feel heard and understood.`;
       });
 
       if (!ttsResponse.ok) {
-        throw new Error(`TTS API error: ${await ttsResponse.text()}`);
+        const errorText = await ttsResponse.text();
+        console.error('TTS API error:', errorText);
+        throw new Error(`TTS API error: ${errorText}`);
       }
 
       // Convert audio to base64
