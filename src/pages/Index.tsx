@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, Brain, Heart, Users } from "lucide-react";
 import FeatureCard from "@/components/FeatureCard";
-import TherapistSection from "@/components/TherapistSection";
 import OnboardingWrapper from "@/components/OnboardingWrapper";
 import { useState } from "react";
 
@@ -121,8 +120,6 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
-
-          <TherapistSection />
         </div>
       </div>
     </>
