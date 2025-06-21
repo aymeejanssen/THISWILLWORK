@@ -252,8 +252,8 @@ const VoiceChat: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
-        </CardContent>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
