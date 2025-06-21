@@ -148,6 +148,24 @@ const VoiceOnlyChat = () => {
     }
   }, [isRecording]);
 
+  // Get OpenAI API key securely from Supabase
+  const getOpenAIKey = useCallback(async () => {
+    try {
+      const keyResponse = await supabase.functions.invoke('openai-voice-chat', {
+        body: { action: 'get-key' }
+      });
+
+      if (keyResponse.error) {
+        throw new Error('Could not get OpenAI API key');
+      }
+
+      return keyResponse.data.key;
+    } catch (error) {
+      console.error('Error getting OpenAI key:', error);
+      throw error;
+    }
+  }, []);
+
   // Process the complete OpenAI flow: Whisper → GPT-4o → Direct TTS
   const processWithOpenAI = useCallback(async () => {
     if (audioChunksRef.current.length === 0) return;
@@ -156,52 +174,70 @@ const VoiceOnlyChat = () => {
     setCurrentStatus('Processing with OpenAI...');
 
     try {
+      // Get OpenAI API key
+      const apiKey = await getOpenAIKey();
+
       // Create audio blob and file
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      
-      console.log('🔄 Using Supabase Edge Function for transcription and chat...');
-      setCurrentStatus('Processing your voice...');
+      const audioFile = new File([audioBlob], "input.webm", { type: 'audio/webm' });
 
-      // Convert audio to base64 for the edge function
-      const reader = new FileReader();
-      const audioBase64 = await new Promise<string>((resolve) => {
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
-        };
-        reader.readAsDataURL(audioBlob);
+      console.log('🔄 Step 1: Transcribing with OpenAI Whisper...');
+      setCurrentStatus('Transcribing your speech...');
+
+      // Step 1: OpenAI Whisper STT
+      const sttForm = new FormData();
+      sttForm.append("file", audioFile);
+      sttForm.append("model", "whisper-1");
+
+      const sttResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${apiKey}` 
+        },
+        body: sttForm
       });
 
-      // Step 1: Transcribe with Whisper
-      const transcribeResponse = await supabase.functions.invoke('openai-voice-chat', {
-        body: { 
-          action: 'transcribe',
-          audio: audioBase64
-        }
-      });
-
-      if (transcribeResponse.error) {
-        throw new Error(`Transcription error: ${transcribeResponse.error.message}`);
+      if (!sttResponse.ok) {
+        throw new Error(`OpenAI Whisper API error: ${await sttResponse.text()}`);
       }
 
-      const transcript = transcribeResponse.data.text;
-      setLastTranscript(transcript);
-      console.log('✅ Whisper transcription:', transcript);
+      const { text } = await sttResponse.json();
+      setLastTranscript(text);
+      console.log('✅ Whisper transcription:', text);
 
-      // Step 2: Get GPT-4o response
+      console.log('🔄 Step 2: Getting GPT-4o response...');
       setCurrentStatus('Getting AI response...');
-      const chatResponse = await supabase.functions.invoke('openai-voice-chat', {
-        body: { 
-          action: 'chat',
-          text: transcript
-        }
+
+      // Step 2: OpenAI GPT-4o
+      const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a helpful, warm AI assistant. Keep your responses conversational and under 100 words since they will be spoken aloud."
+            },
+            {
+              role: "user", 
+              content: text
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.7
+        })
       });
 
-      if (chatResponse.error) {
-        throw new Error(`Chat error: ${chatResponse.error.message}`);
+      if (!gptResponse.ok) {
+        throw new Error(`OpenAI GPT-4o API error: ${await gptResponse.text()}`);
       }
 
-      const aiResponse = chatResponse.data.response;
+      const gptData = await gptResponse.json();
+      const aiResponse = gptData.choices[0]?.message?.content || "I understand. Could you tell me more?";
       setLastResponse(aiResponse);
       console.log('✅ GPT-4o response:', aiResponse);
 
@@ -211,37 +247,25 @@ const VoiceOnlyChat = () => {
         return;
       }
 
-      // Step 3: Convert to speech with direct OpenAI TTS call
+      console.log('🔄 Step 3: Converting to speech with OpenAI TTS...');
       setCurrentStatus('Converting to speech...');
-      console.log('🔊 Getting OpenAI API key for TTS...');
 
-      // Get OpenAI API key through edge function
-      const keyResponse = await supabase.functions.invoke('openai-voice-chat', {
-        body: { action: 'get-key' }
-      });
-
-      if (keyResponse.error) {
-        throw new Error('Could not get OpenAI API key');
-      }
-
-      const apiKey = keyResponse.data.key;
-
-      // Direct OpenAI TTS call
-      const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
-        method: 'POST',
+      // Step 3: OpenAI TTS
+      const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: 'tts-1-hd',
+          model: "tts-1-hd",
           voice: selectedVoice,
           input: aiResponse
         })
       });
 
       if (!ttsResponse.ok) {
-        throw new Error(`TTS API error: ${await ttsResponse.text()}`);
+        throw new Error(`OpenAI TTS API error: ${await ttsResponse.text()}`);
       }
 
       const audioBlob2 = await ttsResponse.blob();
@@ -258,7 +282,7 @@ const VoiceOnlyChat = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [selectedVoice, isSpeakerEnabled]);
+  }, [selectedVoice, isSpeakerEnabled, getOpenAIKey]);
 
   // Play audio using JavaScript Audio object
   const playAudio = useCallback(async (audioUrl: string) => {
