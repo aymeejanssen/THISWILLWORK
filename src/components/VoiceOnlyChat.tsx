@@ -17,7 +17,7 @@ const openAIVoices = [
   { id: 'shimmer', name: 'Shimmer', description: 'Gentle, soothing voice' }
 ];
 
-const OPENAI_API_KEY = 'sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA'; // Your API key ending in XDAA
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 const VoiceOnlyChat = () => {
   const navigate = useNavigate();
