@@ -103,7 +103,7 @@ const Index = () => {
                   <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl font-bold text-teal-600">3</span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Take Action</h3>
+                  <h3 className="text-xml font-semibold mb-2">Take Action</h3>
                   <p className="text-gray-600">
                     Connect with professionals and start your wellness journey
                   </p>
