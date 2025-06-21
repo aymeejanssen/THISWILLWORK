@@ -25,6 +25,13 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
+    // Log the API key format (first 10 chars only for security)
+    console.log('API key format check:', {
+      length: openAIApiKey.length,
+      startsWithSk: openAIApiKey.startsWith('sk-'),
+      firstTenChars: openAIApiKey.substring(0, 10)
+    });
+
     const prompt = `You are a compassionate, expert psychologist analyzing a mental health assessment. Provide deep psychological insights that help the user understand their patterns and behaviors.
 
 IMPORTANT: Look for these specific patterns and provide psychological education:
@@ -82,8 +89,25 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text or markdown for
 
     console.log('Making OpenAI API call...');
 
-    // Clean the API key to ensure it's a valid string
-    const cleanApiKey = openAIApiKey.trim();
+    // Clean and validate the API key
+    const cleanApiKey = openAIApiKey.trim().replace(/[\r\n\t]/g, '');
+    
+    // Validate the API key format
+    if (!cleanApiKey.startsWith('sk-') || cleanApiKey.length < 20) {
+      throw new Error('Invalid OpenAI API key format');
+    }
+
+    const requestBody = {
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You are an expert psychologist who provides compassionate, educational insights about mental health patterns and coping mechanisms. You help people understand their behaviors with warmth and scientific accuracy. Always respond with valid JSON only, no markdown or extra formatting.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    };
+
+    console.log('Request body prepared, making fetch call...');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -91,16 +115,10 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text or markdown for
         'Authorization': `Bearer ${cleanApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are an expert psychologist who provides compassionate, educational insights about mental health patterns and coping mechanisms. You help people understand their behaviors with warmth and scientific accuracy. Always respond with valid JSON only, no markdown or extra formatting.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
+      body: JSON.stringify(requestBody),
     });
+
+    console.log('OpenAI API response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
