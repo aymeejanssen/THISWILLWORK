@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, Brain, Heart, Users } from "lucide-react";
 import FeatureCard from "@/components/FeatureCard";
-import TherapistSection from "@/components/TherapistSection";
 import OnboardingWrapper from "@/components/OnboardingWrapper";
 import { useState } from "react";
 
@@ -32,11 +31,11 @@ const Index = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
-              Welcome to Your Wellness Journey
+              Welcome to Mynd
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Discover personalized insights, connect with mental health professionals, 
-              and take the first step towards better mental wellness.
+              Your personalized mental health companion. Take our assessment to get 
+              insights tailored to your unique needs and connect with the right support.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -122,7 +121,89 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <TherapistSection />
+          {/* Reviews Section */}
+          <Card className="max-w-4xl mx-auto mb-16">
+            <CardHeader className="text-center">
+              <CardTitle className="text-3xl font-bold text-gray-800">
+                What Our Users Say
+              </CardTitle>
+              <CardDescription className="text-lg">
+                Real stories from people who found their path to wellness
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="bg-purple-50 p-6 rounded-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="flex text-yellow-400">
+                      ★★★★★
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    "Mynd helped me understand my mental health patterns in a way I never could before. 
+                    The personalized insights were incredibly accurate and actionable."
+                  </p>
+                  <div className="font-semibold text-gray-800">- Sarah M.</div>
+                </div>
+                
+                <div className="bg-pink-50 p-6 rounded-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="flex text-yellow-400">
+                      ★★★★★
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    "The assessment was thorough yet easy to complete. I finally found a therapist 
+                    who truly understands my background and needs."
+                  </p>
+                  <div className="font-semibold text-gray-800">- Alex K.</div>
+                </div>
+                
+                <div className="bg-teal-50 p-6 rounded-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="flex text-yellow-400">
+                      ★★★★★
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    "I was skeptical about online mental health tools, but Mynd proved me wrong. 
+                    The AI insights were surprisingly deep and helpful."
+                  </p>
+                  <div className="font-semibold text-gray-800">- Jamie L.</div>
+                </div>
+                
+                <div className="bg-blue-50 p-6 rounded-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="flex text-yellow-400">
+                      ★★★★★
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    "The cultural sensitivity in the recommendations made all the difference. 
+                    Finally, a platform that gets it."
+                  </p>
+                  <div className="font-semibold text-gray-800">- Priya R.</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CTA Section */}
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              Ready to Start Your Journey?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Take the first step towards better mental health with our personalized assessment.
+            </p>
+            <Button 
+              onClick={handleStartAssessment}
+              size="lg"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
+            >
+              Get Started Today
+            </Button>
+          </div>
         </div>
       </div>
     </>
