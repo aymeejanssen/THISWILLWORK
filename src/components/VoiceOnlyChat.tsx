@@ -41,7 +41,7 @@ const VoiceOnlyChat = () => {
 
   const SILENCE_THRESHOLD = 0.01;
   const SILENCE_DURATION = 1200; // 1.2 seconds
-  const API_KEY = "sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA"; // Your API key ending in XDAA
+  const API_KEY = "sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA";
 
   // Start recording with natural speech detection
   const startRecording = useCallback(async () => {
@@ -163,7 +163,7 @@ const VoiceOnlyChat = () => {
       console.log('🔄 Step 1: OpenAI Whisper transcription...');
       setCurrentStatus('Transcribing your speech...');
 
-      // Step 1: OpenAI Whisper STT - Official API endpoint
+      // Step 1: OpenAI Whisper STT - DIRECT API CALL
       const sttForm = new FormData();
       sttForm.append("file", audioFile);
       sttForm.append("model", "whisper-1");
@@ -177,7 +177,9 @@ const VoiceOnlyChat = () => {
       });
 
       if (!sttResponse.ok) {
-        throw new Error(`Whisper API error: ${await sttResponse.text()}`);
+        const errorText = await sttResponse.text();
+        console.error('Whisper API error:', errorText);
+        throw new Error(`Whisper API error: ${errorText}`);
       }
 
       const { text } = await sttResponse.json();
@@ -187,7 +189,7 @@ const VoiceOnlyChat = () => {
       console.log('🔄 Step 2: OpenAI GPT-4o response...');
       setCurrentStatus('Getting AI response...');
 
-      // Step 2: OpenAI GPT-4o - Official API endpoint
+      // Step 2: OpenAI GPT-4o - DIRECT API CALL
       const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -212,7 +214,9 @@ const VoiceOnlyChat = () => {
       });
 
       if (!gptResponse.ok) {
-        throw new Error(`GPT-4o API error: ${await gptResponse.text()}`);
+        const errorText = await gptResponse.text();
+        console.error('GPT-4o API error:', errorText);
+        throw new Error(`GPT-4o API error: ${errorText}`);
       }
 
       const gptData = await gptResponse.json();
@@ -229,7 +233,7 @@ const VoiceOnlyChat = () => {
       console.log('🔄 Step 3: OpenAI TTS conversion...');
       setCurrentStatus('Converting to speech...');
 
-      // Step 3: OpenAI TTS - Official API endpoint
+      // Step 3: OpenAI TTS - DIRECT API CALL
       const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
         headers: {
@@ -244,7 +248,9 @@ const VoiceOnlyChat = () => {
       });
 
       if (!ttsResponse.ok) {
-        throw new Error(`TTS API error: ${await ttsResponse.text()}`);
+        const errorText = await ttsResponse.text();
+        console.error('TTS API error:', errorText);
+        throw new Error(`TTS API error: ${errorText}`);
       }
 
       const audioBlob2 = await ttsResponse.blob();
