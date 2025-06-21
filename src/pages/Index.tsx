@@ -3,11 +3,9 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
-import OpenAIVoiceChat from "../components/OpenAIVoiceChat";
 
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showVoiceChat, setShowVoiceChat] = useState(false);
 
   const handleBeginJourney = () => {
     setShowOnboarding(true);
@@ -47,17 +45,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen wellness-gradient">
-      {showVoiceChat && (
-        <OpenAIVoiceChat />
-      )}
-      
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-24">
         <div className="text-center max-w-4xl mx-auto">
           {/* Floating Badge */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-full px-6 py-3 mb-12 border border-white/30">
             <Sparkles className="h-4 w-4 text-white" />
-            <span className="text-white text-sm font-medium">AI-Powered Mental Wellness</span>
+            <span className="text-white text-sm font-medium">Mental Wellness Platform</span>
           </div>
 
           {/* Main Heading */}
@@ -70,7 +64,7 @@ const Index = () => {
           
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-white/90 mb-16 max-w-3xl mx-auto leading-relaxed font-light">
-            Your personal AI companion for mental wellness. Get culturally-aware support 
+            Your personal companion for mental wellness. Get culturally-aware support 
             in your language, available 24/7 for judgment-free guidance.
           </p>
 
@@ -94,7 +88,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-2xl mx-auto mb-32">
             <div className="text-center">
               <div className="text-4xl font-light text-white mb-2">24/7</div>
-              <div className="text-white/80 font-medium">AI Support</div>
+              <div className="text-white/80 font-medium">Support</div>
             </div>
             <div className="text-center">
               <div className="text-4xl font-light text-white mb-2">50+</div>
@@ -115,7 +109,7 @@ const Index = () => {
             </div>
             <h3 className="text-2xl font-medium text-white mb-4">Emotional Support</h3>
             <p className="text-white/80 leading-relaxed font-light">
-              Chat with our culturally-aware AI companion that understands your background, 
+              Connect with our culturally-aware wellness platform that understands your background, 
               language, and emotional needs. Available 24/7 for judgment-free support.
             </p>
           </div>
@@ -124,9 +118,9 @@ const Index = () => {
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/30 transition-colors">
               <Brain className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-2xl font-medium text-white mb-4">Intelligent Coaching</h3>
+            <h3 className="text-2xl font-medium text-white mb-4">Wellness Coaching</h3>
             <p className="text-white/80 leading-relaxed font-light">
-              Receive personalized guidance and coping strategies powered by advanced AI. 
+              Receive personalized guidance and coping strategies. 
               Get practical exercises and insights tailored to your unique situation.
             </p>
           </div>
@@ -135,10 +129,10 @@ const Index = () => {
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/30 transition-colors">
               <MessageCircle className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-2xl font-medium text-white mb-4">Instant Conversations</h3>
+            <h3 className="text-2xl font-medium text-white mb-4">Instant Support</h3>
             <p className="text-white/80 leading-relaxed font-light">
-              Start meaningful conversations anytime you need support. No appointments, 
-              no waiting - your AI wellness companion is always ready to listen and help.
+              Get meaningful support anytime you need it. No appointments, 
+              no waiting - your wellness companion is always ready to help.
             </p>
           </div>
         </div>
