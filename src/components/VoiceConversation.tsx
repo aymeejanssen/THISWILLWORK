@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, X, Clock } from 'lucide-react';
+import { Mic, MicOff, X, Clock, Volume2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,23 +12,22 @@ interface VoiceConversationProps {
   timeLimit: number; // in milliseconds
 }
 
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-}
-
 const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose, timeLimit }) => {
-  const [isRecording, setIsRecording] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const [isActive, setIsActive] = useState(true);
+  const [conversationStarted, setConversationStarted] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState("Ready to start your voice conversation");
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
 
   // Timer effect
@@ -57,37 +56,84 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
     };
   }, [isActive, timeRemaining, onTimeUp]);
 
-  // Add welcome message
-  useEffect(() => {
-    const welcomeMessage: Message = {
-      id: 'welcome',
-      text: "Hi! I'm here to listen and help you process your thoughts and feelings. You have 5 minutes to talk with me about anything on your mind. What would you like to explore today?",
-      isUser: false,
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
-  }, []);
-
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const addMessage = (text: string, isUser: boolean) => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      isUser,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, newMessage]);
-  };
-
-  const startRecording = async () => {
+  const startConversation = async () => {
     if (!isActive) return;
     
+    setConversationStarted(true);
+    
+    // Welcome message
+    setCurrentStatus("Starting conversation...");
+    setIsSpeaking(true);
+    
     try {
+      const welcomeMessage = "Hi! I'm here to listen and help you process your thoughts and feelings. You have 5 minutes to talk with me. What would you like to explore today?";
+      
+      const { data, error } = await supabase.functions.invoke('openai-voice-chat', {
+        body: { action: 'speak', text: welcomeMessage }
+      });
+
+      if (error) throw error;
+
+      if (data?.audioContent) {
+        await playAudio(data.audioContent);
+      }
+    } catch (error) {
+      console.error('Error with welcome message:', error);
+      toast({
+        title: "Error",
+        description: "Could not start conversation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSpeaking(false);
+      startListening();
+    }
+  };
+
+  const playAudio = async (base64Audio: string): Promise<void> => {
+    return new Promise((resolve) => {
+      try {
+        const audioData = atob(base64Audio);
+        const audioArray = new Uint8Array(audioData.length);
+        for (let i = 0; i < audioData.length; i++) {
+          audioArray[i] = audioData.charCodeAt(i);
+        }
+
+        const audioBlob = new Blob([audioArray], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        
+        audio.play();
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        resolve();
+      }
+    });
+  };
+
+  const startListening = async () => {
+    if (!isActive || isSpeaking) return;
+    
+    try {
+      setCurrentStatus("Listening... speak naturally");
+      setIsListening(true);
+      
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           sampleRate: 44100,
@@ -96,7 +142,20 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
           noiseSuppression: true,
         }
       });
-      
+
+      streamRef.current = stream;
+
+      // Set up audio analysis for silence detection
+      audioContextRef.current = new AudioContext();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      source.connect(analyserRef.current);
+
+      analyserRef.current.fftSize = 2048;
+      const bufferLength = analyserRef.current.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      // Set up media recorder
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
 
@@ -107,11 +166,38 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
       };
 
       mediaRecorderRef.current.onstop = () => {
-        processSpeechToSpeech();
+        processUserSpeech();
       };
 
       mediaRecorderRef.current.start();
-      setIsRecording(true);
+
+      // Monitor for silence
+      const checkSilence = () => {
+        if (!analyserRef.current || !isListening) return;
+
+        analyserRef.current.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((sum, value) => sum + value, 0) / bufferLength;
+        
+        if (average < 10) { // Very quiet
+          if (!silenceTimerRef.current) {
+            silenceTimerRef.current = setTimeout(() => {
+              stopListening();
+            }, 2000); // 2 seconds of silence
+          }
+        } else {
+          // User is speaking, clear silence timer
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+        }
+
+        if (isListening) {
+          requestAnimationFrame(checkSilence);
+        }
+      };
+
+      checkSilence();
       
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -120,21 +206,39 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
         description: "Could not access microphone",
         variant: "destructive",
       });
+      setIsListening(false);
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
+  const stopListening = () => {
+    if (mediaRecorderRef.current && isListening) {
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-      setIsRecording(false);
+      setIsListening(false);
+    }
+    
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
     }
   };
 
-  const processSpeechToSpeech = async () => {
-    if (audioChunksRef.current.length === 0) return;
+  const processUserSpeech = async () => {
+    if (audioChunksRef.current.length === 0) {
+      startListening(); // Continue listening
+      return;
+    }
 
     setIsProcessing(true);
+    setCurrentStatus("Processing your message...");
     
     try {
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
@@ -153,16 +257,17 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
       const userText = transcribeResponse.data.text;
       
       if (!userText || userText.trim().length === 0) {
-        throw new Error('No speech detected');
+        startListening(); // Continue listening if no speech detected
+        return;
       }
 
-      addMessage(userText, true);
+      console.log('User said:', userText);
 
-      // Step 2: Get AI response with therapy context
+      // Step 2: Get AI response
       const chatResponse = await supabase.functions.invoke('openai-voice-chat', {
         body: { 
           action: 'chat', 
-          text: `As a compassionate AI therapist, respond to this person who just completed a mental health assessment: "${userText}"` 
+          text: `As a compassionate AI therapist, respond conversationally to: "${userText}"` 
         }
       });
 
@@ -171,9 +276,12 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
       }
 
       const aiText = chatResponse.data.response;
-      addMessage(aiText, false);
+      console.log('AI responds:', aiText);
 
       // Step 3: Convert AI response to speech and play it
+      setCurrentStatus("AI is responding...");
+      setIsSpeaking(true);
+
       const ttsResponse = await supabase.functions.invoke('openai-voice-chat', {
         body: { action: 'speak', text: aiText }
       });
@@ -183,25 +291,10 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
       }
 
       // Play the AI's voice response
-      const audioContent = ttsResponse.data.audioContent;
-      const audioData = atob(audioContent);
-      const audioArray = new Uint8Array(audioData.length);
-      for (let i = 0; i < audioData.length; i++) {
-        audioArray[i] = audioData.charCodeAt(i);
-      }
-
-      const responseBlog = new Blob([audioArray], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(responseBlog);
-      const audio = new Audio(audioUrl);
-      
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-      };
-      
-      await audio.play();
+      await playAudio(ttsResponse.data.audioContent);
 
     } catch (error) {
-      console.error('Speech-to-speech error:', error);
+      console.error('Speech processing error:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Speech processing failed",
@@ -209,16 +302,43 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
       });
     } finally {
       setIsProcessing(false);
+      setIsSpeaking(false);
+      
+      // Continue the conversation loop
+      if (isActive && !isSpeaking) {
+        setTimeout(() => {
+          startListening();
+        }, 500);
+      }
     }
   };
 
+  const endConversation = () => {
+    setIsActive(false);
+    stopListening();
+    onClose();
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopListening();
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
             <CardTitle className="text-xl font-bold text-purple-700">
-              Free Voice Therapy Session
+              Voice Therapy Session
             </CardTitle>
             <div className="flex items-center gap-2 mt-2">
               <Clock className="h-4 w-4 text-gray-500" />
@@ -228,80 +348,102 @@ const VoiceConversation: React.FC<VoiceConversationProps> = ({ onTimeUp, onClose
               <span className="text-sm text-gray-500">remaining</span>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={endConversation}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Recording Controls */}
-          <div className="text-center space-y-4">
-            <Button
-              onClick={isRecording ? stopRecording : startRecording}
-              disabled={isProcessing || !isActive}
-              size="lg"
-              className={`
-                relative transition-all duration-200 
-                ${isRecording 
-                  ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-                  : 'bg-purple-500 hover:bg-purple-600'
-                }
-              `}
-            >
-              {isProcessing ? (
-                <>
-                  <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                  Processing...
-                </>
-              ) : isRecording ? (
-                <>
-                  <MicOff className="w-5 h-5 mr-2" />
-                  Stop Speaking
-                </>
-              ) : (
-                <>
-                  <Mic className="w-5 h-5 mr-2" />
-                  Start Speaking
-                </>
-              )}
-            </Button>
-
-            {isRecording && (
-              <div className="text-red-500 font-medium animate-pulse">
-                🔴 Listening... Click to stop and get AI response
-              </div>
-            )}
-
-            {!isActive && (
-              <div className="text-orange-600 font-medium">
-                ⏰ Your free 5-minute session has ended
-              </div>
-            )}
-          </div>
-
-          {/* Conversation History */}
-          {messages.length > 0 && (
-            <div className="space-y-3 max-h-96 overflow-y-auto bg-gray-50 p-4 rounded-lg">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`p-3 rounded-lg ${
-                    message.isUser
-                      ? 'bg-purple-100 ml-8 text-right'
-                      : 'bg-white mr-8 text-left border'
-                  }`}
-                >
-                  <div className={`font-medium text-sm ${
-                    message.isUser ? 'text-purple-600' : 'text-gray-600'
-                  }`}>
-                    {message.isUser ? 'You' : 'AI Therapist'}
-                  </div>
-                  <div className="text-gray-800 mt-1">{message.text}</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {message.timestamp.toLocaleTimeString()}
-                  </div>
+          {!conversationStarted ? (
+            <div className="text-center space-y-6">
+              <div className="space-y-4">
+                <Volume2 className="h-16 w-16 text-purple-500 mx-auto" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    Natural Voice Conversation
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Speak naturally - I'll listen and respond automatically. 
+                    No need to click anything once we start!
+                  </p>
                 </div>
-              ))}
+              </div>
+              
+              <Button
+                onClick={startConversation}
+                disabled={!isActive}
+                size="lg"
+                className="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4"
+              >
+                <Mic className="w-5 h-5 mr-2" />
+                Start Voice Conversation
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center space-y-6">
+              {/* Status Display */}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-3">
+                  {isListening && (
+                    <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                  )}
+                  {isProcessing && (
+                    <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {isSpeaking && (
+                    <Volume2 className="w-4 h-4 text-green-500 animate-pulse" />
+                  )}
+                </div>
+                <p className="text-sm text-gray-700 font-medium mt-2">{currentStatus}</p>
+              </div>
+
+              {/* Visual Feedback */}
+              <div className="space-y-4">
+                {isListening && (
+                  <div className="flex justify-center space-x-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-2 bg-red-500 rounded-full animate-pulse"
+                        style={{
+                          height: Math.random() * 30 + 10,
+                          animationDelay: `${i * 0.1}s`
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                )}
+
+                {isSpeaking && (
+                  <div className="flex justify-center space-x-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-2 bg-green-500 rounded-full animate-bounce"
+                        style={{
+                          height: Math.random() * 30 + 10,
+                          animationDelay: `${i * 0.2}s`
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {!isActive && (
+                <div className="text-orange-600 font-medium">
+                  ⏰ Your free 5-minute session has ended
+                </div>
+              )}
+
+              <Button
+                onClick={endConversation}
+                variant="outline"
+                size="sm"
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                End Conversation
+              </Button>
             </div>
           )}
         </CardContent>

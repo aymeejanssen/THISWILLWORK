@@ -57,9 +57,9 @@ serve(async (req) => {
       );
     }
 
-    // Step 2: Generate GPT-4o response
+    // Step 2: Generate GPT-4 response (upgraded from GPT-4o)
     if (action === 'chat') {
-      console.log('Generating GPT-4o response for:', text);
+      console.log('Generating GPT-4 response for:', text);
 
       const chatResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -68,29 +68,29 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'gpt-4',
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful, warm AI assistant. Keep your responses conversational and under 100 words since they will be spoken aloud.'
+              content: 'You are a warm, empathetic AI therapist. Keep your responses conversational, supportive, and under 80 words since they will be spoken aloud. Focus on being present and helping the person process their thoughts and feelings.'
             },
             {
               role: 'user',
               content: text
             }
           ],
-          max_tokens: 150,
-          temperature: 0.7,
+          max_tokens: 120,
+          temperature: 0.8,
         }),
       });
 
       if (!chatResponse.ok) {
-        throw new Error(`GPT-4o API error: ${await chatResponse.text()}`);
+        throw new Error(`GPT-4 API error: ${await chatResponse.text()}`);
       }
 
       const chatResult = await chatResponse.json();
-      const aiResponse = chatResult.choices[0]?.message?.content || 'I apologize, I did not understand that.';
-      console.log('GPT-4o response:', aiResponse);
+      const aiResponse = chatResult.choices[0]?.message?.content || 'I hear you. Tell me more about what you\'re feeling.';
+      console.log('GPT-4 response:', aiResponse);
 
       return new Response(
         JSON.stringify({ response: aiResponse }),
@@ -98,9 +98,9 @@ serve(async (req) => {
       );
     }
 
-    // Step 3: Text-to-Speech
+    // Step 3: Text-to-Speech with Nova voice
     if (action === 'speak') {
-      console.log('Converting text to speech:', text.substring(0, 50) + '...');
+      console.log('Converting text to speech with Nova voice:', text.substring(0, 50) + '...');
 
       const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
@@ -109,10 +109,11 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'tts-1',
+          model: 'tts-1-hd',
           input: text,
           voice: 'nova',
           response_format: 'mp3',
+          speed: 1.0,
         }),
       });
 
@@ -124,7 +125,7 @@ serve(async (req) => {
       const audioBuffer = await ttsResponse.arrayBuffer();
       const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
 
-      console.log('TTS audio generated successfully');
+      console.log('TTS audio generated successfully with Nova voice');
 
       return new Response(
         JSON.stringify({ audioContent: base64Audio }),
