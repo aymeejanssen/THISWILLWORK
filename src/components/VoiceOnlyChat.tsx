@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,8 @@ import { Mic, MicOff, Volume2, VolumeX, Settings, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
-// OpenAI TTS voices only
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
 const openAIVoices = [
   { id: 'alloy', name: 'Alloy', description: 'Balanced, natural voice' },
   { id: 'echo', name: 'Echo', description: 'Clear, articulate voice' },
@@ -17,7 +17,7 @@ const openAIVoices = [
   { id: 'shimmer', name: 'Shimmer', description: 'Gentle, soothing voice' }
 ];
 
-const OPENAI_API_KEY = 'sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA'; // Your API key ending in XDAA
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 const VoiceOnlyChat = () => {
   const navigate = useNavigate();
@@ -142,7 +142,7 @@ const VoiceOnlyChat = () => {
           const sttResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
             method: "POST",
             headers: { 
-              "Authorization": `Bearer ${OPENAI_API_KEY}` 
+Authorization: `Bearer ${apiKey}`
             },
             body: sttForm
           });
@@ -162,7 +162,7 @@ const VoiceOnlyChat = () => {
           const gptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${OPENAI_API_KEY}`,
+Authorization: `Bearer ${apiKey}`
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -204,7 +204,7 @@ const VoiceOnlyChat = () => {
           const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${OPENAI_API_KEY}`,
+Authorization: `Bearer ${apiKey}`
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
