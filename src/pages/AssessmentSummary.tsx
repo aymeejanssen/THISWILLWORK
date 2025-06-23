@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, MessageCircle } from 'lucide-react';
 import { useAssessment } from "@/contexts/AssessmentContext";
-import { supabase } from "@/integrations/supabase/client";
 import VoiceConversation from "@/components/VoiceConversation";
 import SubscriptionModal from "@/components/SubscriptionModal";
 
@@ -41,19 +40,30 @@ const AssessmentSummary = () => {
 
       console.log('Generating insights for responses:', responses);
 
-      const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-        body: {
-          responses: responses,
-          primaryConcern: responses.primaryConcern || 'General wellbeing'
-        }
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a helpful, compassionate assistant analyzing mental wellness assessments. Provide clear, supportive insights, cognitive reframes, and action steps based on the user's answers."
+            },
+            {
+              role: "user",
+              content: `Analyze the following responses and return JSON with fields: insights (array with title, description, reframe), actionSteps (title, description, action), and supportiveMessage. Responses: ${JSON.stringify(responses)}`
+            }
+          ]
+        })
       });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to generate insights');
-      }
-
-      console.log('Generated insights:', data);
-      setInsights(data);
+      const data = await response.json();
+      const parsed = JSON.parse(data.choices[0].message.content);
+      setInsights(parsed);
     } catch (err) {
       console.error('Error generating insights:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate insights');
@@ -123,7 +133,6 @@ const AssessmentSummary = () => {
 
         {insights && (
           <>
-            {/* Supportive Message */}
             <Card>
               <CardContent className="p-6">
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
@@ -132,7 +141,6 @@ const AssessmentSummary = () => {
               </CardContent>
             </Card>
 
-            {/* Insights */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-gray-800">Key Insights About You</h3>
               {insights.insights.map((insight, index) => (
@@ -148,7 +156,6 @@ const AssessmentSummary = () => {
               ))}
             </div>
 
-            {/* Action Steps */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-gray-800">Recommended Next Steps</h3>
               {insights.actionSteps.map((step, index) => (
@@ -164,7 +171,6 @@ const AssessmentSummary = () => {
               ))}
             </div>
 
-            {/* Voice Conversation CTA */}
             <Card className="border-2 border-purple-200">
               <CardContent className="p-8 text-center">
                 <MessageCircle className="h-12 w-12 text-purple-600 mx-auto mb-4" />
@@ -193,17 +199,15 @@ const AssessmentSummary = () => {
         )}
       </div>
 
-      {/* Voice Conversation Modal/Component */}
       {showVoiceChat && (
         <VoiceConversation 
           onTimeUp={handleTimeUp}
           onClose={() => setShowVoiceChat(false)}
-          timeLimit={5 * 60 * 1000} // 5 minutes in milliseconds
+          timeLimit={5 * 60 * 1000}
           assessmentResponses={responses}
         />
       )}
 
-      {/* Subscription Modal */}
       {showSubscription && (
         <SubscriptionModal 
           isOpen={showSubscription}
