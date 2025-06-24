@@ -1,219 +1,111 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
+
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, MessageCircle } from 'lucide-react';
-import { useAssessment } from "@/contexts/AssessmentContext";
-import VoiceConversation from "@/components/VoiceConversation";
-import SubscriptionModal from "@/components/SubscriptionModal";
+import { Button } from "@/components/ui/button";
+import { useNavigate, useParams } from 'react-router-dom';
+import { CheckCircle, ArrowRight, Heart } from 'lucide-react';
+import { useAssessment } from '../contexts/AssessmentContext';
 
-interface AssessmentInsights {
-  insights: Array<{
-    title: string;
-    description: string;
-    reframe: string;
-  }>;
-  actionSteps: Array<{
-    title: string;
-    description: string;
-    action: string;
-  }>;
-  supportiveMessage: string;
-}
-
-const AssessmentSummary = () => {
+const AnswerSummary = () => {
+  const navigate = useNavigate();
+  const { questionNumber } = useParams();
   const { responses } = useAssessment();
-  const [insights, setInsights] = useState<AssessmentInsights | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showVoiceChat, setShowVoiceChat] = useState(false);
-  const [showSubscription, setShowSubscription] = useState(false);
-  const [conversationTimeUp, setConversationTimeUp] = useState(false);
 
-  useEffect(() => {
-    generateInsights();
-  }, []);
+  const currentQuestion = parseInt(questionNumber || '1');
+  
+  const getEncouragingMessage = () => {
+    const messages = [
+      "Thank you for sharing that with us. Your openness is the first step toward healing.",
+      "Your self-awareness is truly remarkable. You're already showing incredible strength.",
+      "Every answer you give helps us understand you better. You're doing amazing.",
+      "Your honesty is beautiful. This kind of reflection takes real courage.",
+      "You're being so thoughtful with your responses. This shows deep emotional intelligence.",
+      "Thank you for trusting us with your feelings. Your vulnerability is a strength.",
+      "Each answer brings more clarity. You're on a powerful journey of self-discovery.",
+      "Your willingness to explore these feelings shows incredible bravery.",
+      "You're giving yourself such a gift by taking time for this reflection.",
+      "Thank you for being so genuine. Your authentic responses will help create meaningful insights."
+    ];
+    
+    return messages[(currentQuestion - 1) % messages.length];
+  };
 
-  const generateInsights = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log('Generating insights for responses:', responses);
-
-      const response = await fetch('/api/generate-assessment-insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          responses: responses,
-          primaryConcern: responses.primaryConcern || 'General wellbeing'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Generated insights:', data);
-      setInsights(data);
-    } catch (err) {
-      console.error('Error generating insights:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate insights');
-    } finally {
-      setIsLoading(false);
+  const getProgressMessage = () => {
+    if (currentQuestion <= 3) {
+      return "You're just getting started, and already showing such courage.";
+    } else if (currentQuestion <= 6) {
+      return "You're making wonderful progress. Keep going!";
+    } else if (currentQuestion <= 9) {
+      return "You're more than halfway through. Your dedication is inspiring.";
+    } else {
+      return "You're almost at the end. Your commitment to this process is beautiful.";
     }
   };
 
-  const handleStartVoiceChat = () => {
-    setShowVoiceChat(true);
+  const handleContinue = () => {
+    navigate('/'); // Go back to continue the assessment
   };
-
-  const handleTimeUp = () => {
-    setConversationTimeUp(true);
-    setShowVoiceChat(false);
-    setShowSubscription(true);
-  };
-
-  const handleCloseSubscription = () => {
-    setShowSubscription(false);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 flex items-center justify-center">
-        <Card className="w-full max-w-md mx-auto">
-          <CardContent className="p-8 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-600" />
-            <h3 className="text-lg font-semibold mb-2">Analyzing Your Responses</h3>
-            <p className="text-gray-600">Our AI is generating personalized insights based on your assessment...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 flex items-center justify-center">
-        <Card className="w-full max-w-md mx-auto">
-          <CardContent className="p-8 text-center">
-            <div className="text-red-500 mb-4">⚠️</div>
-            <h3 className="text-lg font-semibold mb-2 text-red-600">Analysis Error</h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={generateInsights} variant="outline">
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Card>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6 flex items-center justify-center">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-4">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Answer {currentQuestion} Recorded</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Thank You for Sharing</h1>
+        </div>
+
+        <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-purple-700">
-              Your Personal Insights
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              AI-powered analysis of your assessment responses
-            </p>
+            <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-fit">
+              <Heart className="h-6 w-6 text-purple-600" />
+            </div>
+            <CardTitle className="text-xl text-gray-900">Your Response Matters</CardTitle>
           </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-gray-700 text-lg leading-relaxed">
+              {getEncouragingMessage()}
+            </p>
+            <div className="bg-white p-4 rounded-lg border border-purple-200">
+              <p className="text-purple-800 font-medium">
+                {getProgressMessage()}
+              </p>
+            </div>
+          </CardContent>
         </Card>
 
-        {insights && (
-          <>
-            {/* Supportive Message */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
-                  <p className="text-blue-800 leading-relaxed">{insights.supportiveMessage}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Insights */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-800">Key Insights About You</h3>
-              {insights.insights.map((insight, index) => (
-                <Card key={index}>
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-semibold text-purple-700 mb-3">{insight.title}</h4>
-                    <p className="text-gray-700 mb-3">{insight.description}</p>
-                    <div className="bg-green-50 border-l-4 border-green-400 p-3 rounded-r-lg">
-                      <p className="text-green-800 font-medium">{insight.reframe}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Action Steps */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-800">Recommended Next Steps</h3>
-              {insights.actionSteps.map((step, index) => (
-                <Card key={index}>
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-semibold text-purple-700 mb-2">{step.title}</h4>
-                    <p className="text-gray-600 mb-3">{step.description}</p>
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">
-                      <p className="text-yellow-800 font-medium">This week: {step.action}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Voice Conversation CTA */}
-            <Card className="border-2 border-purple-200">
-              <CardContent className="p-8 text-center">
-                <MessageCircle className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-purple-700 mb-3">
-                  Personalized Intake Session
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Ready to dive deeper? Have a voice conversation with our AI therapist who will discuss your specific assessment responses - completely free for 5 minutes.
+        <Card className="shadow-lg">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">What happens next?</h3>
+              <p className="text-gray-600">
+                We're carefully noting your response to create a personalized summary just for you. 
+                Each answer helps us understand your unique journey better.
+              </p>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-blue-800 text-sm">
+                  💙 Your responses are being woven together to create insights that honor your individual experience.
                 </p>
-                <Button 
-                  onClick={handleStartVoiceChat}
-                  size="lg"
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
-                  disabled={conversationTimeUp}
-                >
-                  {conversationTimeUp ? "Free Session Complete" : "Start Free Intake Session"}
-                </Button>
-                {conversationTimeUp && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    Want to continue? Check out our subscription options.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </>
-        )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-center">
+          <Button 
+            onClick={handleContinue} 
+            className="bg-purple-600 hover:bg-purple-700" 
+            size="lg"
+          >
+            Continue Assessment
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
-
-      {/* Voice Conversation Modal/Component */}
-      {showVoiceChat && (
-        <VoiceConversation 
-          onTimeUp={handleTimeUp}
-          onClose={() => setShowVoiceChat(false)}
-          timeLimit={5 * 60 * 1000} // 5 minutes in milliseconds
-          assessmentResponses={responses}
-        />
-      )}
-
-      {/* Subscription Modal */}
-      {showSubscription && (
-        <SubscriptionModal 
-          isOpen={showSubscription}
-          onClose={handleCloseSubscription}
-        />
-      )}
     </div>
   );
 };
 
-export default AssessmentSummary;h
+export default AnswerSummary;

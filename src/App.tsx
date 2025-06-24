@@ -14,9 +14,6 @@ import CompetitionSignup from "./pages/CompetitionSignup";
 import Assessment from "./pages/Assessment";
 import AssessmentComplete from "./pages/AssessmentComplete";
 import PrivacyPolicy from "./components/PrivacyPolicy";
-import SimpleIndex from "./pages/SimpleIndex";
-import SimpleAssessment from "./pages/SimpleAssessment";
-import SimpleResults from "./pages/SimpleResults";
 
 const queryClient = new QueryClient();
 
@@ -29,9 +26,6 @@ const App = () => (
         <AssessmentProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/simple" element={<SimpleIndex />} />
-            <Route path="/simple-assessment" element={<SimpleAssessment />} />
-            <Route path="/simple-results" element={<SimpleResults />} />
             <Route path="/competition" element={<CompetitionSignup />} />
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/assessment-complete" element={<AssessmentComplete />} />

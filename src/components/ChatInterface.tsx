@@ -1,10 +1,12 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot, User, X, VolumeX, Volume2 } from 'lucide-react';
-import { useToast } from "@/components/ui/use-toast";
+import { supabase } from '../integrations/supabase/client';
+import { voiceService } from '../services/voiceService';
 
 interface Message {
   id: string;
@@ -29,8 +31,8 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
 
+  // Initialize with welcome message
   useEffect(() => {
     const welcomeMessage: Message = {
       id: '1',
@@ -40,13 +42,20 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     };
     setMessages([welcomeMessage]);
 
+    // Speak the welcome message
     if (isVoiceEnabled) {
       setTimeout(() => {
-        speakText(welcomeMessage.content);
+        voiceService.speak(welcomeMessage.content);
       }, 1000);
     }
   }, [userProfile, isVoiceEnabled]);
 
+  // Update voice service when voice is toggled
+  useEffect(() => {
+    voiceService.setEnabled(isVoiceEnabled);
+  }, [isVoiceEnabled]);
+
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
@@ -60,31 +69,8 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
     const name = userProfile.name || 'there';
     const struggles = userProfile.currentStruggles?.join(', ') || 'what you\'re going through';
-
+    
     return `Hi ${name}! I'm really glad you're here. I know it takes courage to reach out, especially when you're dealing with ${struggles}. I'm here to listen and support you. What's been on your mind lately?`;
-  };
-
-  const speakText = async (text: string) => {
-    try {
-      const response = await fetch("https://api.openai.com/v1/audio/speech", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "tts-1",
-          voice: "shimmer",
-          input: text
-        })
-      });
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.play();
-    } catch (error) {
-      console.error("Voice playback error:", error);
-    }
   };
 
   const sendMessage = async () => {
@@ -102,30 +88,28 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     setIsLoading(true);
 
     try {
+      // Create conversation context
       const conversationContext = messages
         .map(msg => `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`)
         .join('\n');
 
       const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 150 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages.map(msg => ({ role: msg.role, content: msg.content })),
-            { role: "user", content: inputMessage }
-          ]
-        })
+      const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
+        body: {
+          prompt: inputMessage,
+          context: conversationContext,
+          systemPrompt: systemPrompt,
+          maxTokens: 200
+        }
       });
 
-      const data = await response.json();
-      const aiResponse = data?.choices?.[0]?.message?.content || "I'm here to support you.";
+      if (error) {
+        console.error('Error generating AI response:', error);
+        throw error;
+      }
+
+      const aiResponse = data?.response || "I understand. Could you tell me more about that?";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -136,9 +120,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
       setMessages(prev => [...prev, assistantMessage]);
 
+      // Speak the AI response if voice is enabled
       if (isVoiceEnabled) {
         setTimeout(() => {
-          speakText(aiResponse);
+          voiceService.speak(aiResponse);
         }, 500);
       }
 
@@ -165,6 +150,9 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
   const toggleVoice = () => {
     setIsVoiceEnabled(!isVoiceEnabled);
+    if (!isVoiceEnabled) {
+      voiceService.stopCurrentAudio();
+    }
   };
 
   return (
@@ -177,10 +165,20 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
               AI Wellness Coach
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={toggleVoice} className="text-white hover:bg-white/20">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleVoice}
+                className="text-white hover:bg-white/20"
+              >
                 {isVoiceEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
               </Button>
-              <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-white hover:bg-white/20"
+              >
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -191,13 +189,24 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
           <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message) => (
-                <div key={message.id} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  key={message.id}
+                  className={`flex items-start gap-3 ${
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
                   {message.role === 'assistant' && (
                     <div className="p-2 bg-purple-100 rounded-full">
                       <Bot className="h-4 w-4 text-purple-600" />
                     </div>
                   )}
-                  <div className={`max-w-[70%] p-3 rounded-lg ${message.role === 'user' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
+                  <div
+                    className={`max-w-[70%] p-3 rounded-lg ${
+                      message.role === 'user'
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
                     <p className="text-sm leading-relaxed">{message.content}</p>
                   </div>
                   {message.role === 'user' && (
