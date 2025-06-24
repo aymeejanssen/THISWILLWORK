@@ -1,55 +1,52 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
 import OpenAIVoiceChat from "../components/OpenAIVoiceChat";
-
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showVoiceChat, setShowVoiceChat] = useState(false);
-
   const handleBeginJourney = () => {
     setShowOnboarding(true);
   };
-
   const handleCloseOnboarding = () => {
     setShowOnboarding(false);
   };
-
-  const reviews = [
-    {
-      name: "Sarah M.",
-      location: "New York, USA",
-      review: "I often would feel anxious at night and overthink and cry myself to sleep, feeling completely alone with my worries. MindEase became my lifeline, having someone to talk to at 3 AM when the world felt too heavy changed everything for me.",
-      rating: 5
-    },
-    {
-      name: "Ahmed K.",
-      location: "Dubai, UAE",
-      review: "Yes, very happy with it. Finally found support that understands my background and culture.",
-      rating: 5
-    },
-    {
-      name: "Maria L.",
-      location: "São Paulo, Brazil",
-      review: "After losing my job, I fell into a deep depression. MindEase helped me rebuild my confidence step by step. The 24/7 support meant I never had to face my darkest moments alone.",
-      rating: 5
-    }
-  ];
-
-  const countryStats = [
-    { flag: "🇺🇸", users: "34k+", country: "USA" },
-    { flag: "🇦🇪", users: "28k+", country: "UAE" },
-    { flag: "🇳🇱", users: "25k+", country: "Netherlands" },
-    { flag: "🇪🇸", users: "31k+", country: "Spain" }
-  ];
-
-  return (
-    <div className="min-h-screen wellness-gradient">
-      {showVoiceChat && (
-        <OpenAIVoiceChat />
-      )}
+  const reviews = [{
+    name: "Sarah M.",
+    location: "New York, USA",
+    review: "I often would feel anxious at night and overthink and cry myself to sleep, feeling completely alone with my worries. MindEase became my lifeline, having someone to talk to at 3 AM when the world felt too heavy changed everything for me.",
+    rating: 5
+  }, {
+    name: "Ahmed K.",
+    location: "Dubai, UAE",
+    review: "Yes, very happy with it. Finally found support that understands my background and culture.",
+    rating: 5
+  }, {
+    name: "Maria L.",
+    location: "São Paulo, Brazil",
+    review: "After losing my job, I fell into a deep depression. MindEase helped me rebuild my confidence step by step. The 24/7 support meant I never had to face my darkest moments alone.",
+    rating: 5
+  }];
+  const countryStats = [{
+    flag: "🇺🇸",
+    users: "34k+",
+    country: "USA"
+  }, {
+    flag: "🇦🇪",
+    users: "28k+",
+    country: "UAE"
+  }, {
+    flag: "🇳🇱",
+    users: "25k+",
+    country: "Netherlands"
+  }, {
+    flag: "🇪🇸",
+    users: "31k+",
+    country: "Spain"
+  }];
+  return <div className="min-h-screen wellness-gradient">
+      {showVoiceChat && <OpenAIVoiceChat />}
       
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-24">
@@ -61,9 +58,9 @@ const Index = () => {
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-6xl md:text-8xl font-light text-white mb-8 tracking-tight">
+          <h1 className="text-6xl md:text-8xl text-white mb-8 tracking-tight font-medium">
             Welcome to{" "}
-            <span className="font-medium bg-gradient-to-r from-white via-purple-200 to-orange-200 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-purple-200 to-orange-200 bg-clip-text text-transparent font-semibold">
               Mynd Ease
             </span>
           </h1>
@@ -76,11 +73,7 @@ const Index = () => {
 
           {/* CTA Button */}
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-20">
-            <Button 
-              onClick={handleBeginJourney}
-              size="lg"
-              className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm px-12 py-6 text-lg font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-            >
+            <Button onClick={handleBeginJourney} size="lg" className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm px-12 py-6 text-lg font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
               Get Started
               <ArrowRight className="ml-3 h-5 w-5" />
             </Button>
@@ -155,12 +148,9 @@ const Index = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {reviews.map((review, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:bg-white/20">
+            {reviews.map((review, index) => <div key={index} className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 hover:border-white/30 transition-all duration-300 hover:bg-white/20">
                 <div className="flex items-center mb-6">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-300 fill-current" />
-                  ))}
+                  {[...Array(review.rating)].map((_, i) => <Star key={i} className="h-4 w-4 text-yellow-300 fill-current" />)}
                 </div>
                 <p className="text-white/90 leading-relaxed mb-8 font-light italic">
                   "{review.review}"
@@ -169,8 +159,7 @@ const Index = () => {
                   <div className="font-medium text-white">{review.name}</div>
                   <div className="text-white/60 text-sm font-light">{review.location}</div>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
 
@@ -178,23 +167,17 @@ const Index = () => {
         <div className="text-center">
           <p className="text-white/80 mb-8 font-light">Trusted by people from over 50 countries</p>
           <div className="flex justify-center items-center gap-12">
-            {countryStats.map((stat, index) => (
-              <div key={index} className="flex flex-col items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-6 min-w-[90px] border border-white/20">
+            {countryStats.map((stat, index) => <div key={index} className="flex flex-col items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-6 min-w-[90px] border border-white/20">
                 <div className="text-2xl">{stat.flag}</div>
                 <div className="text-white font-medium text-sm">{stat.users}</div>
                 <div className="text-white/60 text-xs font-light">{stat.country}</div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </div>
 
       {/* Onboarding Modal */}
-      {showOnboarding && (
-        <OnboardingWrapper onClose={handleCloseOnboarding} />
-      )}
-    </div>
-  );
+      {showOnboarding && <OnboardingWrapper onClose={handleCloseOnboarding} />}
+    </div>;
 };
-
 export default Index;
