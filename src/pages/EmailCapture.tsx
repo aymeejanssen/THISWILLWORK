@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
 import { Brain, Heart, CheckCircle, Loader2, Shield, Mail, Sparkles, Flower2 } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
-import { supabase } from '../integrations/supabase/client';
 import ConsentModal from '../components/ConsentModal';
 import DataManagement from '../components/DataManagement';
 import { usePrivacyConsent } from '../hooks/usePrivacyConsent';
@@ -50,15 +49,18 @@ const EmailCapture = () => {
     const generateInsights = async () => {
       try {
         console.log('Calling AI function with responses:', responses);
-        const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-          body: { responses, primaryConcern }
+        const response = await fetch('/api/generateInsights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ responses, primaryConcern })
         });
-        
-        if (error) {
-          console.error('Supabase function error:', error);
-          throw error;
+
+        const data = await response.json();
+        if (!response.ok) {
+          console.error('Generate insights error:', data);
+          throw new Error(data.error || 'Failed to generate insights');
         }
-        
+
         console.log('AI insights generated:', data);
         setAiInsights(data);
       } catch (err) {
@@ -88,19 +90,22 @@ const EmailCapture = () => {
       localStorage.setItem('prelaunch_signup_date', new Date().toISOString());
       
       // Send to HubSpot with assessment data
-      const { data, error } = await supabase.functions.invoke('hubspot-contact', {
-        body: { 
+      const hubspotRes = await fetch('/api/createHubspotContact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           email,
           source: 'post-assessment-signup',
           tags: ['post-assessment', 'competition-entry', primaryConcern.replace(/\s+/g, '-')]
-        }
+        })
       });
-      
-      if (error) {
-        console.error('HubSpot integration error:', error);
+
+      const hubspotData = await hubspotRes.json();
+      if (!hubspotRes.ok) {
+        console.error('HubSpot integration error:', hubspotData);
         // Continue with local storage as fallback
       } else {
-        console.log('Successfully added to HubSpot with assessment data:', data);
+        console.log('Successfully added to HubSpot with assessment data:', hubspotData);
       }
       
       console.log('Pre-launch email captured:', email);
