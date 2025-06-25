@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot, User, X, VolumeX, Volume2 } from 'lucide-react';
-import { supabase } from '../integrations/supabase/client';
-import { voiceService } from '../services/voiceService';
+
+const OPENAI_API_KEY = 'sk-proj-abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx1234yz5678abcd9012efghXDAA';
 
 interface Message {
   id: string;
@@ -31,6 +31,45 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const speak = async (text: string) => {
+    try {
+      const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'tts-1',
+          voice: 'nova',
+          input: text
+        })
+      });
+
+      if (!response.ok) {
+        console.error('TTS error:', await response.text());
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+
+      audioRef.current = new Audio(url);
+      audioRef.current.onended = () => {
+        URL.revokeObjectURL(url);
+      };
+      audioRef.current.play();
+    } catch (err) {
+      console.error('Speak error:', err);
+    }
+  };
 
   // Initialize with welcome message
   useEffect(() => {
@@ -45,15 +84,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
     // Speak the welcome message
     if (isVoiceEnabled) {
       setTimeout(() => {
-        voiceService.speak(welcomeMessage.content);
+        speak(welcomeMessage.content);
       }, 1000);
     }
   }, [userProfile, isVoiceEnabled]);
-
-  // Update voice service when voice is toggled
-  useEffect(() => {
-    voiceService.setEnabled(isVoiceEnabled);
-  }, [isVoiceEnabled]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -95,21 +129,24 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
       const systemPrompt = `You are a warm, empathetic AI wellness coach. Keep responses conversational, supportive, and under 150 words. Focus on ${userProfile?.currentStruggles?.join(', ') || 'general wellness'}. Respond naturally as if speaking aloud.`;
 
-      const { data, error } = await supabase.functions.invoke('generate-assessment-insights', {
-        body: {
+      const aiRes = await fetch('/api/generateInsights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           prompt: inputMessage,
           context: conversationContext,
           systemPrompt: systemPrompt,
           maxTokens: 200
-        }
+        })
       });
 
-      if (error) {
-        console.error('Error generating AI response:', error);
-        throw error;
+      const data = await aiRes.json();
+      if (!aiRes.ok) {
+        console.error('Error generating AI response:', data);
+        throw new Error(data.error || 'Failed to generate response');
       }
 
-      const aiResponse = data?.response || "I understand. Could you tell me more about that?";
+      const aiResponse = data.response || "I understand. Could you tell me more about that?";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -123,7 +160,7 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
       // Speak the AI response if voice is enabled
       if (isVoiceEnabled) {
         setTimeout(() => {
-          voiceService.speak(aiResponse);
+          speak(aiResponse);
         }, 500);
       }
 
@@ -150,8 +187,10 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 
   const toggleVoice = () => {
     setIsVoiceEnabled(!isVoiceEnabled);
-    if (!isVoiceEnabled) {
-      voiceService.stopCurrentAudio();
+    if (isVoiceEnabled && audioRef.current) {
+      audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
+      audioRef.current = null;
     }
   };
 
