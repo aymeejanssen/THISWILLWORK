@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, Mail, Calendar, Gift, Users, Heart, Brain, Shield, Clock, MapPin } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
 
 const CompetitionSignup = () => {
   const navigate = useNavigate();
@@ -34,22 +33,25 @@ const CompetitionSignup = () => {
       const lastName = nameParts.slice(1).join(' ') || '';
       
       // Send to HubSpot
-      const { data, error } = await supabase.functions.invoke('hubspot-contact', {
-        body: { 
+      const hubspotRes = await fetch('/api/createHubspotContact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           email,
           firstName,
           lastName,
           dateOfBirth,
           source: 'pre-launch-competition',
           tags: ['pre-launch', 'competition-entry', 'sri-lanka-contest']
-        }
+        })
       });
-      
-      if (error) {
-        console.error('HubSpot integration error:', error);
+
+      const hubspotData = await hubspotRes.json();
+      if (!hubspotRes.ok) {
+        console.error('HubSpot integration error:', hubspotData);
         // Continue with local storage as fallback
       } else {
-        console.log('Successfully added to HubSpot:', data);
+        console.log('Successfully added to HubSpot:', hubspotData);
       }
       
       console.log('Pre-launch signup captured:', { email, fullName, dateOfBirth });
