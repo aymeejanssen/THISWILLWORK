@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "prelint": "node -e \"const fs=require('fs'); const path='node_modules/.bin/eslint'; if(!fs.existsSync(path)) { console.error('Dependencies missing. Run npm install first.'); process.exit(1);} \"",
     "lint": "eslint .",
     "preview": "vite preview"
   },

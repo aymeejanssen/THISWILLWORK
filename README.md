@@ -36,6 +36,20 @@ npm i
 npm run dev
 ```
 
+## Linting your code
+
+Run the linter after installing dependencies:
+
+```sh
+npm install
+npm run lint
+```
+
+Running `npm run lint` will automatically check that ESLint is installed and will warn if dependencies are missing.
+
+If you see errors such as `eslint: command not found` or `Cannot find module`,
+make sure you ran `npm install` first.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
