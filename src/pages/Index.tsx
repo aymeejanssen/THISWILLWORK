@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
-import OpenAIVoiceChat from "../components/OpenAIVoiceChat";
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showVoiceChat, setShowVoiceChat] = useState(false);
@@ -45,9 +44,7 @@ const Index = () => {
     users: "31k+",
     country: "Spain"
   }];
-  return <div className="min-h-screen wellness-gradient">
-      {showVoiceChat && <OpenAIVoiceChat />}
-      
+  return <div className="min-h-screen wellness-gradient">      
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-24">
         <div className="text-center max-w-4xl mx-auto">
