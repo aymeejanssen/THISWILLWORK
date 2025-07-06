@@ -1,4 +1,3 @@
-// /api/session.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -21,8 +20,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const data = await response.json();
-    return res.status(200).json(data);
+    return res.status(200).json({ client_secret: { value: data.secret } });
   } catch (error) {
     return res.status(500).json({ error: "Failed to create ephemeral key" });
   }
 }
+
