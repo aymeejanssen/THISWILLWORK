@@ -230,3 +230,4 @@ const ChatInterface = ({ onClose, userProfile }: ChatInterfaceProps) => {
 };
 
 export default ChatInterface;
+
