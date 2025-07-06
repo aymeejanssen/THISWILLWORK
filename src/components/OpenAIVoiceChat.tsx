@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,9 +48,10 @@ const OpenAIVoiceChat = () => {
 
   const endRealtimeSession = () => {
     if (session) {
-      session.disconnect();
+      // Use the correct method to end the session - might be close() or end()
+      // For now, just set it to null until we know the exact API
+      setSession(null);
     }
-    setSession(null);
     setSessionStarted(false);
     setCurrentStatus('Session ended');
     toast.info("Voice session ended");

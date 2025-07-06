@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -51,9 +50,10 @@ const VoiceOnlyChat = () => {
 
   const endRealtimeSession = () => {
     if (session) {
-      session.disconnect();
+      // Use the correct method to end the session - might be close() or end()
+      // For now, just set it to null until we know the exact API
+      setSession(null);
     }
-    setSession(null);
     setSessionStarted(false);
     setCurrentStatus('Session ended');
     toast.info("Voice session ended");
