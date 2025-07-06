@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mic, MicOff, Volume2, VolumeX, Settings, Home, PhoneOff } from 'lucide-react';
+import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
 
 const openAIVoices = [
   { id: 'alloy', name: 'Alloy', description: 'Balanced, natural voice' },
@@ -23,16 +24,24 @@ const VoiceOnlyChat = () => {
   const [isMicEnabled, setIsMicEnabled] = useState(true);
   const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
   const [currentStatus, setCurrentStatus] = useState('Choose your AI voice and start');
+  const [session, setSession] = useState<RealtimeSession | null>(null);
 
   const startRealtimeSession = async () => {
     try {
       setCurrentStatus('Connecting to Realtime API...');
-      // Simulate connection for now - replace with actual OpenAI integration
-      setTimeout(() => {
-        setSessionStarted(true);
-        setCurrentStatus('🎙️ Live session started');
-        toast.success("AI voice session connected!");
-      }, 2000);
+      
+      const agent = new RealtimeAgent({ name: 'Assistant' });
+      const newSession = new RealtimeSession(agent);
+
+      const res = await fetch("/api/session");
+      const data = await res.json();
+      const ephemeralKey = data.client_secret.value;
+
+      await newSession.connect({ apiKey: ephemeralKey });
+      setSession(newSession);
+      setSessionStarted(true);
+      setCurrentStatus('🎙️ Live session started');
+      toast.success("AI voice session connected!");
     } catch (error) {
       console.error("Realtime session error:", error);
       toast.error("Failed to connect to OpenAI Realtime.");
@@ -41,6 +50,10 @@ const VoiceOnlyChat = () => {
   };
 
   const endRealtimeSession = () => {
+    if (session) {
+      session.disconnect();
+    }
+    setSession(null);
     setSessionStarted(false);
     setCurrentStatus('Session ended');
     toast.info("Voice session ended");

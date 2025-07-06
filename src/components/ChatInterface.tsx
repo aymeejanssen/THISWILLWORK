@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Send, Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
 
 interface Message {
   type: 'user' | 'assistant';
@@ -17,6 +18,8 @@ const ChatInterface = () => {
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [session, setSession] = useState<RealtimeSession | null>(null);
+  const [sessionStarted, setSessionStarted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -41,16 +44,21 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // Simulate AI response - replace with actual API call
-      setTimeout(() => {
-        const assistantMessage: Message = {
-          type: 'assistant',
-          content: `I understand you said: "${userMessage.content}". How can I help you with that?`,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setIsLoading(false);
-      }, 1000);
+      if (session) {
+        // Use the realtime session to send message
+        await session.send([{ type: 'input_text', text: userMessage.content }]);
+      } else {
+        // Fallback simulation
+        setTimeout(() => {
+          const assistantMessage: Message = {
+            type: 'assistant',
+            content: `I understand you said: "${userMessage.content}". How can I help you with that?`,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+          setIsLoading(false);
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
@@ -65,12 +73,32 @@ const ChatInterface = () => {
     }
   };
 
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      toast.info('Voice input activated');
+  const toggleListening = async () => {
+    if (!sessionStarted) {
+      try {
+        const agent = new RealtimeAgent({ name: 'Assistant' });
+        const newSession = new RealtimeSession(agent);
+
+        const res = await fetch("/api/session");
+        const data = await res.json();
+        const ephemeralKey = data.client_secret.value;
+
+        await newSession.connect({ apiKey: ephemeralKey });
+        setSession(newSession);
+        setSessionStarted(true);
+        setIsListening(true);
+        toast.success("AI voice session connected!");
+      } catch (error) {
+        console.error("Realtime session error:", error);
+        toast.error("Failed to connect to OpenAI Realtime.");
+      }
     } else {
-      toast.info('Voice input deactivated');
+      setIsListening(!isListening);
+      if (!isListening) {
+        toast.info('Voice input activated');
+      } else {
+        toast.info('Voice input deactivated');
+      }
     }
   };
 
@@ -131,9 +159,9 @@ const ChatInterface = () => {
           onClick={toggleListening}
           variant="outline"
           size="icon"
-          className={isListening ? 'text-red-500' : 'text-gray-500'}
+          className={sessionStarted && isListening ? 'text-red-500' : 'text-gray-500'}
         >
-          {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          {sessionStarted && isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
         </Button>
         <Button
           onClick={handleSendMessage}
