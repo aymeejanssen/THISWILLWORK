@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mic, MicOff, Volume2, VolumeX, Settings, Home, PhoneOff } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Settings, PhoneOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 const openAIVoices = [
   { id: 'alloy', name: 'Alloy', description: 'Balanced, natural voice' },
@@ -16,8 +15,7 @@ const openAIVoices = [
   { id: 'shimmer', name: 'Shimmer', description: 'Gentle, soothing voice' },
 ];
 
-const VoiceOnlyChat = () => {
-  const navigate = useNavigate();
+const OpenAIVoiceChat = () => {
   const [selectedVoice, setSelectedVoice] = useState('nova');
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isMicEnabled, setIsMicEnabled] = useState(true);
@@ -27,7 +25,7 @@ const VoiceOnlyChat = () => {
   const startRealtimeSession = async () => {
     try {
       setCurrentStatus('Connecting to Realtime API...');
-      // Simulate connection for now - replace with actual OpenAI integration
+      // Simulate connection - replace with actual OpenAI Realtime API integration
       setTimeout(() => {
         setSessionStarted(true);
         setCurrentStatus('🎙️ Live session started');
@@ -47,21 +45,16 @@ const VoiceOnlyChat = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-50 bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-purple-50 to-pink-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex items-center justify-between mb-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-purple-600">
-              <Home className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
-                <span className="text-white text-xs">🤖</span>
-              </div>
-              <CardTitle className="text-xl font-bold text-purple-700">
-                AI Voice Chat
-              </CardTitle>
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+              <span className="text-white text-xs">🤖</span>
             </div>
+            <CardTitle className="text-xl font-bold text-purple-700">
+              AI Voice Chat
+            </CardTitle>
             <Button variant="ghost" size="icon" className="text-purple-600">
               <Settings className="h-5 w-5" />
             </Button>
@@ -139,4 +132,4 @@ const VoiceOnlyChat = () => {
   );
 };
 
-export default VoiceOnlyChat;
+export default OpenAIVoiceChat;
