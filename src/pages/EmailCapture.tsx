@@ -250,10 +250,11 @@ const EmailCapture = () => {
           <div className="order-first lg:order-last">
             <div className="rounded-lg overflow-hidden shadow-2xl">
               <img 
-                src="/lovable-uploads/1749b98f-d6c9-41a9-977f-47b9be29154e.png" 
-                alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
-                className="w-full h-64 lg:h-80 object-cover"
-              />
+  src="https://a0.muscache.com/im/pictures/INTERNAL/INTERNAL-ImageByPlaceId-ChIJnR5a9jxZ4joRjNPiALSkPeE-large_background/original/e432a186-1516-480d-bbac-e596c8f74eba.jpeg" 
+  alt="Sri Lanka mountain railway through lush green forest - your wellness retreat destination"
+  className="w-full h-64 lg:h-80 object-cover rounded-lg shadow-2xl"
+/>
+
             </div>
           </div>
         </div>
