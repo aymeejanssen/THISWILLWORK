@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/session.ts": {
-      "runtime": "nodejs18.x"
-    }
-  }
-}
