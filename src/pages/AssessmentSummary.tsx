@@ -1,64 +1,85 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, XCircle } from 'lucide-react';
-import VoiceOnlyChat from "@/components/VoiceOnlyChat";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Mic, MicOff, Volume2, VolumeX, Settings, Home, PhoneOff } from 'lucide-react';
+import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
 
-interface AssessmentResult {
-  category: string;
-  score: number;
-  maxScore: number;
-}
+const openAIVoices = [
+  { id: 'alloy', name: 'Alloy', description: 'Balanced, natural voice' },
+  { id: 'echo', name: 'Echo', description: 'Clear, articulate voice' },
+  { id: 'fable', name: 'Fable', description: 'Warm, engaging voice' },
+  { id: 'onyx', name: 'Onyx', description: 'Deep, confident voice' },
+  { id: 'nova', name: 'Nova', description: 'Bright, energetic voice' },
+  { id: 'shimmer', name: 'Shimmer', description: 'Gentle, soothing voice' },
+];
 
-const AssessmentSummary = () => {
-  const [showVoiceChat, setShowVoiceChat] = useState(false);
+const VoiceOnlyChat = () => {
+  const navigate = useNavigate();
+  const [selectedVoice, setSelectedVoice] = useState('nova');
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
+  const [currentStatus, setCurrentStatus] = useState('Choose your AI voice and start');
+  const [session, setSession] = useState<RealtimeSession | null>(null);
 
-  const assessmentResults: AssessmentResult[] = [
-    { category: "Mood", score: 8, maxScore: 10 },
-    { category: "Anxiety", score: 6, maxScore: 10 },
-    { category: "Stress", score: 7, maxScore: 10 },
-  ];
+  const startRealtimeSession = async () => {
+    try {
+      const agent = new RealtimeAgent({
+        name: 'Assistant',
+        instructions: 'You provide mental health assistance, companionship, and advice.',
+      });
 
-  const toggleVoiceChat = () => {
-    setShowVoiceChat(!showVoiceChat);
+      const newSession = new RealtimeSession(agent);
+
+      const res = await fetch('/api/session');
+      const data = await res.json();
+      const ephemeralKey = data.client_secret.value;
+
+      await newSession.connect({ apiKey: ephemeralKey });
+
+      console.log('✅ Realtime session started');
+
+      // You can store session in state or route to VoiceOnlyChat if needed
+    } catch (error) {
+      console.error('Realtime session error:', error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-      <Card className="w-full max-w-md mx-auto">
+    <div className="fixed inset-0 flex items-center justify-center p-4 z-50 bg-gradient-to-br from-purple-50 to-pink-50">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-purple-700">
-            Assessment Summary
-          </CardTitle>
-          <p className="text-sm text-gray-600">
-            Review your assessment results and discuss with our AI.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {assessmentResults.map((result, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <span>{result.category}</span>
-              <span>
-                {result.score} / {result.maxScore}
-              </span>
-              {result.score > result.maxScore / 2 ? (
-                <CheckCircle className="text-green-500 h-5 w-5" />
-              ) : (
-                <XCircle className="text-red-500 h-5 w-5" />
-              )}
+          <div className="flex items-center justify-between mb-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-purple-600">
+              <Home className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+                <span className="text-white text-xs">🤖</span>
+              </div>
+              <CardTitle className="text-xl font-bold text-purple-700">
+                AI Voice Chat
+              </CardTitle>
             </div>
-          ))}
-          <Button onClick={toggleVoiceChat} className="w-full bg-purple-500 text-white">
-            {showVoiceChat ? "Hide Voice Chat" : "Show Voice Chat"}
+            <Button variant="ghost" size="icon" className="text-purple-600">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <Button onClick={startRealtimeSession} className="w-full py-3 bg-purple-600 text-white rounded-lg">
+            Talk to AI now
           </Button>
         </CardContent>
       </Card>
-      
-      {showVoiceChat && (
-        <VoiceOnlyChat />
-      )}
     </div>
   );
 };
 
-export default AssessmentSummary;
+export default VoiceOnlyChat;
+
+

@@ -1,9 +1,9 @@
-export default async function handler(req: any, res: any) {
+export default async function handler(req: Request): Promise<Response> {
   try {
     const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY!}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -16,14 +16,13 @@ export default async function handler(req: any, res: any) {
     const text = await response.text();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: text });
+      console.error("❌ OpenAI Error:", text);
+      return new Response(text, { status: response.status });
     }
 
-    const data = JSON.parse(text);
-    res.status(200).json(data);
+    return new Response(text, { status: 200 });
   } catch (err) {
-    console.error("💥 Unexpected Error in /api/session:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("💥 Unexpected Error:", err);
+    return new Response("Internal Server Error", { status: 500 });
   }
 }
-
