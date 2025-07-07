@@ -1,28 +1,29 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-  if (!OPENAI_API_KEY) {
-    return res.status(500).json({ error: "Missing OpenAI API key" });
-  }
-
+export default async function handler(req: any, res: any) {
   try {
-    const response = await fetch("https://api.openai.com/v1/ephemeral_keys", {
+    const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        purpose: "agents.realtime"
-      })
+        model: "gpt-4o-realtime-preview",
+        modalities: ["audio", "text"],
+        instructions: "You provide mental health assistance, companionship, and advice.",
+      }),
     });
 
-    const data = await response.json();
-    return res.status(200).json({ client_secret: { value: data.secret } });
-  } catch (error) {
-    return res.status(500).json({ error: "Failed to create ephemeral key" });
+    const text = await response.text();
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: text });
+    }
+
+    const data = JSON.parse(text);
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("💥 Unexpected Error in /api/session:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
