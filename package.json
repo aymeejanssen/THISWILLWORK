@@ -16,6 +16,7 @@
     "@capacitor/cli": "^7.2.0",
     "@capacitor/core": "^7.2.0",
     "@hookform/resolvers": "^3.9.0",
+    "@openai/agents": "^0.0.10",
     "@openai/agents-realtime": "^0.0.10",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -49,10 +50,13 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
+    "dotenv": "^17.0.1",
     "embla-carousel-react": "^8.3.0",
+    "express": "^5.1.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
+    "openai": "^5.8.2",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
@@ -84,5 +88,18 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.19"
-  }
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aymeejanssen/THISWILLWORK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aymeejanssen/THISWILLWORK/issues"
+  },
+  "homepage": "https://github.com/aymeejanssen/THISWILLWORK#readme",
+  "description": ""
 }

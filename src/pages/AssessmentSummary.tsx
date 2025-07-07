@@ -6,6 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mic, MicOff, Volume2, VolumeX, Settings, Home, PhoneOff } from 'lucide-react';
 import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
+import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
+
+document.getElementById('startBtn').addEventListener('click', async () => {
+  const agent = new RealtimeAgent({
+    name: 'Mynd Ease',
+    instructions: 'You provide mental health support, emotional insight, and resilience coaching in a calm, supportive voice.',
+  });
+
+  const tokenResponse = await fetch("http://localhost:3000/session");
+  const data = await tokenResponse.json();
+  const session = new RealtimeSession(agent, {
+    model: "gpt-4o-realtime-preview-2025-06-03",
+  });
+
+  await session.connect({
+    apiKey: data.client_secret.value,
+  });
+});
 
 const openAIVoices = [
   { id: 'alloy', name: 'Alloy', description: 'Balanced, natural voice' },

@@ -2,6 +2,34 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart, Globe, Users, ArrowRight, Sparkles, Shield, Brain, MessageCircle, Star } from 'lucide-react';
 import OnboardingWrapper from "../components/OnboardingWrapper";
+import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
+
+const agent = new RealtimeAgent({
+  name: 'Assistant',
+  instructions: 'You are a helpful assistant.',
+});
+
+const session = new RealtimeSession(agent);
+
+await session.connect({
+const agent = new RealtimeAgent({
+  name: 'Assistant',
+  instructions: 'You provide mental health assistance, companionship, psychological insights and good advice.',
+});
+
+const session = new RealtimeSession(agent);
+
+// 🔑 Fetch ephemeral key from your server
+const res = await fetch('http://localhost:3000/session');
+const data = await res.json();
+const ephemeralKey = data.client_secret.value;
+
+await session.connect({
+  apiKey: ephemeralKey,
+});
+
+});
+
 const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showVoiceChat, setShowVoiceChat] = useState(false);

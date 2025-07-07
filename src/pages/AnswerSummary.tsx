@@ -1,4 +1,4 @@
-
+import { VoiceOnlyChat } from "../components/VoiceOnlyChat";
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ const AnswerSummary = () => {
   const { responses } = useAssessment();
 
   const currentQuestion = parseInt(questionNumber || '1');
-  
+
   const getEncouragingMessage = () => {
     const messages = [
       "Thank you for sharing that with us. Your openness is the first step toward healing.",
@@ -26,7 +26,7 @@ const AnswerSummary = () => {
       "You're giving yourself such a gift by taking time for this reflection.",
       "Thank you for being so genuine. Your authentic responses will help create meaningful insights."
     ];
-    
+
     return messages[(currentQuestion - 1) % messages.length];
   };
 
@@ -44,6 +44,57 @@ const AnswerSummary = () => {
 
   const handleContinue = () => {
     navigate('/'); // Go back to continue the assessment
+  };
+
+  const startRealtimeSession = async () => {
+    try {
+      const tokenResponse = await fetch("/api/session");
+      const data = await tokenResponse.json();
+      const EPHEMERAL_KEY = data.client_secret?.value;
+
+      if (!EPHEMERAL_KEY) {
+        throw new Error("No ephemeral key received");
+      }
+
+      const pc = new RTCPeerConnection();
+
+      const audioEl = document.createElement("audio");
+      audioEl.autoplay = true;
+      pc.ontrack = (e) => (audioEl.srcObject = e.streams[0]);
+
+      const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
+      pc.addTrack(ms.getTracks()[0]);
+
+      const dc = pc.createDataChannel("oai-events");
+      dc.addEventListener("message", (e) => {
+        console.log("🧠 AI Event:", e.data);
+      });
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      const response = await fetch(
+        `https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2025-06-03`,
+        {
+          method: "POST",
+          body: offer.sdp,
+          headers: {
+            Authorization: `Bearer ${EPHEMERAL_KEY}`,
+            "Content-Type": "application/sdp",
+          },
+        }
+      );
+
+      const answer = {
+        type: "answer",
+        sdp: await response.text(),
+      };
+
+      await pc.setRemoteDescription(answer);
+      console.log("✅ WebRTC connection established");
+    } catch (error) {
+      console.error("⚠️ Realtime session error:", error);
+    }
   };
 
   return (
@@ -93,7 +144,9 @@ const AnswerSummary = () => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-center">
+        <div className="flex justify-center flex-col items-center space-y-4">
+  <TalkToAIButton />
+  
           <Button 
             onClick={handleContinue} 
             className="bg-purple-600 hover:bg-purple-700" 
@@ -102,6 +155,14 @@ const AnswerSummary = () => {
             Continue Assessment
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
+
+          <Button 
+            onClick={startRealtimeSession} 
+            className="bg-pink-500 hover:bg-pink-600" 
+            size="lg"
+          >
+            🎙️ Talk to AI Now
+          </Button>
         </div>
       </div>
     </div>
@@ -109,3 +170,4 @@ const AnswerSummary = () => {
 };
 
 export default AnswerSummary;
+
