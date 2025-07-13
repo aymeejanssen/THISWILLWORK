@@ -1,103 +1,113 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Button } from "@/components/ui/button";
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mic, MicOff, Volume2, VolumeX, Settings, Home, PhoneOff } from 'lucide-react';
-import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
-import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
+import { Button } from "@/components/ui/button";
+import { useNavigate, useParams } from 'react-router-dom';
+import { CheckCircle, ArrowRight, Heart } from 'lucide-react';
+import { useAssessment } from '../contexts/AssessmentContext';
+import VoiceOnlyChat from "@/components/VoiceOnlyChat";
 
-document.getElementById('startBtn').addEventListener('click', async () => {
-  const agent = new RealtimeAgent({
-    name: 'Mynd Ease',
-    instructions: 'You provide mental health support, emotional insight, and resilience coaching in a calm, supportive voice.',
-  });
-
-  const tokenResponse = await fetch("http://localhost:3000/session");
-  const data = await tokenResponse.json();
-  const session = new RealtimeSession(agent, {
-    model: "gpt-4o-realtime-preview-2025-06-03",
-  });
-
-  await session.connect({
-    apiKey: data.client_secret.value,
-  });
-});
-
-const openAIVoices = [
-  { id: 'alloy', name: 'Alloy', description: 'Balanced, natural voice' },
-  { id: 'echo', name: 'Echo', description: 'Clear, articulate voice' },
-  { id: 'fable', name: 'Fable', description: 'Warm, engaging voice' },
-  { id: 'onyx', name: 'Onyx', description: 'Deep, confident voice' },
-  { id: 'nova', name: 'Nova', description: 'Bright, energetic voice' },
-  { id: 'shimmer', name: 'Shimmer', description: 'Gentle, soothing voice' },
-];
-
-const VoiceOnlyChat = () => {
+const AnswerSummary = () => {
   const navigate = useNavigate();
-  const [selectedVoice, setSelectedVoice] = useState('nova');
-  const [sessionStarted, setSessionStarted] = useState(false);
-  const [isMicEnabled, setIsMicEnabled] = useState(true);
-  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(true);
-  const [currentStatus, setCurrentStatus] = useState('Choose your AI voice and start');
-  const [session, setSession] = useState<RealtimeSession | null>(null);
+  const { questionNumber } = useParams();
+  const { responses } = useAssessment();
 
-  const startRealtimeSession = async () => {
-    try {
-      const agent = new RealtimeAgent({
-        name: 'Assistant',
-        instructions: 'You provide mental health assistance, companionship, and advice.',
-      });
+  const currentQuestion = parseInt(questionNumber || '1');
 
-      const newSession = new RealtimeSession(agent);
+  const getEncouragingMessage = () => {
+    const messages = [
+      "Thank you for sharing that with us. Your openness is the first step toward healing.",
+      "Your self-awareness is truly remarkable. You're already showing incredible strength.",
+      "Every answer you give helps us understand you better. You're doing amazing.",
+      "Your honesty is beautiful. This kind of reflection takes real courage.",
+      "You're being so thoughtful with your responses. This shows deep emotional intelligence.",
+      "Thank you for trusting us with your feelings. Your vulnerability is a strength.",
+      "Each answer brings more clarity. You're on a powerful journey of self-discovery.",
+      "Your willingness to explore these feelings shows incredible bravery.",
+      "You're giving yourself such a gift by taking time for this reflection.",
+      "Thank you for being so genuine. Your authentic responses will help create meaningful insights."
+    ];
 
-      const res = await fetch('/api/session');
-      const data = await res.json();
-      const ephemeralKey = data.client_secret.value;
+    return messages[(currentQuestion - 1) % messages.length];
+  };
 
-      await newSession.connect({ apiKey: ephemeralKey });
-
-      console.log('✅ Realtime session started');
-
-      // You can store session in state or route to VoiceOnlyChat if needed
-    } catch (error) {
-      console.error('Realtime session error:', error);
+  const getProgressMessage = () => {
+    if (currentQuestion <= 3) {
+      return "You're just getting started, and already showing such courage.";
+    } else if (currentQuestion <= 6) {
+      return "You're making wonderful progress. Keep going!";
+    } else if (currentQuestion <= 9) {
+      return "You're more than halfway through. Your dedication is inspiring.";
+    } else {
+      return "You're almost at the end. Your commitment to this process is beautiful.";
     }
   };
 
-  return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-50 bg-gradient-to-br from-purple-50 to-pink-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-between mb-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-purple-600">
-              <Home className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
-                <span className="text-white text-xs">🤖</span>
-              </div>
-              <CardTitle className="text-xl font-bold text-purple-700">
-                AI Voice Chat
-              </CardTitle>
-            </div>
-            <Button variant="ghost" size="icon" className="text-purple-600">
-              <Settings className="h-5 w-5" />
-            </Button>
-          </div>
-        </CardHeader>
+  const handleContinue = () => {
+    navigate('/'); // Go back to continue the assessment
+  };
 
-        <CardContent className="space-y-6">
-          <Button onClick={startRealtimeSession} className="w-full py-3 bg-purple-600 text-white rounded-lg">
-            Talk to AI now
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6 flex items-center justify-center">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-4 py-2 mb-4">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Answer {currentQuestion} Recorded</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Thank You for Sharing</h1>
+        </div>
+
+        <Card className="shadow-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-fit">
+              <Heart className="h-6 w-6 text-purple-600" />
+            </div>
+            <CardTitle className="text-xl text-gray-900">Your Response Matters</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-gray-700 text-lg leading-relaxed">
+              {getEncouragingMessage()}
+            </p>
+            <div className="bg-white p-4 rounded-lg border border-purple-200">
+              <p className="text-purple-800 font-medium">
+                {getProgressMessage()}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">What happens next?</h3>
+              <p className="text-gray-600">
+                We're carefully noting your response to create a personalized summary just for you. 
+                Each answer helps us understand your unique journey better.
+              </p>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-blue-800 text-sm">
+                  💙 Your responses are being woven together to create insights that honor your individual experience.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-center">
+          <Button 
+            onClick={handleContinue} 
+            className="bg-purple-600 hover:bg-purple-700" 
+            size="lg"
+          >
+            Continue Assessment
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+
+        <VoiceOnlyChat />
+      </div>
     </div>
   );
 };
 
-export default VoiceOnlyChat;
-
-
+export default AnswerSummary;

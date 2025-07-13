@@ -1,7 +1,7 @@
 import React from 'react';
 import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
 
-export const TalkToAIButton = () => {
+const VoiceOnlyChat = () => {
   const startRealtimeSession = async () => {
     try {
       const agent = new RealtimeAgent({
@@ -37,3 +37,5 @@ export const TalkToAIButton = () => {
     </button>
   );
 };
+
+export default VoiceOnlyChat;
