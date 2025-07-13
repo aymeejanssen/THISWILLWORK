@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import Index from './pages/Index.tsx'; // ✅ point to your homepage
+import App from './App.tsx';
+import './index.css'; // 👈 this is where Tailwind comes from
 
-createRoot(document.getElementById("root")!).render(<Index />);
+createRoot(document.getElementById('root')!).render(<App />);
