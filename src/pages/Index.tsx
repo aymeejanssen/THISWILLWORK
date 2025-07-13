@@ -16,27 +16,35 @@ const Index = () => {
     setShowOnboarding(false);
   };
 
-  const startRealtimeSession = async () => {
-    try {
-      const agent = new RealtimeAgent({
-        name: 'Assistant',
-        instructions: 'You provide mental health assistance, companionship, psychological insights and good advice.',
-      });
+ const startRealtimeSession = async () => {
+  try {
+    const agent = new RealtimeAgent({
+      name: 'Assistant',
+      instructions: 'You provide mental health assistance, companionship, psychological insights and good advice.',
+    });
 
-      const session = new RealtimeSession(agent);
+    const session = new RealtimeSession(agent);
 
-      const res = await fetch('/api/session');
-      const data = await res.json();
-      const ephemeralKey = data.client_secret?.value;
+    // 🔑 Call your /api/session route to get the ephemeral key from Vercel
+    const res = await fetch('/api/session');
+    const data = await res.json();
+    const ephemeralKey = data.client_secret?.value;
 
-      if (!ephemeralKey) throw new Error("Missing ephemeral key");
+    if (!ephemeralKey) throw new Error("Missing ephemeral key");
 
-      await session.connect({ apiKey: ephemeralKey });
-      console.log("✅ Connected to realtime");
-    } catch (error) {
-      console.error("Realtime session error:", error);
-    }
-  };
+    // ✅ Connect to the Realtime API with your key
+    await session.connect({ apiKey: ephemeralKey });
+    console.log("✅ Connected to Realtime API");
+
+    // 🎤 Get mic permission and pass stream
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    (await (session as any).audio.input.start(stream));
+    console.log("🎤 Microphone started");
+
+  } catch (error) {
+    console.error("Realtime session error:", error);
+  }
+};
 
   const reviews = [
     {
@@ -131,4 +139,5 @@ const Index = () => {
 };
 
 export default Index;
+
 

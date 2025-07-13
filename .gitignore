@@ -25,3 +25,4 @@ dist-ssr
 .env
 .env # Ignore your secret file
 .env # Ensure secrets are not tracked
+.vercel

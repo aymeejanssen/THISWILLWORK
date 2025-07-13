@@ -20,9 +20,13 @@ const VoiceOnlyChat = () => {
       }
 
       await newSession.connect({ apiKey: ephemeralKey });
-
       console.log('✅ Realtime session started');
-      // Optional: route or set state here
+
+      // ✅ Add microphone permission and audio input start
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      await (newSession as any).audio.input.start(stream);
+      console.log('🎤 Microphone started');
+
     } catch (error) {
       console.error('Realtime session error:', error);
     }
