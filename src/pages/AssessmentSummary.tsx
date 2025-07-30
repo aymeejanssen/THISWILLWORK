@@ -1,60 +1,64 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useParams } from 'react-router-dom';
-import { CheckCircle, Heart } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { CheckCircle, ArrowRight, Heart } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import VoiceOnlyChat from "@/components/VoiceOnlyChat";
-import OpenAI from 'openai';
+
+
+const AnswerSummary = () => {
+  const navigate = useNavigate();
+  const { questionNumber } = useParams();
+  const { responses } = useAssessment();
+  import { useEffect, useState } from 'react';
+import { OpenAI } from 'openai';
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
-const AnswerSummary = () => {
-  const { questionNumber } = useParams();
-  const { responses } = useAssessment();
+const [insight, setInsight] = useState<string>('Generating your personalized insight...');
+const [loadingInsight, setLoadingInsight] = useState<boolean>(true);
 
-  const currentQuestion = parseInt(questionNumber || '1');
+useEffect(() => {
+  const fetchInsight = async () => {
+    try {
+      const formattedResponses = Object.entries(responses)
+        .map(([question, answer]) => `Q: ${question}\nA: ${answer}`)
+        .join('\n\n');
 
-  const [insight, setInsight] = useState<string>('Generating your personalized insight...');
-  const [loadingInsight, setLoadingInsight] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchInsight = async () => {
-      try {
-        const formattedResponses = Object.entries(responses)
-          .map(([question, answer]) => `Q: ${question}\nA: ${answer}`)
-          .join('\n\n');
-
-        const systemPrompt = `
+      const systemPrompt = `
 You are a compassionate psychology coach. 
 Your task is to analyze a user's answers and provide a short, emotionally insightful summary (max 10 lines) 
 that highlights recurring emotional themes, behavioral patterns, or personal tendencies. 
 Avoid diagnoses. Focus on psychological reflection.
 `;
 
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Here are my responses:\n\n${formattedResponses}` },
-          ],
-        });
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Here are my responses:\n\n${formattedResponses}` },
+        ],
+      });
 
-        const aiMessage = completion.choices[0].message.content;
-        setInsight(aiMessage || "We couldn't generate insights this time.");
-      } catch (error) {
-        console.error('Error generating insight:', error);
-        setInsight("We couldn’t generate your insight at the moment. Please try again later.");
-      } finally {
-        setLoadingInsight(false);
-      }
-    };
+      const aiMessage = completion.choices[0].message.content;
+      setInsight(aiMessage || "We couldn't generate insights this time.");
+    } catch (error) {
+      console.error('Error generating insight:', error);
+      setInsight("We couldn’t generate your insight at the moment. Please try again later.");
+    } finally {
+      setLoadingInsight(false);
+    }
+  };
 
-    fetchInsight();
-  }, []);
+  fetchInsight();
+}, []);
+
+
+  const currentQuestion = parseInt(questionNumber || '1');
 
   const getEncouragingMessage = () => {
     const messages = [
@@ -83,6 +87,10 @@ Avoid diagnoses. Focus on psychological reflection.
     } else {
       return "You're almost at the end. Your commitment to this process is beautiful.";
     }
+  };
+
+  const handleContinue = () => {
+    navigate('/'); // Go back to continue the assessment
   };
 
   return (
@@ -115,20 +123,34 @@ Avoid diagnoses. Focus on psychological reflection.
           </CardContent>
         </Card>
 
-        {/* AI Insight Summary */}
-        <Card className="shadow-lg bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 p-3 bg-yellow-100 rounded-full w-fit">
-              <Heart className="h-6 w-6 text-yellow-600" />
+        <Card className="shadow-lg">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">What happens next?</h3>
+              <p className="text-gray-600">
+                We're carefully noting your response to create a personalized summary just for you. 
+                Each answer helps us understand your unique journey better.
+              </p>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-blue-800 text-sm">
+                  💙 Your responses are being woven together to create insights that honor your individual experience.
+                </p>
+              </div>
             </div>
-            <CardTitle className="text-xl text-gray-900">Insights based on your responses</CardTitle>
-          </CardHeader>
-          <CardContent className="text-gray-700 whitespace-pre-line">
-            {loadingInsight ? "Analyzing your responses..." : insight}
           </CardContent>
         </Card>
 
-        {/* AI Voice Chat Button */}
+        <div className="flex justify-center">
+          <Button 
+            onClick={handleContinue} 
+            className="bg-purple-600 hover:bg-purple-700" 
+            size="lg"
+          >
+            Continue Assessment
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+
         <VoiceOnlyChat />
       </div>
     </div>
