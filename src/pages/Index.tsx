@@ -89,7 +89,7 @@ const Index = () => {
           <h1 className="text-6xl md:text-8xl text-white mb-8 tracking-tight font-medium">
             Welcome to{" "}
             <span className="bg-gradient-to-r from-white via-purple-200 to-orange-200 bg-clip-text text-transparent font-semibold">
-              Mynd Ease
+              Mynd.Ease
             </span>
           </h1>
 
@@ -99,20 +99,23 @@ const Index = () => {
             in your language, available 24/7 for judgment-free guidance.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-20">
-            <Button onClick={handleBeginJourney} size="lg" className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm px-12 py-6 text-lg font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-              Get Started
-              <ArrowRight className="ml-3 h-5 w-5" />
-            </Button>
-            <Button onClick={startRealtimeSession} className="text-white bg-pink-600 hover:bg-pink-700 px-8 py-4 rounded-full text-lg font-medium shadow-lg">
-              🎙️ PLEASE Talk to AI
-            </Button>
-            <div className="flex items-center gap-2 text-white/80">
-              <Shield className="h-4 w-4" />
-              <span className="text-sm font-medium">Private & Secure</span>
-            </div>
-          </div>
+         {/* CTA Buttons */}
+<div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-20">
+  <Button
+    onClick={handleBeginJourney}
+    size="lg"
+    className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm px-12 py-6 text-lg font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+  >
+    Get Started
+    <ArrowRight className="ml-3 h-5 w-5" />
+  </Button>
+
+  <div className="flex items-center gap-2 text-white/80 mt-4 sm:mt-0">
+    <Shield className="h-4 w-4" />
+    <span className="text-sm font-medium">Private & Secure</span>
+  </div>
+</div>
+
 
           {/* Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-2xl mx-auto mb-32">
