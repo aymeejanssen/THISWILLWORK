@@ -18,6 +18,8 @@
     "@hookform/resolvers": "^3.9.0",
     "@openai/agents": "^0.0.10",
     "@openai/agents-realtime": "^0.0.10",
+    "@plasmicapp/loader-nextjs": "^1.0.434",
+    "@plasmicapp/react-web": "^0.2.394",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
