@@ -26,3 +26,5 @@ dist-ssr
 .env # Ignore your secret file
 .env # Ensure secrets are not tracked
 .vercel
+plasmic.lock
+src/components/plasmic-tokens.theo.json
