@@ -6,57 +6,10 @@ import { CheckCircle, ArrowRight, Heart } from 'lucide-react';
 import { useAssessment } from '../contexts/AssessmentContext';
 import VoiceOnlyChat from "@/components/VoiceOnlyChat";
 
-
 const AnswerSummary = () => {
   const navigate = useNavigate();
   const { questionNumber } = useParams();
   const { responses } = useAssessment();
-  import { useEffect, useState } from 'react';
-import { OpenAI } from 'openai';
-
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
-const [insight, setInsight] = useState<string>('Generating your personalized insight...');
-const [loadingInsight, setLoadingInsight] = useState<boolean>(true);
-
-useEffect(() => {
-  const fetchInsight = async () => {
-    try {
-      const formattedResponses = Object.entries(responses)
-        .map(([question, answer]) => `Q: ${question}\nA: ${answer}`)
-        .join('\n\n');
-
-      const systemPrompt = `
-You are a compassionate psychology coach. 
-Your task is to analyze a user's answers and provide a short, emotionally insightful summary (max 10 lines) 
-that highlights recurring emotional themes, behavioral patterns, or personal tendencies. 
-Avoid diagnoses. Focus on psychological reflection.
-`;
-
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Here are my responses:\n\n${formattedResponses}` },
-        ],
-      });
-
-      const aiMessage = completion.choices[0].message.content;
-      setInsight(aiMessage || "We couldn't generate insights this time.");
-    } catch (error) {
-      console.error('Error generating insight:', error);
-      setInsight("We couldn’t generate your insight at the moment. Please try again later.");
-    } finally {
-      setLoadingInsight(false);
-    }
-  };
-
-  fetchInsight();
-}, []);
-
 
   const currentQuestion = parseInt(questionNumber || '1');
 
