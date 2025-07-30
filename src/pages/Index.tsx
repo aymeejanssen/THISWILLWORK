@@ -89,7 +89,7 @@ const Index = () => {
           <h1 className="text-6xl md:text-8xl text-white mb-8 tracking-tight font-medium">
             Welcome to{" "}
             <span className="bg-gradient-to-r from-white via-purple-200 to-orange-200 bg-clip-text text-transparent font-semibold">
-              Mynd Ease
+              Mynd.EEEse
             </span>
           </h1>
 
@@ -105,8 +105,7 @@ const Index = () => {
               Get Started
               <ArrowRight className="ml-3 h-5 w-5" />
             </Button>
-            <Button onClick={startRealtimeSession} className="text-white bg-pink-600 hover:bg-pink-700 px-8 py-4 rounded-full text-lg font-medium shadow-lg">
-              🎙️ Talk to AI
+           
             </Button>
             <div className="flex items-center gap-2 text-white/80">
               <Shield className="h-4 w-4" />
